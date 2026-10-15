@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prova 1 resolvida</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../assets/style.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="../assets/common.js"></script>
+</head>
+<body>
+<nav class="topbar">
+  <a href="../index.html">← Índice das aulas</a>
+  <span>Prova 1 (08/06/2026) resolvida</span>
+  <span class="spacer"></span>
+  <button class="theme-btn" type="button">tema</button>
+</nav>
+<main>
+<h1>Prova 1 (08/06/2026): resolução comentada</h1>
+<p class="lead">Uma prova recente da disciplina, resolvida passo a passo. Tente cada questão sozinho antes de abrir a lição correspondente.</p>
+
+<h2>Lições</h2>
+<ol>
+  <li><a href="q1a-contagem.html">Questão 1(a)</a>, 2,0 pts: melhor e pior caso de VerificaTodosUnicos e a tabela de contagem. Aulas 1 e 2.</li>
+  <li><a href="q1bc-limites.html">Questão 1(b) e (c)</a>, 3,0 pts: limites $\Theta$ provados com $c$, $n_0$ e com limite; como reduzir o pior caso. Aulas 3, 4, 7, 8 e 9.</li>
+  <li><a href="q2-recorrencia.html">Questão 2</a>, 3,0 pts: recorrência de CalculaSomaArray e método iterativo. Aulas 5, 6 e 7.</li>
+  <li><a href="q3-verdadeiro-falso.html">Questão 3</a>, 2,0 pts: quatro afirmações sobre $O$, $\Omega$ e $\Theta$. Aula 4.</li>
+</ol>
+
+<h2>Gabarito resumido</h2>
+<details class="box">
+  <summary>Mostrar (só depois de tentar)</summary>
+  <div class="table-wrap"><table>
+    <tr><th>Item</th><th>Resposta</th></tr>
+    <tr><td>1a</td><td>Melhor caso: $\text{vetor}[0] = \text{vetor}[1]$, $T_m(n) = 9$. Pior caso: todos distintos, $T_p(n) = 3n^2 - n - 1$ (linhas com 2, 3, 3, 1, 1 op; execuções $n-1$, $\frac{n(n-1)}{2}$, $\frac{n(n-1)}{2}$, 0, 1).</td></tr>
+    <tr><td>1b</td><td>Melhor $\Theta(1)$ ($c_1 = c_2 = 9$). Pior $\Theta(n^2)$: $2n^2 \le 3n^2 - n - 1 \le 3n^2$ para $n \ge 2$; ou $\lim = 3$.</td></tr>
+    <tr><td>1c</td><td>Ordenar com MergeSort ou HeapSort e comparar vizinhos: $\Theta(n\log n)$. (Alternativa com vetor de contagem: $O(n + k)$.)</td></tr>
+    <tr><td>2a</td><td>$T(1) = 1$; $T(n) = 2T(n/2) + 1$ para $n &gt; 1$.</td></tr>
+    <tr><td>2b</td><td>$T(n) = 2^kT(n/2^k) + 2^k - 1$, $k = \log_2 n$, $T(n) = 2n - 1 = \Theta(n)$.</td></tr>
+    <tr><td>3</td><td>(a) F · (b) V · (c) V · (d) V</td></tr>
+  </table></div>
+</details>
+
+<h2>O que essa prova mostra sobre o estilo do professor</h2>
+<ul>
+  <li>Contagem de passos com tabela "# operações / # execuções" para <b>melhor e pior caso</b>: sempre cai, e vale muito.</li>
+  <li>Pedidos de <b>prova</b> de $\Theta$ "usando limites ou $c$ e $n_0$", com explicação.</li>
+  <li>Recorrência <b>completa</b> (com caso base) e resolução pelo <b>método iterativo</b>, com a fórmula da PG e $a^{\log_a b} = b$ fornecidas.</li>
+  <li>Verdadeiro ou falso conceitual sobre o que melhor caso, pior caso e as notações garantem.</li>
+  <li>Uma pergunta de <b>projeto</b>: melhorar um algoritmo usando o que foi visto (ordenação $n\log n$).</li>
+</ul>
+</main>
+</body>
+</html>

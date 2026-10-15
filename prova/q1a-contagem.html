@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prova 1 · Questão 1a</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../assets/style.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="../assets/common.js"></script>
+<script defer src="../assets/player.js"></script>
+</head>
+<body>
+<nav class="topbar">
+  <a href="index.html">← Prova resolvida</a>
+  <span>Prova 1 (08/06/2026) · Questão 1</span>
+  <span class="spacer"></span>
+  <button class="theme-btn" type="button">tema</button>
+</nav>
+<main>
+<p class="kicker">Prova resolvida · Lição 1 de 4</p>
+<h1>Questão 1(a): melhor caso, pior caso e contagem de passos</h1>
+<p class="lead">Vale 2,0 pontos, o item mais pesado da prova. É exatamente o que treinamos nas Aulas 1 e 2: identificar o que varia, descrever as entradas e preencher a tabela "# operações / # execuções" para os dois casos.</p>
+
+<h2>O enunciado</h2>
+<div class="box prof">
+  <span class="tag">Questão 1</span>
+  <p>Considere o pseudocódigo abaixo referente ao seguinte problema: <i>"Dado um vetor contendo $n$ números inteiros não-negativos, verifique se todos os elementos são únicos no vetor."</i></p>
+<pre class="code">1  <span class="fn">Função VerificaTodosUnicos</span>(vetor, n)
+2     <span class="kw">para</span> i ← 0 até n − 2 <span class="kw">faça</span>
+3        <span class="kw">para</span> j ← i + 1 até n − 1 <span class="kw">faça</span>
+4           <span class="kw">se</span> vetor[i] == vetor[j] <span class="kw">então</span>
+5              <span class="kw">retorna</span> False
+6     <span class="kw">retorna</span> True</pre>
+  <p><b>a) (2,0 pts)</b> Considerando uma análise em relação ao tempo de execução, explique quando ocorrem o melhor caso e o pior caso do algoritmo. Em seguida, realize a contagem de passos do algoritmo em ambos os casos e encontre as respectivas funções $T(n)$. Utilize a tabela ao lado do algoritmo para realizar a contagem de passos de cada linha.</p>
+</div>
+
+<h2>Passo 1: entender o algoritmo</h2>
+<p>O algoritmo compara <b>todos os pares</b> $(i, j)$ com $i &lt; j$:</p>
+<ul>
+  <li>o laço de fora fixa a posição $i$, de $0$ até $n-2$ (o último elemento não tem com quem ser comparado "para a frente");</li>
+  <li>o laço de dentro compara $\text{vetor}[i]$ com todo mundo <b>depois</b> dele, de $i+1$ até $n-1$;</li>
+  <li>se achar dois iguais, <b>para na hora</b> e retorna <code>False</code> (linha 5);</li>
+  <li>se terminar os dois laços sem achar repetido, retorna <code>True</code> (linha 6).</li>
+</ul>
+<div class="box tip">
+  <span class="tag">A pergunta-chave</span>
+  <p>O que faz o número de passos variar? O <code>retorna False</code> <b>dentro</b> dos laços. Assim que um par igual aparece, tudo para. Então quanto <b>mais cedo</b> aparecer um par repetido, menos passos. Se <b>nunca</b> aparecer, o algoritmo percorre todos os pares.</p>
+</div>
+
+<h2>Passo 2: melhor e pior caso (o "explique")</h2>
+<div class="box def">
+  <span class="tag">Melhor caso</span>
+  <p>Quando os <b>dois primeiros elementos são iguais</b> ($\text{vetor}[0] = \text{vetor}[1]$). A primeira comparação feita ($i = 0$, $j = 1$) já é verdadeira, e o algoritmo retorna <code>False</code> imediatamente. O número de passos não depende de $n$.</p>
+</div>
+<div class="box def">
+  <span class="tag">Pior caso</span>
+  <p>Quando <b>todos os elementos são distintos</b>. O teste da linha 4 nunca é verdadeiro, então os dois laços rodam completos: todos os $\frac{n(n-1)}{2}$ pares são comparados e o algoritmo termina na linha 6.</p>
+  <p>(Empata com o pior caso a entrada em que o <b>único</b> par repetido é o último a ser comparado, $\text{vetor}[n-2] = \text{vetor}[n-1]$: também faz todas as comparações. Basta citar "todos distintos".)</p>
+</div>
+<div class="box warn">
+  <span class="tag">Erro que custa ponto</span>
+  <p>Não diga "o melhor caso é quando $n$ é pequeno". O melhor caso é uma <b>arrumação dos dados</b> para um $n$ qualquer (Aula 1). Também evite "o melhor caso é quando tem elemento repetido": um repetido no fim do vetor gera o pior caso! O que importa é <b>onde</b> está o par.</p>
+</div>
+
+<h2>Passo 3: a coluna "# operações"</h2>
+<p>Operações básicas, como sempre: expressões de avaliação, atribuições, indexação de arrays e retorno de funções.</p>
+<div class="table-wrap"><table>
+  <tr><th>Linha</th><th class="num"># op</th><th>Justificativa</th></tr>
+  <tr><td class="mono">1 Função …</td><td class="num">—</td><td>cabeçalho, não executa nada</td></tr>
+  <tr><td class="mono">2 para i ← 0 até n − 2</td><td class="num">2</td><td>comparação do $i$ com o limite + incremento de $i$</td></tr>
+  <tr><td class="mono">3 para j ← i + 1 até n − 1</td><td class="num">3</td><td>a soma <code>i + 1</code> + comparação + incremento (mesma contagem do SelectionSort, Aula 2)</td></tr>
+  <tr><td class="mono">4 se vetor[i] == vetor[j]</td><td class="num">3</td><td>duas indexações + uma comparação</td></tr>
+  <tr><td class="mono">5 retorna False</td><td class="num">1</td><td>retorno</td></tr>
+  <tr><td class="mono">6 retorna True</td><td class="num">1</td><td>retorno</td></tr>
+</table></div>
+<p class="caption">Se você contar a linha 3 com 2 op (sem a soma), o resultado muda só nos coeficientes. O que vale ponto é a contagem ser coerente e justificada, e a coluna de execuções estar certa.</p>
+
+<h2>Passo 4: a coluna "# execuções" no melhor caso</h2>
+<p>Com $\text{vetor}[0] = \text{vetor}[1]$:</p>
+<ol class="steps">
+  <li><b>Linha 2:</b> entra no laço de fora uma vez ($i = 0$) → <b>1</b>.</li>
+  <li><b>Linha 3:</b> entra no laço de dentro uma vez ($j = 1$) → <b>1</b>.</li>
+  <li><b>Linha 4:</b> compara $\text{vetor}[0]$ com $\text{vetor}[1]$ uma vez → <b>1</b>. Dá verdadeiro.</li>
+  <li><b>Linha 5:</b> retorna <code>False</code> → <b>1</b>.</li>
+  <li><b>Linha 6:</b> nunca é alcançada → <b>0</b>.</li>
+</ol>
+
+<h2>Passo 5: a coluna "# execuções" no pior caso</h2>
+<p>Com todos distintos:</p>
+<ul>
+  <li><b>Linha 2:</b> $i$ vai de $0$ a $n-2$: $(n-2) - 0 + 1 = $ <b>$n - 1$</b> iterações.</li>
+  <li><b>Linhas 3 e 4:</b> para cada $i$, $j$ vai de $i+1$ a $n-1$: são $(n-1) - (i+1) + 1 = n - 1 - i$ iterações. Somando:</li>
+</ul>
+<div class="table-wrap"><table>
+  <tr><th>valor de $i$</th><td class="num">0</td><td class="num">1</td><td class="num">2</td><td class="num">…</td><td class="num">$n-2$</td></tr>
+  <tr><th>iterações de $j$</th><td class="num">$n-1$</td><td class="num">$n-2$</td><td class="num">$n-3$</td><td class="num">…</td><td class="num">$1$</td></tr>
+</table></div>
+$$\sum_{i=0}^{n-2}(n-1-i) = (n-1) + (n-2) + \dots + 1 = \frac{(n-1)\,\big((n-1) + 1\big)}{2} = \frac{n(n-1)}{2}.$$
+<p>É uma PA com $n - 1$ termos, primeiro $n-1$ e último $1$: a fórmula $S = \frac{\text{termos}}{2}(a_1 + a_n)$ da tabela da prova dá $\frac{n-1}{2}(n - 1 + 1) = \frac{n(n-1)}{2}$.</p>
+<ul>
+  <li><b>Linha 5:</b> nunca → <b>0</b>.</li>
+  <li><b>Linha 6:</b> uma vez → <b>1</b>.</li>
+</ul>
+<p class="caption">Convenção do professor (Aula 1): o cabeçalho de cada laço tem o mesmo número de execuções do corpo; o teste final que falha não é contado.</p>
+
+<div class="widget">
+  <div class="wtitle">Cada quadrado azul é uma comparação da linha 4 no pior caso (par $(i, j)$ com $j &gt; i$)</div>
+  <div class="controls"><label>n = <b id="gnv">5</b> <input type="range" id="gn" min="2" max="10" value="5"></label></div>
+  <div style="display:flex;gap:20px;flex-wrap:wrap;align-items:flex-start">
+    <div id="grid"></div>
+    <div id="ginfo" style="flex:1;min-width:240px"></div>
+  </div>
+</div>
+
+<h2>Passo 6: a tabela preenchida</h2>
+<div class="table-wrap"><table>
+  <tr><th>Linha</th><th class="num"># operações</th><th class="num"># execuções (melhor caso)</th><th class="num"># execuções (pior caso)</th></tr>
+  <tr><td>2</td><td class="num">2</td><td class="num">1</td><td class="num">$n - 1$</td></tr>
+  <tr><td>3</td><td class="num">3</td><td class="num">1</td><td class="num">$\frac{n(n-1)}{2}$</td></tr>
+  <tr><td>4</td><td class="num">3</td><td class="num">1</td><td class="num">$\frac{n(n-1)}{2}$</td></tr>
+  <tr><td>5</td><td class="num">1</td><td class="num">1</td><td class="num">0</td></tr>
+  <tr><td>6</td><td class="num">1</td><td class="num">0</td><td class="num">1</td></tr>
+</table></div>
+
+<h2>Passo 7: as funções $T(n)$</h2>
+<h3>Melhor caso</h3>
+$$T_m(n) = 2\cdot1 + 3\cdot1 + 3\cdot1 + 1\cdot1 + 1\cdot0 = 9.$$
+<p class="result">$T_m(n) = 9$ (constante)</p>
+
+<h3>Pior caso</h3>
+$$\begin{aligned}
+T_p(n) &= 2(n-1) + 3\cdot\frac{n(n-1)}{2} + 3\cdot\frac{n(n-1)}{2} + 1\cdot 0 + 1\cdot1\\
+&= 2n - 2 + 6\cdot\frac{n^2 - n}{2} + 1\\
+&= 2n - 2 + 3n^2 - 3n + 1\\
+&= 3n^2 - n - 1.
+\end{aligned}$$
+<p class="result">$T_p(n) = 3n^2 - n - 1$</p>
+<div class="box tip">
+  <span class="tag">Confira com $n = 2$ (sempre faça isso na prova)</span>
+  <p>Com 2 elementos distintos: linha 2 uma vez (2), linha 3 uma vez (3), linha 4 uma vez (3), linha 6 (1). Total $9$. Fórmula: $3\cdot4 - 2 - 1 = 9$ ✓. Com $n = 3$: duas voltas do laço de fora ($2\cdot2 = 4$) + três pares comparados, cada um com linha 3 e linha 4 ($3\cdot(3+3) = 18$) + retorno (1) $= 23$. Fórmula: $27 - 3 - 1 = 23$ ✓.</p>
+  <p>Faz sentido que $T_m(2) = T_p(2) = 9$: com 2 elementos só existe uma comparação a fazer.</p>
+</div>
+
+<h2>Passo 8: confira na animação</h2>
+<div class="widget">
+  <div class="wtitle">VerificaTodosUnicos com a tabela sendo preenchida</div>
+  <div class="controls" id="vBtns"></div>
+  <div id="vPlayer"></div>
+  <p class="caption">Ao final, o total bate com $9$ (melhor caso) ou $3n^2 - n - 1$ (pior caso). Os testes finais dos laços, em cinza, não entram na contagem.</p>
+</div>
+
+<h2>Como escrever na prova</h2>
+<div class="box prof">
+  <span class="tag">Modelo de resposta</span>
+  <p><b>Melhor caso:</b> ocorre quando $\text{vetor}[0] = \text{vetor}[1]$: a primeira comparação já encontra uma repetição e o algoritmo retorna <i>False</i> sem continuar os laços.</p>
+  <p><b>Pior caso:</b> ocorre quando todos os elementos são distintos: nenhuma comparação é verdadeira, os dois laços executam por completo e todos os $n(n-1)/2$ pares são comparados.</p>
+  <p>[tabela preenchida]</p>
+  <p>$T_m(n) = 2 + 3 + 3 + 1 = 9$.</p>
+  <p>$T_p(n) = 2(n-1) + 3\frac{n(n-1)}{2} + 3\frac{n(n-1)}{2} + 1 = 3n^2 - n - 1$.</p>
+</div>
+
+<div class="pager">
+  <a href="index.html"><small>← voltar</small>Prova resolvida</a>
+  <a class="next" href="q1bc-limites.html"><small>próxima →</small>Questão 1(b) e (c)</a>
+</div>
+</main>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const gn = document.getElementById('gn');
+  function drawG() {
+    const n = +gn.value; document.getElementById('gnv').textContent = n;
+    const box = APA.el('div', { class: 'unroll' });
+    for (let i = 0; i <= n - 2; i++) {
+      const g = APA.el('div', { class: 'grid-exec' }); g.style.gridTemplateColumns = `repeat(${n}, 22px)`;
+      for (let j = 0; j < n; j++) g.append(APA.el('span', { class: j > i ? '' : 'off' }, j > i ? String(j) : ''));
+      box.append(APA.el('div', { class: 'row' }, APA.el('span', { class: 'rl' }, 'i = ' + i), g, APA.el('span', { class: 'rr' }, `${n - 1 - i} comparações`)));
+    }
+    document.getElementById('grid').replaceChildren(box);
+    const tot = n * (n - 1) / 2;
+    document.getElementById('ginfo').innerHTML = `<p>${Array.from({ length: n - 1 }, (_, i) => n - 1 - i).join(' + ')} = <b>${tot}</b></p><p>$\\frac{n(n-1)}{2} = \\frac{${n}\\cdot${n - 1}}{2} = ${tot}$ ✓</p><p>$T_p(${n}) = 3\\cdot${n}^2 - ${n} - 1 = ${3 * n * n - n - 1}$</p>`;
+    APA.renderMath(document.getElementById('ginfo'));
+  }
+  gn.oninput = drawG; drawG();
+
+  const OPS = { 1: 2, 2: 3, 3: 3, 4: 1, 5: 1 };
+  function trace(v) {
+    const n = v.length, S = [];
+    let i = '—', j = '—';
+    const snap = (line, note, o = {}) => {
+      const ptrs = {}; if (typeof i === 'number' && i < n) ptrs[i] = 'i'; if (typeof j === 'number' && j < n) ptrs[j] = ptrs[j] ? ptrs[j] + ',j' : 'j';
+      S.push({ line, note, skip: o.skip, vars: { n, i, j }, arrays: [{ name: 'vetor', values: v, marks: o.marks || {}, ptrs }] });
+    };
+    for (i = 0; i <= n - 2; i++) {
+      j = '—'; snap(1, `Linha 2: i = ${i}. 2 op.`);
+      for (j = i + 1; j <= n - 1; j++) {
+        snap(2, `Linha 3: j = ${j}. 3 op.`);
+        const eq = v[i] === v[j];
+        snap(3, `Linha 4: vetor[${i}] = ${v[i]} == vetor[${j}] = ${v[j]}? <b>${eq ? 'Sim' : 'Não'}</b>. 3 op.`, { marks: { [i]: eq ? 'bad' : 'cmp', [j]: eq ? 'bad' : 'cmp' } });
+        if (eq) {
+          const tot = S.reduce((s, st) => s + (st.skip ? 0 : OPS[st.line]), 0) + 1;
+          snap(4, `Linha 5: retorna False. Total = <b>${tot}</b>.` + (i === 0 && j === 1 ? ' Melhor caso: $T_m = 9$ ✓' : ` Para comparar: pior caso $3n^2 - n - 1 = ${3 * n * n - n - 1}$.`), { marks: { [i]: 'bad', [j]: 'bad' } });
+          return S;
+        }
+      }
+      snap(2, `Teste final do laço de j (j = ${n}): não conta.`, { skip: true });
+    }
+    i = n - 1; j = '—';
+    snap(1, `Teste final do laço de i (i = ${n - 1}): não conta.`, { skip: true });
+    i = '—';
+    const tot = S.reduce((s, st) => s + (st.skip ? 0 : OPS[st.line]), 0) + 1;
+    snap(5, `Linha 6: retorna True. Total = <b>${tot}</b> = $3\\cdot${n}^2 - ${n} - 1$ ✓ (pior caso).`);
+    return S;
+  }
+  const code = [{ h: '1  Função VerificaTodosUnicos(vetor, n)' }, ['2', 'para i ← 0 até n − 2 faça'], ['3', '   para j ← i + 1 até n − 1 faça'], ['4', '      se vetor[i] == vetor[j] então'], ['5', '         retorna False'], ['6', 'retorna True']];
+  const P = StepPlayer.mount(document.getElementById('vPlayer'), { code, ops: OPS, steps: trace([7, 7, 3, 5]), speed: 650 });
+  const vb = document.getElementById('vBtns');
+  [['melhor caso: [7, 7, 3, 5]', [7, 7, 3, 5]], ['pior caso: [4, 8, 1, 6]', [4, 8, 1, 6]], ['par no meio: [4, 8, 1, 8]', [4, 8, 1, 8]], ['par no fim: [4, 8, 1, 1]', [4, 8, 1, 1]]].forEach(([lab, a], k) =>
+    vb.append(APA.el('button', { class: 'btn' + (k ? '' : ' on'), type: 'button', onclick: (e) => {
+      [...vb.children].forEach((b) => b.classList.remove('on')); e.target.classList.add('on'); P.load(trace(a)); } }, lab)));
+});
+</script>
+</body>
+</html>

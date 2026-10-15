@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prova 1 · Questão 2</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../assets/style.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="../assets/common.js"></script>
+<script defer src="../assets/player.js"></script>
+<script defer src="../assets/tree.js"></script>
+</head>
+<body>
+<nav class="topbar">
+  <a href="index.html">← Prova resolvida</a>
+  <span>Prova 1 (08/06/2026) · Questão 2</span>
+  <span class="spacer"></span>
+  <button class="theme-btn" type="button">tema</button>
+</nav>
+<main>
+<p class="kicker">Prova resolvida · Lição 3 de 4</p>
+<h1>Questão 2: recorrência de divisão e conquista e método iterativo</h1>
+<p class="lead">3,0 pontos ao todo. Junta a Aula 5 (método iterativo) com as Aulas 6 e 7 (recorrência $aT(n/b) + f(n)$). O algoritmo tem o mesmo "esqueleto" do MergeSort, mas a combinação custa $O(1)$ em vez de $O(n)$, e isso muda a resposta.</p>
+
+<h2>O enunciado</h2>
+<div class="box prof">
+  <span class="tag">Questão 2</span>
+  <p>Considere o seguinte pseudocódigo referente a um algoritmo que recebe como entrada um vetor com $n$ valores inteiros e retorna a soma de seus elementos.</p>
+<pre class="code">1  <span class="fn">Função CalculaSomaArray</span>(vetor, l, r)
+2     <span class="kw">se</span> r == l <span class="kw">então</span>
+3        <span class="kw">retorna</span> vetor[l]
+4
+5     meio ← floor((l + r)/2);
+6     soma_esquerda ← CalculaSomaArray(vetor, l, meio);
+7     soma_direita ← CalculaSomaArray(vetor, meio + 1, r);
+8
+9     <span class="kw">retorna</span> soma_esquerda + soma_direita</pre>
+  <p>Claramente, esse algoritmo não possui melhor e pior casos distintos. Assumindo que $n$ seja uma potência de 2:</p>
+  <p><b>a) (1,5 pts)</b> Defina a recorrência que descreve o comportamento desse algoritmo com base no número de elementos do vetor de entrada. Observe que você deve especificar a recorrência completa, incluindo o caso base, e não apenas o caso geral.</p>
+  <p><b>b) (1,5 pts)</b> Resolva a recorrência desse algoritmo utilizando o <b>Método Iterativo</b> e encontre a fórmula fechada que descreve o seu tempo de execução.</p>
+</div>
+
+<h2>Entendendo o algoritmo</h2>
+<ul>
+  <li><b>Caso base (linhas 2–3):</b> quando $l = r$, o trecho tem 1 elemento, e a soma é ele mesmo.</li>
+  <li><b>Divisão (linha 5):</b> calcula o meio.</li>
+  <li><b>Conquista (linhas 6–7):</b> soma recursivamente a metade esquerda e a metade direita.</li>
+  <li><b>Combinação (linha 9):</b> uma soma de dois números. <b>Custo constante.</b></li>
+</ul>
+<p>Por que "não possui melhor e pior casos distintos"? Porque o algoritmo <b>sempre</b> divide até chegar em trechos de 1 elemento, independentemente dos valores. Nada depende dos dados, como no MergeSort (Aula 7).</p>
+
+<div class="widget">
+  <div class="wtitle">Animação: CalculaSomaArray em [3, 1, 4, 1, 5, 9, 2, 6]</div>
+  <div class="controls" id="sBtns"></div>
+  <div id="sPlayer"></div>
+  <p class="caption">Cinza: fora do trecho $[l, r]$ da chamada atual. A variável "chamadas" conta quantas vezes a função foi chamada até agora. Repare que, no fim, ela vale $2n - 1$.</p>
+</div>
+
+<h2>Questão 2(a): a recorrência</h2>
+<p>Identifique $a$, $b$ e $f(n)$ do formato $T(n) = aT(n/b) + f(n)$ (Aula 6):</p>
+<ul>
+  <li><b>$a = 2$</b>: duas chamadas recursivas (linhas 6 e 7);</li>
+  <li><b>$b = 2$</b>: cada uma com metade dos elementos, $n/2$ (exato, pois $n$ é potência de 2);</li>
+  <li><b>$f(n) = \Theta(1)$</b>: fora das chamadas, só operações constantes, ou seja, o teste da linha 2, o cálculo do meio (linha 5) e a soma com retorno (linha 9).</li>
+</ul>
+<p><b>Caso base:</b> com $n = 1$ ($l = r$), executa o teste e o retorno: tempo constante.</p>
+<p class="result">$T(n) = \begin{cases} 1, & n = 1 \\ 2\,T\!\left(\dfrac{n}{2}\right) + 1, & n &gt; 1 \end{cases}$</p>
+<div class="box tip">
+  <span class="tag">"1" ou "c"?</span>
+  <p>Escrever o trabalho constante como $1$ é a convenção dos slides: $T(1) = 1$ na busca binária e no MergeSort. Também é correto escrever $T(1) = c_0$ e $T(n) = 2T(n/2) + c$ (ou $+\Theta(1)$). O que o enunciado cobra é: <b>caso base</b> + <b>duas chamadas de tamanho $n/2$</b> + <b>trabalho constante</b>. Se usar constantes, carregue-as até o fim no item (b).</p>
+</div>
+<div class="box warn">
+  <span class="tag">Erros comuns</span>
+  <ul>
+    <li>Esquecer o caso base (o enunciado avisa que perde ponto).</li>
+    <li>Escrever $T(n) = T(n/2) + 1$, uma só chamada, como na busca binária. Aqui são <b>duas</b>.</li>
+    <li>Escrever $2T(n/2) + n$, copiando o MergeSort. Aqui a combinação é <b>uma</b> soma, não um merge de $n$ elementos.</li>
+  </ul>
+</div>
+
+<h2>Questão 2(b): método iterativo</h2>
+<p><b>Observe que</b> a regra vale para qualquer argumento, trocando $n$ por $n/2$, $n/4$, …:</p>
+$$T\!\left(\tfrac{n}{2}\right) = 2T\!\left(\tfrac{n}{4}\right) + 1, \qquad T\!\left(\tfrac{n}{4}\right) = 2T\!\left(\tfrac{n}{8}\right) + 1.$$
+<p><b>Expandindo:</b></p>
+<div class="widget">
+  <div class="wtitle">Expansão, um passo por clique</div>
+  <div class="controls">
+    <button class="btn" id="eP" type="button">◀ menos</button>
+    <button class="btn primary" id="eN" type="button">expandir mais ▶</button>
+  </div>
+  <div id="eBox"></div>
+</div>
+<p>Escrito por extenso, como você deve escrever na prova:</p>
+$$\begin{aligned}
+T(n) &= 2T(n/2) + 1 && \text{passo 1}\\
+&= 2\big(2T(n/4) + 1\big) + 1 = 2^2\,T(n/2^2) + 2 + 1 && \text{passo 2}\\
+&= 2^2\big(2T(n/8) + 1\big) + 2 + 1 = 2^3\,T(n/2^3) + 4 + 2 + 1 && \text{passo 3}\\
+&\;\;\vdots\\
+&= 2^k\,T\!\left(\frac{n}{2^k}\right) + \underbrace{2^{k-1} + \dots + 2^2 + 2 + 1}_{\sum_{i=0}^{k-1} 2^i} && \text{passo } k
+\end{aligned}$$
+<p><b>Quando para?</b> No caso base, $T(1)$:</p>
+$$\frac{n}{2^k} = 1 \iff 2^k = n \iff k = \log_2 n.$$
+<p><b>Resolvendo o somatório</b> com a fórmula da PG da tabela da prova ($a_1 = 1$, $q = 2$, $k$ termos):</p>
+$$\sum_{i=0}^{k-1} 2^i = 1\cdot\frac{2^k - 1}{2 - 1} = 2^k - 1.$$
+<p><b>Substituindo</b> $k = \log_2 n$ e usando a propriedade $a^{\log_a b} = b$ (também da tabela), que dá $2^{\log_2 n} = n$:</p>
+$$\begin{aligned}
+T(n) &= 2^{\log_2 n}\,T(1) + 2^{\log_2 n} - 1\\
+&= n\cdot 1 + n - 1.
+\end{aligned}$$
+<p class="result">$T(n) = 2n - 1 = \Theta(n)$</p>
+
+<div class="box tip">
+  <span class="tag">Confira com valores pequenos</span>
+  <div class="table-wrap"><table>
+    <tr><th>$n$</th><th class="num">pela recorrência</th><th class="num">$2n - 1$</th></tr>
+    <tr><td>1</td><td class="num">$T(1) = 1$</td><td class="num">1 ✓</td></tr>
+    <tr><td>2</td><td class="num">$2\cdot1 + 1 = 3$</td><td class="num">3 ✓</td></tr>
+    <tr><td>4</td><td class="num">$2\cdot3 + 1 = 7$</td><td class="num">7 ✓</td></tr>
+    <tr><td>8</td><td class="num">$2\cdot7 + 1 = 15$</td><td class="num">15 ✓</td></tr>
+  </table></div>
+  <p>Com constantes genéricas, $T(1) = c_0$ e $T(n) = 2T(n/2) + c$, a mesma conta dá $T(n) = c_0\,n + c\,(n-1)$, também $\Theta(n)$.</p>
+</div>
+
+<h2>A mesma resposta pela árvore de recursão</h2>
+<div class="widget">
+  <div class="wtitle">Cada nó é uma chamada e faz trabalho constante (1)</div>
+  <div id="tree" style="overflow-x:auto"></div>
+</div>
+<p>No nível $d$ há $2^d$ chamadas, cada uma com custo 1. Os níveis vão de $0$ a $\log_2 n$:</p>
+$$T(n) = 1 + 2 + 4 + \dots + n = \sum_{d=0}^{\log_2 n} 2^d = 2^{\log_2 n + 1} - 1 = 2n - 1.$$
+<p>Interpretação: $T(n)$ é o <b>número total de chamadas</b>. São $n$ folhas (uma por elemento) e $n - 1$ nós internos (uma soma para cada).</p>
+<div class="box def">
+  <span class="tag">Comparando com o MergeSort</span>
+  <p>Mesma árvore, custos diferentes:</p>
+  <ul>
+    <li><b>MergeSort:</b> $2T(n/2) + n$. <b>Todo nível</b> custa $n$, com $\log_2 n + 1$ níveis, total $\Theta(n\log n)$.</li>
+    <li><b>CalculaSomaArray:</b> $2T(n/2) + 1$. Os níveis custam $1, 2, 4, \dots, n$. Os níveis de baixo dominam e a soma da PG dá $\Theta(n)$.</li>
+  </ul>
+  <p>Faz sentido: somar $n$ números exige olhar cada um, então $\Theta(n)$ é o melhor possível, igual a um laço simples.</p>
+</div>
+
+<div class="box prof">
+  <span class="tag">Modelo de resposta</span>
+  <p><b>(a)</b> A função faz duas chamadas recursivas sobre metades do vetor e, fora delas, apenas operações de custo constante. Logo $a = 2$, $b = 2$, $f(n) = \Theta(1)$: $T(1) = 1$ e $T(n) = 2T(n/2) + 1$ para $n &gt; 1$.</p>
+  <p><b>(b)</b> $T(n) = 2T(n/2) + 1 = 2^2T(n/2^2) + 2 + 1 = 2^3T(n/2^3) + 4 + 2 + 1 = \dots = 2^kT(n/2^k) + \sum_{i=0}^{k-1}2^i$. O caso base ocorre quando $n/2^k = 1$, ou seja, $k = \log_2 n$. Pela soma da PG, $\sum_{i=0}^{k-1}2^i = 2^k - 1$. Logo $T(n) = 2^{\log_2 n}T(1) + 2^{\log_2 n} - 1 = n + n - 1 = 2n - 1$, que é $\Theta(n)$.</p>
+</div>
+
+<div class="pager">
+  <a href="q1bc-limites.html"><small>← anterior</small>Questão 1(b) e (c)</a>
+  <a class="next" href="q3-verdadeiro-falso.html"><small>próxima →</small>Questão 3</a>
+</div>
+</main>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  // animação
+  function trace(V) {
+    const n = V.length, S = []; let calls = 0; const stack = [];
+    const snap = (line, note, o) => {
+      const marks = {}; V.forEach((_, x) => { if (x < o.l || x > o.r) marks[x] = 'dim'; });
+      if (o.m != null) marks[o.m] = 'cmp';
+      S.push({ line, note, vars: { l: o.l, r: o.r, meio: o.meio ?? '—', chamadas: calls, pilha: stack.join(' → ') || '—' },
+        arrays: [{ name: 'vetor', values: V, marks: Object.assign(marks, o.marks || {}), ptrs: o.l === o.r ? { [o.l]: 'l=r' } : { [o.l]: 'l', [o.r]: 'r' } }] });
+    };
+    function rec(l, r) {
+      calls++; stack.push(`(${l},${r})`);
+      snap(1, `Chamada nº ${calls}: CalculaSomaArray(vetor, ${l}, ${r}). r == l? <b>${l === r ? 'Sim' : 'Não'}</b>.`, { l, r });
+      if (l === r) { snap(2, `Caso base: retorna vetor[${l}] = ${V[l]}.`, { l, r, marks: { [l]: 'ok' } }); stack.pop(); return V[l]; }
+      const meio = Math.floor((l + r) / 2);
+      snap(4, `meio = ⌊(${l} + ${r})/2⌋ = ${meio}.`, { l, r, meio });
+      snap(5, `Soma a metade esquerda: vetor[${l}..${meio}].`, { l, r, meio });
+      const se = rec(l, meio);
+      snap(6, `soma_esquerda = ${se}. Agora a metade direita: vetor[${meio + 1}..${r}].`, { l, r, meio });
+      const sd = rec(meio + 1, r);
+      const marks = {}; for (let x = l; x <= r; x++) marks[x] = 'ok';
+      snap(8, `retorna ${se} + ${sd} = ${se + sd}: uma única soma (custo constante).`, { l, r, meio, marks });
+      stack.pop(); return se + sd;
+    }
+    const tot = rec(0, n - 1);
+    snap(0, `Resultado: ${tot}. Total de chamadas: ${calls} = 2·${n} − 1 ✓`, { l: 0, r: n - 1 });
+    return S;
+  }
+  const code = [{ h: '1  Função CalculaSomaArray(vetor, l, r)' }, ['2', 'se r == l então'], ['3', '   retorna vetor[l]'], ['4', ''], ['5', 'meio ← floor((l + r)/2)'],
+    ['6', 'soma_esquerda ← CalculaSomaArray(vetor, l, meio)'], ['7', 'soma_direita ← CalculaSomaArray(vetor, meio + 1, r)'], ['8', ''], ['9', 'retorna soma_esquerda + soma_direita']];
+  const P = StepPlayer.mount(document.getElementById('sPlayer'), { code, steps: trace([3, 1, 4, 1, 5, 9, 2, 6]), speed: 600 });
+  const sb = document.getElementById('sBtns');
+  [['n = 8', [3, 1, 4, 1, 5, 9, 2, 6]], ['n = 4', [7, 2, 5, 1]], ['n = 2', [4, 6]]].forEach(([lab, a], k) =>
+    sb.append(APA.el('button', { class: 'btn' + (k ? '' : ' on'), type: 'button', onclick: (e) => {
+      [...sb.children].forEach((b) => b.classList.remove('on')); e.target.classList.add('on'); P.load(trace(a)); } }, lab)));
+
+  // expansão
+  let k = 1; const box = document.getElementById('eBox');
+  function draw() {
+    const L = [];
+    for (let s = 1; s <= k; s++) {
+      const sum = Array.from({ length: s }, (_, i) => 2 ** (s - 1 - i)).join(' + ');
+      L.push(`${s === 1 ? 'T(n)' : ''} &= ${s === 1 ? '' : '2^{' + s + '}'}${s === 1 ? '2' : ''}\\,T\\!\\left(\\tfrac{n}{${2 ** s}}\\right) + ${sum} && \\text{passo ${s}}`);
+    }
+    box.innerHTML = `$$\\begin{aligned}${L.join('\\\\')}\\end{aligned}$$` + (k >= 3 ? '<p>Padrão: coeficiente $2^k$, argumento $n/2^k$ e a soma $1 + 2 + \\dots + 2^{k-1}$.</p>' : '<p>Continue até enxergar o padrão.</p>');
+    APA.renderMath(box);
+    document.getElementById('eP').disabled = k <= 1; document.getElementById('eN').disabled = k >= 5;
+  }
+  document.getElementById('eP').onclick = () => { k--; draw(); };
+  document.getElementById('eN').onclick = () => { k++; draw(); };
+  draw();
+
+  // árvore
+  const build = (a) => ({ arr: a, marks: a.length === 1 ? { 0: 'ok' } : {}, children: a.length > 1 ? [build(a.slice(0, a.length / 2)), build(a.slice(a.length / 2))] : [] });
+  document.getElementById('tree').append(TreeView.arrays(build([3, 1, 4, 1, 5, 9, 2, 6]), { cell: 28, levelH: 54, title: 'Árvore de recursão de CalculaSomaArray',
+    levelLabel: (d) => `nível ${d}: ${2 ** d} chamada${d ? 's' : ''} × 1 = ${2 ** d}` + (d === 3 ? '  → total 15 = 2·8 − 1' : '') }));
+});
+</script>
+</body>
+</html>

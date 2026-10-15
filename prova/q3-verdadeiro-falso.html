@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prova 1 · Questão 3</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../assets/style.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="../assets/common.js"></script>
+<script defer src="../assets/chart.js"></script>
+</head>
+<body>
+<nav class="topbar">
+  <a href="index.html">← Prova resolvida</a>
+  <span>Prova 1 (08/06/2026) · Questão 3</span>
+  <span class="spacer"></span>
+  <button class="theme-btn" type="button">tema</button>
+</nav>
+<main>
+<p class="kicker">Prova resolvida · Lição 4 de 4</p>
+<h1>Questão 3: verdadeiro ou falso sobre O, Ω e Θ</h1>
+<p class="lead">2,0 pontos: quatro itens de 0,5. A resposta "V" ou "F" sozinha vale pouco ou nada: o enunciado pede <b>justificativa</b>. Os itens (a) e (c) parecem iguais, mas não são: a diferença é exatamente a ideia do slide 28 da Aula 4.</p>
+
+<div class="box prof">
+  <span class="tag">Questão 3</span>
+  <p>Determine a veracidade das seguintes afirmações, apresentando justificativas para as respostas.</p>
+</div>
+
+<h2>Ferramentas que vamos usar</h2>
+<ul>
+  <li><b>Melhor caso</b> = limite inferior para <b>qualquer</b> entrada. <b>Pior caso</b> = limite superior para <b>qualquer</b> entrada (Aula 4, slide 26).</li>
+  <li>$f = \Theta(g) \iff f = O(g)$ <b>e</b> $f = \Omega(g)$ (teorema, Aula 4).</li>
+  <li>Todo tempo de execução fica entre o melhor e o pior caso: $T_{\text{melhor}}(n) \le T_{\text{entrada}}(n) \le T_{\text{pior}}(n)$.</li>
+</ul>
+
+<h2>(a) Falso</h2>
+<div class="box def">
+  <span class="tag">Afirmação (a)</span>
+  <p>Um algoritmo $A_1$ possui melhor caso em $\Theta(n)$ e pior caso em $\Theta(n^3)$. Sendo assim, podemos afirmar que seu tempo de execução é $\Theta(n^3)$.</p>
+</div>
+<p class="result">FALSO</p>
+<p><b>Justificativa:</b> dizer que "o tempo de execução é $\Theta(n^3)$", sem especificar o caso, significa que, <b>para toda entrada</b>, o tempo é $O(n^3)$ <b>e</b> $\Omega(n^3)$. A parte $O(n^3)$ vale, porque o pior caso limita tudo por cima. Mas a parte $\Omega(n^3)$ falha: nas entradas de melhor caso o algoritmo gasta só $\Theta(n)$, e uma função $\Theta(n)$ não é $\Omega(n^3)$, porque $\lim_{n\to\infty} \frac{n}{n^3} = 0$.</p>
+<p>O correto seria: o tempo de execução de $A_1$ é $O(n^3)$ e $\Omega(n)$. Ou: o pior caso é $\Theta(n^3)$.</p>
+<div class="box tip">
+  <span class="tag">É o slide 28 da Aula 4</span>
+  <p>"O pior caso do InsertionSort é $O(n^2)$. Podemos afirmar que $\Theta(n^2)$ é um limite válido sob qualquer entrada? Não! Pois o melhor caso é $\Theta(n)$." A afirmação (a) é a mesma situação, com $n^3$.</p>
+</div>
+
+<div class="widget">
+  <div class="wtitle">Item (a): onde podem estar os tempos de $A_1$</div>
+  <div id="aChart"></div>
+  <p class="caption">Qualquer entrada tem custo entre a curva do melhor caso ($n$) e a do pior caso ($n^3$). Para ser $\Theta(n^3)$, toda entrada teria que ficar acima de $c\cdot n^3$, e as de melhor caso não ficam.</p>
+</div>
+
+<h2>(b) Verdadeiro</h2>
+<div class="box def">
+  <span class="tag">Afirmação (b)</span>
+  <p>O pior caso de um algoritmo $A_2$ é dado por $T(n) = 5n\log n + 3n$. Portanto, é correto afirmar que $T(n) = \Omega(n\log n)$.</p>
+</div>
+<p class="result">VERDADEIRO</p>
+<p><b>Justificativa pela definição:</b> precisamos de $c &gt; 0$ e $n_0$ com $5n\log n + 3n \ge c\,n\log n$ para todo $n \ge n_0$. Para $n \ge 1$, o termo $3n$ é positivo, então
+$$5n\log n + 3n \ge 5n\log n.$$
+Logo vale com $c = 5$ e $n_0 = 1$. (Para $n \ge 1$, $\log n \ge 0$, então nada fica negativo.)</p>
+<p><b>Ou pelo limite:</b>
+$$\lim_{n\to\infty}\frac{5n\log n + 3n}{n\log n} = \lim_{n\to\infty}\left(5 + \frac{3}{\log n}\right) = 5,$$
+uma constante finita e positiva. As funções têm a mesma taxa, então $T(n) = \Theta(n\log n)$ e, em particular, $\Omega(n\log n)$.</p>
+<div class="box warn">
+  <span class="tag">Pegadinha possível</span>
+  <p>Alguém pode pensar "$\Omega$ é para melhor caso, então usar $\Omega$ no pior caso está errado". Não está. $\Omega$ é um limite inferior <b>de uma função</b>; a afirmação é sobre a função $T(n)$, e ela é verdadeira. O "mais apropriado para o melhor caso" do slide é sobre <b>uso típico</b>, não uma regra. (Como o slide diz sobre $O$: usar no melhor caso "é correto".)</p>
+</div>
+
+<h2>(c) Verdadeiro</h2>
+<div class="box def">
+  <span class="tag">Afirmação (c)</span>
+  <p>Se um algoritmo possui pior caso em $O(n^2)$ e melhor caso em $\Omega(n^2)$, então necessariamente o algoritmo roda em $\Theta(n^2)$.</p>
+</div>
+<p class="result">VERDADEIRO</p>
+<p><b>Justificativa:</b> seja $T(n)$ o tempo para uma entrada qualquer de tamanho $n$. Ele fica entre o melhor e o pior caso:
+$$T_{\text{melhor}}(n) \le T(n) \le T_{\text{pior}}(n).$$</p>
+<ul>
+  <li>Pior caso $O(n^2)$: existem $c_2, n_2$ com $T_{\text{pior}}(n) \le c_2 n^2$ para $n \ge n_2$. Então $T(n) \le c_2 n^2$: <b>$T(n) = O(n^2)$</b>.</li>
+  <li>Melhor caso $\Omega(n^2)$: existem $c_1, n_1$ com $T_{\text{melhor}}(n) \ge c_1 n^2$ para $n \ge n_1$. Então $T(n) \ge c_1 n^2$: <b>$T(n) = \Omega(n^2)$</b>.</li>
+</ul>
+<p>Logo, para toda entrada, $c_1 n^2 \le T(n) \le c_2 n^2$ para $n \ge \max(n_1, n_2)$: $T(n) = \Theta(n^2)$. (O pior caso não pode ser menor que o melhor, então os dois são, eles mesmos, $\Theta(n^2)$.)</p>
+<div class="box tip">
+  <span class="tag">Por que (a) é falso e (c) é verdadeiro?</span>
+  <p>Em (c), o limite <b>inferior</b> vem do <b>melhor</b> caso e o <b>superior</b> do <b>pior</b> caso: exatamente as duas pontas que cercam toda entrada. Em (a), o melhor caso é $\Theta(n)$, então nenhuma ponta garante $\Omega(n^3)$. Exemplo real de (c): o SelectionSort, com melhor e pior caso quadráticos (Aula 2).</p>
+</div>
+
+<h2>(d) Verdadeiro</h2>
+<div class="box def">
+  <span class="tag">Afirmação (d)</span>
+  <p>Sejam $f(n)$ e $g(n)$ duas funções positivas. Se $f(n) = O(g(n))$ e $g(n) = O(f(n))$, então $f(n) = \Theta(g(n))$.</p>
+</div>
+<p class="result">VERDADEIRO</p>
+<p><b>Justificativa:</b></p>
+<ul>
+  <li>$f = O(g)$: existem $c_1 &gt; 0$ e $n_1$ com $f(n) \le c_1\,g(n)$ para todo $n \ge n_1$.</li>
+  <li>$g = O(f)$: existem $c_2 &gt; 0$ e $n_2$ com $g(n) \le c_2\,f(n)$ para todo $n \ge n_2$. Dividindo por $c_2 &gt; 0$: $f(n) \ge \frac{1}{c_2}\,g(n)$. Isso é exatamente $f = \Omega(g)$, com constante $\frac{1}{c_2}$.</li>
+</ul>
+<p>Juntando, para todo $n \ge n_0 = \max(n_1, n_2)$:
+$$\frac{1}{c_2}\,g(n) \;\le\; f(n) \;\le\; c_1\,g(n),$$
+que é a definição de $f = \Theta(g)$, com constantes $\frac{1}{c_2}$ e $c_1$. Pelo teorema da Aula 4: $O$ + $\Omega$ = $\Theta$. ∎</p>
+<div class="box tip">
+  <span class="tag">Intuição</span>
+  <p>"$f$ não cresce mais rápido que $g$" e "$g$ não cresce mais rápido que $f$" juntos dão "crescem na mesma proporção". Na analogia dos slides: $f \le g$ e $g \le f$ dão $f = g$.</p>
+</div>
+
+<h2>Resumo da Questão 3</h2>
+<div class="table-wrap"><table>
+  <tr><th>Item</th><th>Resposta</th><th>Argumento central</th></tr>
+  <tr><td>(a)</td><td><b>F</b></td><td>melhor caso $\Theta(n)$ não é $\Omega(n^3)$: só vale $O(n^3)$ e $\Omega(n)$</td></tr>
+  <tr><td>(b)</td><td><b>V</b></td><td>$5n\log n + 3n \ge 5n\log n$ ($c = 5$, $n_0 = 1$); limite $= 5$</td></tr>
+  <tr><td>(c)</td><td><b>V</b></td><td>toda entrada fica entre melhor ($\ge c_1n^2$) e pior ($\le c_2n^2$)</td></tr>
+  <tr><td>(d)</td><td><b>V</b></td><td>$g \le c_2 f \Rightarrow f \ge g/c_2$ ($\Omega$); com $f = O(g)$ dá $\Theta$</td></tr>
+</table></div>
+
+<div class="pager">
+  <a href="q2-recorrencia.html"><small>← anterior</small>Questão 2</a>
+  <a class="next" href="index.html"><small>fim →</small>Resumo da prova</a>
+</div>
+</main>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  LineChart.mount(document.getElementById('aChart'), {
+    series: [
+      { name: 'pior caso ~ n³', f: (n) => n ** 3, color: 'var(--series-2)' },
+      { name: 'entrada intermediária ~ n²', f: (n) => n * n, color: 'var(--series-7)' },
+      { name: 'melhor caso ~ n', f: (n) => n, color: 'var(--series-1)' },
+    ], xMin: 1, xMax: 20, xLabel: 'n', yLabel: 'tempo', log: true, tableXs: [5, 10, 20],
+  });
+});
+</script>
+</body>
+</html>

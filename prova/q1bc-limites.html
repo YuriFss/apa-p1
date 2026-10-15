@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prova 1 · Questão 1b e 1c</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../assets/style.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="../assets/common.js"></script>
+<script defer src="../assets/chart.js"></script>
+</head>
+<body>
+<nav class="topbar">
+  <a href="index.html">← Prova resolvida</a>
+  <span>Prova 1 (08/06/2026) · Questão 1</span>
+  <span class="spacer"></span>
+  <button class="theme-btn" type="button">tema</button>
+</nav>
+<main>
+<p class="kicker">Prova resolvida · Lição 2 de 4</p>
+<h1>Questão 1(b) e 1(c): limites restritos e como melhorar o algoritmo</h1>
+<p class="lead">O item (b) usa as notações das Aulas 3 e 4 sobre os $T(n)$ do item (a). O item (c) pede para pensar como projetista: trocar a força bruta por uma ideia que já vimos (ordenação ou contagem).</p>
+
+<h2>Lembrete do item (a)</h2>
+<p>$T_m(n) = 9$ (melhor caso) e $T_p(n) = 3n^2 - n - 1$ (pior caso).</p>
+
+<h2>Questão 1(b) (1,5 pts)</h2>
+<div class="box prof">
+  <span class="tag">Enunciado</span>
+  <p>Especifique um <b>limite assintoticamente restrito</b> para o algoritmo tanto no pior quanto no melhor caso e <b>prove</b> que tais limites estão corretos. Utilize um dos métodos de prova ensinados em sala (usando limites ou encontrando os valores de $c$ e $n_0$). Lembre-se de desenvolver a prova e explicar o que foi feito.</p>
+</div>
+<div class="box warn">
+  <span class="tag">Leia com atenção</span>
+  <p>"Limite assintoticamente restrito" é o nome da notação <b>$\Theta$</b> (Aula 4). Responder só com $O$ ou só com $\Omega$ perde ponto. E o enunciado pede <b>prova</b> com explicação, não só a resposta.</p>
+</div>
+
+<h3>Resposta</h3>
+<p class="result">Melhor caso: $\Theta(1)$ · Pior caso: $\Theta(n^2)$</p>
+
+<h3>Prova do melhor caso: $9 = \Theta(1)$</h3>
+<p>Aqui $f(n) = 9$ e $g(n) = 1$. Pela definição, precisamos de constantes positivas $c_1$, $c_2$ e $n_0$ com $c_1\cdot 1 \le 9 \le c_2 \cdot 1$ para todo $n \ge n_0$.</p>
+<p>Tome $c_1 = c_2 = 9$ e $n_0 = 2$. Para todo $n \ge 2$: $9 \cdot 1 \le 9 \le 9 \cdot 1$, que é verdade. Logo $T_m(n) = \Theta(1)$. ∎</p>
+<p><b>Ou pelo limite:</b> $\lim_{n\to\infty} \frac{9}{1} = 9$, uma constante finita e positiva. Então as funções têm a mesma taxa de crescimento: $\Theta(1)$.</p>
+<p class="caption">$n_0 = 2$ porque o algoritmo só faz sentido como analisamos com pelo menos 2 elementos (o melhor caso pressupõe $\text{vetor}[0]$ e $\text{vetor}[1]$).</p>
+
+<h3>Prova do pior caso: $3n^2 - n - 1 = \Theta(n^2)$, pela definição</h3>
+<p>Precisamos de $c_1, c_2, n_0 &gt; 0$ com $c_1 n^2 \le 3n^2 - n - 1 \le c_2 n^2$ para todo $n \ge n_0$. Vamos provar cada lado separadamente (teorema: $\Theta \iff O$ e $\Omega$).</p>
+<p><b>Lado de cima ($O$):</b> para $n \ge 1$, os termos $-n$ e $-1$ são negativos, então
+$$3n^2 - n - 1 \le 3n^2.$$
+Logo vale com $c_2 = 3$ e $n_0 = 1$.</p>
+<p><b>Lado de baixo ($\Omega$):</b> escolha $c_1 = 2$, um pouco menor que o coeficiente líder 3, e resolva:
+$$3n^2 - n - 1 \ge 2n^2 \iff n^2 - n - 1 \ge 0.$$
+As raízes de $n^2 - n - 1$ são $\frac{1 \pm \sqrt5}{2}$, ou seja, $\approx -0{,}62$ e $\approx 1{,}62$. A parábola é $\ge 0$ para $n \ge 1{,}62$, ou seja, para todo inteiro $n \ge 2$. Logo vale com $c_1 = 2$ e $n_0 = 2$.</p>
+<p><b>Juntando:</b> com $c_1 = 2$, $c_2 = 3$ e $n_0 = \max(1, 2) = 2$:
+$$2n^2 \le 3n^2 - n - 1 \le 3n^2 \quad \text{para todo } n \ge 2.$$
+Confira em $n = 2$: $8 \le 9 \le 12$ ✓. Portanto $T_p(n) = \Theta(n^2)$. ∎</p>
+
+<div class="widget">
+  <div class="wtitle">O sanduíche: $2n^2 \le 3n^2 - n - 1 \le 3n^2$</div>
+  <div class="controls"><label>n até <b id="snv">12</b> <input type="range" id="sn" min="3" max="60" value="12"></label></div>
+  <div id="sChart"></div>
+</div>
+
+<h3>A mesma prova pelo limite (alternativa)</h3>
+$$\lim_{n\to\infty}\frac{3n^2 - n - 1}{n^2} = \lim_{n\to\infty}\left(3 - \frac{1}{n} - \frac{1}{n^2}\right) = 3.$$
+<p>O limite é uma constante finita e positiva, então $T_p(n)$ e $n^2$ têm a mesma taxa de crescimento: $T_p(n) = O(n^2)$ e $T_p(n) = \Omega(n^2)$, logo $T_p(n) = \Theta(n^2)$.</p>
+<div class="box tip">
+  <span class="tag">Qual método usar na prova?</span>
+  <p>O enunciado aceita qualquer um. O do limite é mais curto, mas escreva a <b>interpretação</b> ("constante finita e positiva → mesma taxa → $\Theta$"). O de $c$ e $n_0$ exige mostrar a conta de cada lado e conferir um valor. Fazer os dois não rende ponto extra; faça um bem feito.</p>
+</div>
+
+<div class="box prof">
+  <span class="tag">Modelo de resposta (1b)</span>
+  <p><b>Melhor caso:</b> $T_m(n) = 9 = \Theta(1)$. Tomando $c_1 = c_2 = 9$ e $n_0 = 2$, temos $9\cdot 1 \le 9 \le 9\cdot 1$ para todo $n \ge n_0$.</p>
+  <p><b>Pior caso:</b> $T_p(n) = 3n^2 - n - 1 = \Theta(n^2)$. Superior: para $n \ge 1$, $3n^2 - n - 1 \le 3n^2$ ($c_2 = 3$). Inferior: $3n^2 - n - 1 \ge 2n^2 \iff n^2 - n - 1 \ge 0$, verdadeiro para $n \ge 2$ ($c_1 = 2$). Logo $2n^2 \le T_p(n) \le 3n^2$ para todo $n \ge n_0 = 2$.</p>
+</div>
+
+<h2>Questão 1(c) (1,5 pts)</h2>
+<div class="box prof">
+  <span class="tag">Enunciado</span>
+  <p>É possível modificar o algoritmo de forma que a complexidade assintótica do <b>pior caso</b> seja reduzida. Explique como isso pode ser feito e especifique qual seria a complexidade resultante para o pior caso após tais modificações.</p>
+</div>
+<p><b>Onde está o desperdício?</b> O algoritmo compara cada elemento com <b>todos</b> os outros: $\frac{n(n-1)}{2}$ comparações. Mas, se o vetor estiver <b>ordenado</b>, elementos iguais ficam <b>vizinhos</b>, e basta comparar cada um com o seguinte: $n - 1$ comparações.</p>
+
+<h3>Solução esperada: ordenar e varrer</h3>
+<pre class="code"><span class="fn">VerificaTodosUnicos2</span>(vetor, n)
+1   MergeSort(vetor, 0, n − 1)          // ou HeapSort: O(n log n) no pior caso
+2   <span class="kw">para</span> i ← 0 até n − 2 <span class="kw">faça</span>          // O(n)
+3      <span class="kw">se</span> vetor[i] == vetor[i + 1] <span class="kw">então</span>
+4         <span class="kw">retorna</span> False
+5   <span class="kw">retorna</span> True</pre>
+<ul>
+  <li>Ordenar com <b>MergeSort</b> (Aula 7) ou <b>HeapSort</b> (Aula 9) custa $O(n\log n)$ <b>no pior caso</b>.</li>
+  <li>A varredura comparando vizinhos custa $O(n)$.</li>
+  <li>Total: $O(n\log n) + O(n) = O(n\log n)$.</li>
+</ul>
+<p class="result">Pior caso depois da modificação: $\Theta(n\log n)$, contra $\Theta(n^2)$ antes</p>
+<div class="box warn">
+  <span class="tag">Armadilha</span>
+  <p>Não use QuickSort nem InsertionSort como justificativa para o pior caso. O pior caso do QuickSort é $\Theta(n^2)$ (Aula 7), e o do Insertion também (Aula 2). A melhoria só vale com um algoritmo que seja $O(n\log n)$ <b>no pior caso</b>: MergeSort ou HeapSort.</p>
+</div>
+
+<h3>Alternativa: usar que são inteiros não-negativos (ideia do CountingSort)</h3>
+<p>O enunciado diz que os elementos são <b>inteiros não-negativos</b>. Se o maior valor for $k$, dá para usar um vetor de contagem como o $C[0..k]$ do CountingSort (Aula 8):</p>
+<pre class="code"><span class="fn">VerificaTodosUnicos3</span>(vetor, n, k)
+1   <span class="kw">para</span> v ← 0 até k <span class="kw">faça</span> visto[v] ← False        // O(k)
+2   <span class="kw">para</span> i ← 0 até n − 1 <span class="kw">faça</span>                     // O(n)
+3      <span class="kw">se</span> visto[vetor[i]] <span class="kw">então retorna</span> False
+4      visto[vetor[i]] ← True
+5   <span class="kw">retorna</span> True</pre>
+<p>Custo: $O(n + k)$, que é $O(n)$ quando $k = O(n)$. Como no CountingSort, só compensa se $k$ não for enorme perto de $n$. Citar essa alternativa, com essa ressalva, mostra domínio do conteúdo.</p>
+
+<div class="widget">
+  <div class="wtitle">Comparações no pior caso: original × ordenar e varrer</div>
+  <div class="controls"><label>n até <b id="cnv">100</b> <input type="range" id="cn" min="10" max="1000" step="10" value="100"></label></div>
+  <div id="cChart"></div>
+  <p class="caption">Laranja: $\frac{n(n-1)}{2}$ comparações do algoritmo original. Azul: cerca de $n\log_2 n$ (MergeSort) $+ (n-1)$ (varredura). Com $n = 1000$: cerca de 500 mil contra cerca de 11 mil.</p>
+</div>
+
+<div class="box extra">
+  <span class="tag">Para ir além (fora da matéria)</span>
+  <p>Dá para provar que qualquer algoritmo <b>baseado em comparações</b> para esse problema precisa de $\Omega(n\log n)$ comparações no pior caso, com um argumento parecido com a árvore de decisão da Aula 8. Então "ordenar e varrer" é o melhor possível nesse modelo. Só fugindo das comparações (contagem, ou tabela hash, que dá tempo esperado linear) se faz melhor.</p>
+</div>
+
+<div class="box prof">
+  <span class="tag">Modelo de resposta (1c)</span>
+  <p>Sim. Primeiro ordena-se o vetor com um algoritmo $O(n\log n)$ no pior caso, como MergeSort ou HeapSort. Num vetor ordenado, elementos repetidos ficam em posições consecutivas, então basta uma única varredura comparando $\text{vetor}[i]$ com $\text{vetor}[i+1]$, em $O(n)$. A complexidade de pior caso passa a ser $O(n\log n) + O(n) = \Theta(n\log n)$, menor que o $\Theta(n^2)$ original.</p>
+</div>
+
+<div class="pager">
+  <a href="q1a-contagem.html"><small>← anterior</small>Questão 1(a)</a>
+  <a class="next" href="q2-recorrencia.html"><small>próxima →</small>Questão 2</a>
+</div>
+</main>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const s = LineChart.mount(document.getElementById('sChart'), {
+    series: [
+      { name: 'c₂·n² = 3n²', f: (n) => 3 * n * n, color: 'var(--series-1)' },
+      { name: 'T_p(n) = 3n² − n − 1', f: (n) => 3 * n * n - n - 1, color: 'var(--series-2)' },
+      { name: 'c₁·n² = 2n²', f: (n) => 2 * n * n, color: 'var(--series-3)' },
+    ], xMin: 1, xMax: 12, xLabel: 'n', yLabel: 'passos', tableXs: [1, 2, 3, 5, 10],
+  });
+  const sn = document.getElementById('sn');
+  sn.oninput = () => { document.getElementById('snv').textContent = sn.value; s.update({ xMax: +sn.value }); };
+  const c = LineChart.mount(document.getElementById('cChart'), {
+    series: [
+      { name: 'original: n(n−1)/2', f: (n) => n * (n - 1) / 2, color: 'var(--series-2)' },
+      { name: 'ordenar e varrer: n log₂ n + n − 1', f: (n) => n * Math.log2(n) + n - 1, color: 'var(--series-1)' },
+    ], xMin: 2, xMax: 100, xLabel: 'n', yLabel: 'comparações', tableXs: [10, 100, 1000],
+  });
+  const cn = document.getElementById('cn');
+  cn.oninput = () => { document.getElementById('cnv').textContent = cn.value; c.update({ xMax: +cn.value }); };
+});
+</script>
+</body>
+</html>
