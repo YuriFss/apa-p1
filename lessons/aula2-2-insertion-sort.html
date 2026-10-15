@@ -162,6 +162,26 @@ $$T_m(n) = \underbrace{1}_{\text{linha 1}} + 13(n-1) + \underbrace{1}_{\text{lin
 $$\#\text{exec(linhas 6, 7)} = \sum_{i=1}^{n-1} i = (n-1)\cdot\frac{1 + (n-1)}{2} = \frac{(n-1)\,n}{2} = \frac{n^2 - n}{2}.$$
 <p>O professor escreve exatamente assim no slide: <code>(n−1)(1+n−1)/2</code>. A linha 5 (cabeçalho) tem o mesmo # exec do corpo, porque o teste final, que falha por $j = -1$, não é contado.</p>
 
+<div class="box tip">
+  <span class="tag">Entendendo o (n−1)(1+n−1)/2, passo a passo</span>
+  <p>Essa expressão é a <b>fórmula da soma de uma PA</b> com os números do InsertionSort encaixados:</p>
+  $$S = \frac{(\text{número de termos}) \times (\text{primeiro} + \text{último})}{2}$$
+  <p>Na soma $1 + 2 + 3 + \dots + (n-1)$:</p>
+  <ul>
+    <li><b>número de termos:</b> $n - 1$, uma parcela para cada volta do <code>for</code>, de $i = 1$ até $i = n-1$;</li>
+    <li><b>primeiro termo:</b> $1$, na volta $i = 1$, quando um elemento é deslocado;</li>
+    <li><b>último termo:</b> $n - 1$, na volta $i = n-1$, quando $n-1$ elementos são deslocados.</li>
+  </ul>
+  <p>Encaixando: $\dfrac{(n-1)\,(1 + n - 1)}{2}$. É exatamente o que está no slide: <b>(termos) × (primeiro + último) / 2</b>, sem simplificar.</p>
+  <p><b>Simplificando:</b> $1 + n - 1 = n$, então $\dfrac{(n-1)\,n}{2} = \dfrac{n^2 - n}{2}$.</p>
+  <p><b>Conferindo com $n = 5$</b>, entrada $[5, 4, 3, 2, 1]$: são 4 voltas, com 1, 2, 3 e 4 deslocamentos, e $1 + 2 + 3 + 4 = 10$. Pela fórmula: $\dfrac{(5-1)(1+5-1)}{2} = \dfrac{4 \cdot 5}{2} = 10$ ✓</p>
+  <p><b>Por que a fórmula funciona (truque de Gauss):</b> junte o primeiro com o último, o segundo com o penúltimo, e assim por diante: $\underbrace{(1+4)}_{5} + \underbrace{(2+3)}_{5} = 10$. Todo par soma "primeiro + último", e há (número de termos) ÷ 2 pares. Por isso a soma é (termos) × (primeiro + último) ÷ 2. O desenho das duas escadas formando um retângulo, na seção 6 da lição 1.2, mostra a mesma ideia.</p>
+  <details>
+    <summary>Teste rápido: quanto vale $2 + 4 + 6 + \dots + 20$?</summary>
+    <p>São 10 termos, o primeiro é 2 e o último é 20: $\dfrac{10 \cdot (2 + 20)}{2} = 110$.</p>
+  </details>
+</div>
+
 <div class="algo">
 <pre class="panel"><span class="fn">InsertionSort</span>(A, n)
 1. pivo ← null
