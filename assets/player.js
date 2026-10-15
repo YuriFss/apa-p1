@@ -36,10 +36,14 @@
     root.classList.add('player');
     root.tabIndex = 0;
     const codeEl = APA.el('div', { class: 'code' });
-    const lines = cfg.code.map((txt, k) => {
+    // item da lista de código: 'texto' (numerado pelo índice), ['rótulo', 'texto'] ou { h: 'cabeçalho' }
+    const lines = cfg.code.map((item, k) => {
+      const head = k === 0 || (item && item.h !== undefined);
+      const txt = head ? (item.h ?? item) : Array.isArray(item) ? item[1] : item;
+      const lab = head ? '' : Array.isArray(item) ? item[0] : k + '.';
       const ln = APA.el('div', { class: 'ln' },
-        APA.el('span', { class: 'no' }, k === 0 ? '' : k + '.'),
-        APA.el('span', { html: k === 0 ? '<span class="fn">' + esc(txt) + '</span>' : hl(txt) }));
+        APA.el('span', { class: 'no' }, lab),
+        APA.el('span', { html: head ? '<span class="fn">' + esc(txt) + '</span>' : hl(txt) }));
       codeEl.append(ln);
       return ln;
     });
@@ -75,7 +79,8 @@
         const e = ex[ln] || 0, sub = e * cfg.ops[ln];
         total += sub;
         const hot = steps[s] && steps[s].line === ln && !steps[s].skip;
-        t.append(APA.el('tr', { class: hot ? 'hot' : '' }, APA.el('td', {}, ln + '.'),
+        const lab = Array.isArray(cfg.code[ln]) ? cfg.code[ln][0] : ln + '.';
+        t.append(APA.el('tr', { class: hot ? 'hot' : '' }, APA.el('td', {}, lab),
           APA.el('td', { class: 'num' }, String(cfg.ops[ln])), APA.el('td', { class: 'num' }, String(e)),
           APA.el('td', { class: 'num' }, String(sub))));
       }

@@ -254,6 +254,10 @@ svg.tree .hot circle { fill: var(--orange-soft); stroke: var(--orange); stroke-w
 svg.tree .cold circle { fill: var(--accent-soft); stroke: var(--accent); }
 svg.tree .ok circle { fill: var(--aqua-soft); stroke: var(--aqua); stroke-width: 2; }
 svg.tree .lvl { fill: var(--muted); font: 12px var(--sans); text-anchor: start; }
+svg.tree .cellbox { fill: var(--accent-soft); stroke: var(--accent); stroke-width: 1; }
+svg.tree .hot .cellbox { fill: var(--orange-soft); stroke: var(--orange); stroke-width: 2; }
+svg.tree .ok .cellbox { fill: var(--aqua-soft); stroke: var(--aqua); }
+svg.tree .dim .cellbox { fill: var(--surface-2); stroke: var(--line); }
 
 /* quiz */
 .quiz .q { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; margin: 12px 0; }

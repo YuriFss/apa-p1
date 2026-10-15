@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Aula 6 · Divisão e conquista</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../assets/style.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="../assets/common.js"></script>
+<script defer src="../assets/player.js"></script>
+<script defer src="../assets/tree.js"></script>
+<script defer src="../assets/quiz.js"></script>
+</head>
+<body>
+<nav class="topbar">
+  <a href="../index.html">← Índice</a>
+  <span>Aula 6 · Divisão e conquista (Parte I)</span>
+  <span class="spacer"></span>
+  <a href="../reference/aula6.html">Folha de referência</a>
+  <button class="theme-btn" type="button">tema</button>
+</nav>
+<main>
+<p class="kicker">Aula 6 · Lição única</p>
+<h1>Divisão e conquista e a busca binária</h1>
+<p class="lead">Os 13 slides da Aula 6: o paradigma, a forma típica da recorrência, $T(n) = aT(n/b) + f(n)$, e a busca binária como primeiro exemplo. No fim, resolvemos a recorrência da busca binária, um complemento que os slides deixam implícito.</p>
+
+<div class="toc">
+  <b>Nesta lição</b>
+  <ol>
+    <li><a href="#paradigmas">Paradigmas de projeto de algoritmos</a></li>
+    <li><a href="#dc">Divisão e conquista: as três etapas</a></li>
+    <li><a href="#forma">A recorrência típica: $aT(n/b) + f(n)$</a></li>
+    <li><a href="#busca">Busca binária: ideia e pseudocódigo</a></li>
+    <li><a href="#anim">Animação</a></li>
+    <li><a href="#casos">Melhor e pior caso</a></li>
+    <li><a href="#rec">A recorrência da busca binária</a></li>
+    <li><a href="#resolve">Resolvendo: $\Theta(\log n)$</a></li>
+    <li><a href="#quiz">Quiz</a> · <a href="#exercicio">Exercício</a></li>
+  </ol>
+</div>
+
+<h2 id="paradigmas">1. Paradigmas de projeto de algoritmos</h2>
+<p><b>Paradigmas</b> são técnicas genéricas para construir algoritmos. Eles fornecem uma abstração do algoritmo usado para resolver um problema. Exemplos: <b>divisão e conquista</b>, algoritmos gulosos, programação dinâmica etc.</p>
+
+<h2 id="dc">2. Divisão e conquista: as três etapas</h2>
+<p>É uma técnica que consiste em <b>dividir um problema maior</b> e mais complexo <b>em subproblemas menores</b> e, depois, <b>combinar as soluções</b> dos subproblemas para gerar a solução do problema original. Geralmente cada subproblema tem só <b>uma fração do tamanho</b> do original, o que pode reduzir bastante o tamanho dos subproblemas.</p>
+<div class="box def">
+  <span class="tag">Três etapas (slide 4), resolvidas recursivamente</span>
+  <ol>
+    <li><b>Divisão:</b> dividir o problema em subproblemas que são instâncias menores do mesmo problema.</li>
+    <li><b>Conquista:</b> resolver os subproblemas recursivamente. Se o subproblema for suficientemente pequeno, resolve-se de forma direta (é o caso base).</li>
+    <li><b>Combinação:</b> combinar as soluções fornecidas pela conquista até resolver o problema original.</li>
+  </ol>
+</div>
+
+<h2 id="forma">3. A recorrência típica: $aT(n/b) + f(n)$</h2>
+<p>Algoritmos de divisão e conquista costumam ter recorrências com um formato típico:</p>
+$$T(n) = \textcolor{#2a78d6}{a}\; T\!\left(\frac{n}{\textcolor{#d03b3b}{b}}\right) + \textcolor{#1baf7a}{f(n)}$$
+<div class="table-wrap"><table>
+  <tr><th>Símbolo</th><th>Significado</th><th>Pergunta para achar</th></tr>
+  <tr><td>$a$</td><td>número de subproblemas criados</td><td>quantas chamadas recursivas a função faz?</td></tr>
+  <tr><td>$b$</td><td>tamanho de cada subproblema em relação ao original ($n/b$)</td><td>em quantas partes o problema foi dividido?</td></tr>
+  <tr><td>$f(n)$</td><td>custo da divisão e da combinação</td><td>quanto trabalho a chamada faz fora das chamadas recursivas?</td></tr>
+</table></div>
+<p>Compare com a Aula 5: lá os subproblemas eram $n - 1$ (subtrair). Aqui são $n/b$ (dividir), e é isso que torna a divisão e conquista tão eficiente.</p>
+
+<h2 id="busca">4. Busca binária: ideia e pseudocódigo</h2>
+<p><b>Problema:</b> encontrar um elemento em um vetor <b>ordenado</b>.</p>
+<p><b>Ideia básica:</b> supondo o vetor já ordenado, olhe o elemento do <b>meio</b>. Se ele for menor que o procurado, o procurado só pode estar na metade da direita. Se for maior, só pode estar na metade da esquerda. Repita o processo na metade certa até encontrar o elemento.</p>
+<p>Exemplo do slide, procurando <b>10</b> em $[3, 4, 5, 6, 7, 8, 9, 10]$, com $meio = \lfloor n/2 \rfloor$:</p>
+<div id="slideChain" style="overflow-x:auto"></div>
+<pre class="code"><span class="fn">binarySearch</span>(A, E, L, R)
+1.  <span class="kw">if</span> R &lt; L:
+2.     <span class="kw">return</span> −1
+3.  m ← floor((L + R) / 2)
+5.  <span class="kw">if</span> A[m] &lt; E:
+6.     <span class="kw">return</span> binarySearch(A, E, m+1, R)
+7.  <span class="kw">else if</span> A[m] &gt; E:
+8.     <span class="kw">return</span> binarySearch(A, E, L, m−1)
+9.  <span class="kw">else</span>:                      // caso A[m] == E
+10.    <span class="kw">return</span> m</pre>
+<p class="caption">A numeração pula a linha 4, como no slide. Chamada inicial: <code>binarySearch(A, E, 0, n−1)</code>. <code>L</code> e <code>R</code> delimitam o trecho onde E ainda pode estar.</p>
+
+<h2 id="anim">5. Animação</h2>
+<div class="widget">
+  <div class="wtitle">binarySearch em A = [3, 4, 5, 6, 7, 8, 9, 10]</div>
+  <div class="controls" id="bsBtns"></div>
+  <div id="bsPlayer"></div>
+  <p class="caption">Cinza: fora de $[L, R]$, já descartado. Laranja: $A[m]$, o elemento do meio. Verde: encontrado.</p>
+</div>
+
+<h2 id="casos">6. Melhor e pior caso</h2>
+<ul>
+  <li><b>Melhor caso:</b> o valor buscado está na posição $m$, no meio do vetor. Nenhuma chamada recursiva é feita: $\Theta(1)$.</li>
+  <li><b>Pior caso:</b> o elemento <b>não está</b> no vetor, <b>ou</b> está presente mas só é encontrado quando o algoritmo chega ao caso base, numa partição com 1 elemento. Exemplo: o próprio 10 do slide.</li>
+</ul>
+
+<h2 id="rec">7. A recorrência da busca binária</h2>
+<p>A árvore de recursão para encontrar o 10 é uma <b>corrente</b>: cada chamada faz trabalho constante (custo $c$: comparar e calcular o meio) e no máximo <b>uma</b> chamada, com metade do tamanho.</p>
+<ul>
+  <li>$a = 1$: uma única chamada recursiva (linha 6 <b>ou</b> linha 8, nunca as duas);</li>
+  <li>$b = 2$: o subproblema tem metade do tamanho;</li>
+  <li>$f(n) = \Theta(1)$: só comparações e o cálculo de $m$.</li>
+</ul>
+$$T(n) = \begin{cases} 1 & n = 1 \\ T\!\left(\dfrac{n}{2}\right) + \Theta(1) & n &gt; 1 \end{cases}$$
+
+<h2 id="resolve">8. Resolvendo: $\Theta(\log n)$</h2>
+<p class="caption">Complemento: os slides param na recorrência. A resolução usa o método iterativo da Aula 5.</p>
+<p>Troque $\Theta(1)$ por uma constante $c$ e suponha que $n$ é potência de 2, $n = 2^m$, para as divisões serem exatas.</p>
+$$\begin{aligned}
+T(n) &= T(n/2) + c && \text{passo 1}\\
+&= \big(T(n/4) + c\big) + c = T(n/2^2) + 2c && \text{passo 2}\\
+&= T(n/2^3) + 3c && \text{passo 3}\\
+&= T(n/2^k) + k\,c && \text{passo } k
+\end{aligned}$$
+<p><b>Caso base:</b> $\dfrac{n}{2^k} = 1 \iff 2^k = n \iff k = \log_2 n$.</p>
+$$T(n) = T(1) + c\log_2 n = 1 + c\log_2 n.$$
+<p class="result">$T(n) = \Theta(\log n)$</p>
+<div class="box tip">
+  <span class="tag">Intuição</span>
+  <p>"Quantas vezes dá para dividir $n$ por 2 até chegar em 1?" A resposta é $\log_2 n$. Com $n = 1\,000\,000$ são cerca de 20 chamadas, contra até 1 milhão de comparações da busca sequencial.</p>
+</div>
+<div class="box warn">
+  <span class="tag">Novidade em relação à Aula 5</span>
+  <p>Quando o argumento <b>divide</b> ($n/2$), o caso base dá uma equação com potência, $n/2^k = 1$, e $k$ sai como um <b>logaritmo</b>. Quando o argumento <b>subtrai</b> ($n-1$), $k$ sai linear ($k = n$ ou $n - 1$).</p>
+</div>
+
+<h2 id="quiz">9. Quiz de recordação</h2>
+<div id="quiz"></div>
+
+<h2 id="exercicio">10. Exercício</h2>
+<div class="exercise">
+  <span class="tag">Exercício 6.1</span>
+  <ol type="a">
+    <li>Simule <code>binarySearch</code> em $A = [3, 4, 5, 6, 7, 8, 9, 10]$ procurando $E = 4$ e depois $E = 11$. Para cada chamada, mostre $L$, $R$ e $m$. Quantas chamadas cada busca faz? Confira na animação.</li>
+    <li>Identifique $a$, $b$ e $f(n)$ para um algoritmo que divide o vetor em <b>3</b> partes, chama a si mesmo em <b>uma</b> delas e gasta tempo constante fora da chamada. Escreva a recorrência.</li>
+    <li>Resolva pelo método iterativo, com $n$ potência de 3: $T(1) = 1$, $T(n) = T(n/3) + 1$.</li>
+  </ol>
+  <p class="caption">Responda no chat.</p>
+</div>
+
+<div class="pager">
+  <a href="aula5-2-hanoi.html"><small>← anterior</small>5.2 Torre de Hanói</a>
+  <a class="next" href="aula7-1-merge-sort.html"><small>próxima →</small>Aula 7 · MergeSort</a>
+</div>
+</main>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const A = [3, 4, 5, 6, 7, 8, 9, 10];
+  // corrente do slide (procurando 10)
+  (function () {
+    let L = 0, R = A.length - 1, root = null, cur = null, d = 0;
+    while (L <= R) {
+      const m = Math.floor((L + R) / 2), sub = A.slice(L, R + 1);
+      const node = { arr: sub, marks: { [m - L]: A[m] === 10 ? 'ok' : 'hot' }, children: [], n: sub.length };
+      if (!root) root = node; else cur.children.push(node);
+      cur = node; d++;
+      if (A[m] === 10) break;
+      if (A[m] < 10) L = m + 1; else R = m - 1;
+    }
+    const ns = []; for (let x = root; x; x = x.children[0]) ns.push(x.n);
+    document.getElementById('slideChain').append(TreeView.arrays(root, { cell: 30, levelH: 52, title: 'Busca binária do 10',
+      levelLabel: (k) => `meio = ${[6, 8, 9, 10][k]} · n = ${ns[k]} · custo c` }));
+  })();
+
+  function trace(E) {
+    const S = []; let calls = 0;
+    const snap = (line, note, o) => S.push({ line, note, vars: { E, L: o.L, R: o.R, m: o.m ?? '—', chamadas: calls },
+      arrays: [{ name: 'A', values: A, marks: Object.assign(Object.fromEntries(A.map((_, i) => [i, i < o.L || i > o.R ? 'dim' : ''])), o.marks || {}),
+        ptrs: (() => { const p = {}; const add = (k, s) => { if (k >= 0 && k < A.length) p[k] = p[k] ? p[k] + ',' + s : s; }; add(o.L, 'L'); add(o.R, 'R'); if (o.m != null) add(o.m, 'm'); return p; })() }] });
+    function rec(L, R) {
+      calls++;
+      snap(1, `Chamada ${calls}: binarySearch(A, ${E}, ${L}, ${R}). R &lt; L? <b>${R < L ? 'Sim' : 'Não'}</b>.`, { L, R });
+      if (R < L) { snap(2, `Trecho vazio: ${E} não está no vetor. return −1.`, { L, R }); return -1; }
+      const m = Math.floor((L + R) / 2);
+      snap(3, `m = ⌊(${L} + ${R}) / 2⌋ = ${m}. A[${m}] = ${A[m]}.`, { L, R, m, marks: { [m]: 'cmp' } });
+      if (A[m] < E) {
+        snap(4, `A[${m}] = ${A[m]} &lt; ${E}? <b>Sim</b>: E só pode estar à direita de m.`, { L, R, m, marks: { [m]: 'cmp' } });
+        snap(5, `Chama binarySearch(A, ${E}, ${m + 1}, ${R}): descarta A[${L}..${m}].`, { L, R, m, marks: { [m]: 'cmp' } });
+        return rec(m + 1, R);
+      }
+      snap(4, `A[${m}] = ${A[m]} &lt; ${E}? Não.`, { L, R, m, marks: { [m]: 'cmp' } });
+      if (A[m] > E) {
+        snap(6, `A[${m}] = ${A[m]} &gt; ${E}? <b>Sim</b>: E só pode estar à esquerda de m.`, { L, R, m, marks: { [m]: 'cmp' } });
+        snap(7, `Chama binarySearch(A, ${E}, ${L}, ${m - 1}): descarta A[${m}..${R}].`, { L, R, m, marks: { [m]: 'cmp' } });
+        return rec(L, m - 1);
+      }
+      snap(6, `A[${m}] = ${A[m]} &gt; ${E}? Não.`, { L, R, m, marks: { [m]: 'cmp' } });
+      snap(8, `Então A[${m}] == ${E}.`, { L, R, m, marks: { [m]: 'ok' } });
+      snap(9, `return ${m}. Encontrado em ${calls} chamada(s).`, { L, R, m, marks: { [m]: 'ok' } });
+      return m;
+    }
+    rec(0, A.length - 1);
+    return S;
+  }
+  const P = StepPlayer.mount(document.getElementById('bsPlayer'), {
+    code: ['binarySearch(A, E, L, R)', ['1.', 'if R < L:'], ['2.', '   return −1'], ['3.', 'm ← floor((L + R) / 2)'],
+      ['5.', 'if A[m] < E:'], ['6.', '   return binarySearch(A, E, m+1, R)'], ['7.', 'else if A[m] > E:'],
+      ['8.', '   return binarySearch(A, E, L, m−1)'], ['9.', 'else:   // A[m] == E'], ['10.', '   return m']],
+    steps: trace(10), speed: 900,
+  });
+  const bb = document.getElementById('bsBtns');
+  [[10, 'E = 10 (slide, pior caso)'], [6, 'E = 6 (melhor caso)'], [4, 'E = 4'], [11, 'E = 11 (ausente)']].forEach(([E, lab], k) =>
+    bb.append(APA.el('button', { class: 'btn' + (k ? '' : ' on'), type: 'button', onclick: (e) => {
+      [...bb.children].forEach((b) => b.classList.remove('on')); e.target.classList.add('on'); P.load(trace(E)); } }, lab)));
+
+  Quiz.mount(document.getElementById('quiz'), [
+    { q: 'Quais são as três etapas da divisão e conquista?',
+      options: ['Ler, processar, imprimir', 'Divisão, conquista, combinação', 'Ordenar, buscar, retornar', 'Base, passo, indução'], answer: 1, explain: 'Slide 4.' },
+    { q: 'Em $T(n) = aT(n/b) + f(n)$, o que é $a$?',
+      options: ['o tamanho do subproblema', 'o número de subproblemas criados', 'o custo da combinação', 'a altura da árvore'], answer: 1, explain: '$b$ é a fração do tamanho; $f(n)$ é o custo de dividir e combinar.' },
+    { q: 'Para a busca binária, $(a, b, f(n)) = $ …',
+      options: ['$(2, 2, n)$', '$(1, 2, \\Theta(1))$', '$(2, 1, 1)$', '$(1, 1, n)$'], answer: 1, explain: 'Uma chamada, metade do tamanho, trabalho constante.' },
+    { q: 'Qual a pré-condição da busca binária?',
+      options: ['vetor sem repetidos', 'vetor ordenado', 'tamanho potência de 2', 'nenhuma'], answer: 1, explain: 'Sem ordem, olhar o meio não diz em qual metade o elemento está.' },
+    { q: 'A solução de $T(n) = T(n/2) + c$ é…',
+      options: ['$\\Theta(n)$', '$\\Theta(\\log n)$', '$\\Theta(n\\log n)$', '$\\Theta(1)$'], answer: 1, explain: '$n/2^k = 1 \\Rightarrow k = \\log_2 n$ passos de custo $c$.' },
+  ]);
+});
+</script>
+</body>
+</html>

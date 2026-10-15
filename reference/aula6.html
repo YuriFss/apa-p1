@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Referência · Aula 6</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../assets/style.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="../assets/common.js"></script>
+</head>
+<body>
+<nav class="topbar">
+  <a href="../index.html">← Índice</a>
+  <span>Folha de referência · Aula 6</span>
+  <span class="spacer"></span>
+  <button class="theme-btn" type="button">tema</button>
+</nav>
+<main>
+<h1>Aula 6: Divisão e conquista (Parte I)</h1>
+
+<h2>Paradigma</h2>
+<ul>
+  <li>Paradigmas: técnicas genéricas de construção (divisão e conquista, gulosos, programação dinâmica…).</li>
+  <li><b>Divisão</b> em subproblemas menores do mesmo tipo → <b>conquista</b> recursiva (caso base resolvido direto) → <b>combinação</b> das soluções.</li>
+  <li>Recorrência típica: $T(n) = a\,T(n/b) + f(n)$, com $a$ = nº de subproblemas, $n/b$ = tamanho de cada um e $f(n)$ = custo de dividir e combinar.</li>
+</ul>
+
+<h2>Busca binária</h2>
+<pre class="code"><span class="fn">binarySearch</span>(A, E, L, R)
+1.  <span class="kw">if</span> R &lt; L: <span class="kw">return</span> −1
+3.  m ← floor((L + R) / 2)
+5.  <span class="kw">if</span> A[m] &lt; E: <span class="kw">return</span> binarySearch(A, E, m+1, R)
+7.  <span class="kw">else if</span> A[m] &gt; E: <span class="kw">return</span> binarySearch(A, E, L, m−1)
+9.  <span class="kw">else</span>: <span class="kw">return</span> m</pre>
+<ul>
+  <li>Pré-condição: vetor <b>ordenado</b>.</li>
+  <li>Melhor caso: E no meio, sem chamada recursiva, $\Theta(1)$.</li>
+  <li>Pior caso: E ausente, ou achado só na partição de 1 elemento.</li>
+  <li>$a = 1$, $b = 2$, $f(n) = \Theta(1)$: $T(1) = 1$, $T(n) = T(n/2) + \Theta(1)$.</li>
+</ul>
+
+<h2>Resolver $T(n) = T(n/2) + c$</h2>
+$$T(n) = T(n/2^k) + kc,\quad \frac{n}{2^k} = 1 \Rightarrow k = \log_2 n,\quad T(n) = 1 + c\log_2 n = \Theta(\log n).$$
+<p>Argumento que <b>divide</b> leva a $k = \log_b n$. Argumento que <b>subtrai</b> leva a $k$ linear.</p>
+</main>
+</body>
+</html>
