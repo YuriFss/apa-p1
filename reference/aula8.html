@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Referência · Aula 8</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../assets/style.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="../assets/common.js"></script>
+</head>
+<body>
+<nav class="topbar">
+  <a href="../index.html">← Índice</a>
+  <span>Folha de referência · Aula 8</span>
+  <span class="spacer"></span>
+  <button class="theme-btn" type="button">tema</button>
+</nav>
+<main>
+<h1>Aula 8: Ordenação em tempo linear</h1>
+
+<h2>Limite inferior por comparações</h2>
+<ul>
+  <li>Algoritmo por comparação = árvore de decisão binária. Pior caso = altura $h$.</li>
+  <li>Folhas $\ge n!$ (todas as permutações); árvore de altura $h$ tem $\le 2^h$ folhas.</li>
+  <li>$2^h \ge n! \Rightarrow h \ge \log n! \ge c\,n\log n$. Logo, <b>$\Omega(n\log n)$ comparações no pior caso</b>.</li>
+  <li>Não vale para quem não compara: CountingSort, RadixSort, BucketSort.</li>
+</ul>
+
+<h2>CountingSort</h2>
+<p>Entrada: $n$ inteiros em $[0, k]$. Vetores: $A[0..n-1]$ entrada, $B[0..n-1]$ saída, $C[0..k]$ contagem.</p>
+<pre class="code"><span class="fn">CountingSort</span>(A, B, k, n)
+1.   <span class="kw">for</span> i ← 0 <span class="kw">to</span> k <span class="kw">do</span> C[i] ← 0                     // O(k)
+4.   <span class="kw">for</span> j ← 0 <span class="kw">to</span> n − 1 <span class="kw">do</span> C[A[j]] ← C[A[j]] + 1     // O(n)  contar
+7.   <span class="kw">for</span> i ← 1 <span class="kw">to</span> k <span class="kw">do</span> C[i] ← C[i] + C[i − 1]       // O(k)  acumular
+10.  <span class="kw">for</span> j ← n − 1 <span class="kw">downto</span> 0 <span class="kw">do</span>                      // O(n)  posicionar
+11.     B[C[A[j]] − 1] ← A[j]
+12.     C[A[j]] ← C[A[j]] − 1</pre>
+<ul>
+  <li>Ideia: "há $m$ elementos menores que $x$" $\Rightarrow$ $x$ vai na posição $m + 1$.</li>
+  <li>Exemplo: $A = [2,5,3,0,2,3,0,3]$, $k = 5$: contagem $C = [2,0,2,3,0,1]$; acumulado $C = [2,2,4,7,7,8]$; $B = [0,0,2,2,3,3,3,5]$.</li>
+  <li>Tempo $O(n + k)$, <b>pseudolinear</b>. Com $k = O(n)$: $O(n)$.</li>
+  <li><b>Estável</b>, graças ao <code>downto</code>. MergeSort e InsertionSort também são estáveis.</li>
+  <li>Slide 15 diz "$k = 10$" para valores em $[0,9]$ (contando os valores); no pseudocódigo, $k$ é o maior valor.</li>
+</ul>
+</main>
+</body>
+</html>
