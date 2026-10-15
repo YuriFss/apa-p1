@@ -34,6 +34,7 @@
 
   function mount(root, cfg) {
     root.classList.add('player');
+    if (cfg.stack) root.classList.add('stack'); // código em cima, estado embaixo (largura total)
     root.tabIndex = 0;
     const codeEl = APA.el('div', { class: 'code' });
     // item da lista de código: 'texto' (numerado pelo índice), ['rótulo', 'texto'] ou { h: 'cabeçalho' }

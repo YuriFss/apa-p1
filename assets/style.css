@@ -309,3 +309,14 @@ details > summary { cursor: pointer; font-weight: 600; color: var(--ink-2); }
   body { background: #fff; font-size: 12pt; }
   h2 { break-after: avoid; }
 }
+
+/* heap: árvore + array lado a lado */
+.heapview { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; }
+.heapview .hv-tree { flex: 1 1 340px; min-width: 0; }
+.heapview .hv-tree svg { width: 100%; height: auto; display: block; }
+.heapview .hv-arr { flex: 1 1 260px; min-width: 0; }
+svg.heaptree .idx { fill: var(--muted); font: 10px var(--mono); text-anchor: start; }
+svg.heaptree .dim circle { fill: var(--surface-2); stroke: var(--line); }
+svg.heaptree .dim text { fill: var(--muted); }
+svg.heaptree line.out { stroke-dasharray: 3 3; opacity: .5; }
+.player.stack { grid-template-columns: 1fr; }

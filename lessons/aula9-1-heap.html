@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Aula 9.1 · Heap e MaxHeapify</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../assets/style.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="../assets/common.js"></script>
+<script defer src="../assets/player.js"></script>
+<script defer src="../assets/heap.js"></script>
+<script defer src="../assets/quiz.js"></script>
+</head>
+<body>
+<nav class="topbar">
+  <a href="../index.html">← Índice</a>
+  <span>Aula 9 · HeapSort</span>
+  <span class="spacer"></span>
+  <a href="../reference/aula9.html">Folha de referência</a>
+  <button class="theme-btn" type="button">tema</button>
+</nav>
+<main>
+<p class="kicker">Aula 9 · Lição 1 de 2</p>
+<h1>Heap binário e MaxHeapify</h1>
+<p class="lead">Slides 1 a 21 da Aula 9. O HeapSort é parecido com o SelectionSort: a cada iteração, acha o <b>maior</b> elemento e o coloca na posição final. A diferença é que um <b>heap</b> acha o maior em $O(\log n)$ em vez de $O(n)$, e isso faz o HeapSort ser bem mais eficiente.</p>
+
+<div class="toc">
+  <b>Nesta lição</b>
+  <ol>
+    <li><a href="#heap">Heap binário: um array visto como árvore</a></li>
+    <li><a href="#indices">Pai e filhos pelo índice</a></li>
+    <li><a href="#atributos">comprimento e tamanho_heap</a></li>
+    <li><a href="#maxmin">Heap máximo e heap mínimo</a></li>
+    <li><a href="#heapify">MaxHeapify: ideia e pseudocódigo</a></li>
+    <li><a href="#anim">Animação (exemplo do slide)</a></li>
+    <li><a href="#custo">Quanto custa o MaxHeapify</a></li>
+    <li><a href="#quiz">Quiz</a> · <a href="#exercicio">Exercício</a></li>
+  </ol>
+</div>
+
+<h2 id="heap">1. Heap binário: um array visto como árvore</h2>
+<p>Um <b>heap binário</b> é um array que pode ser visto como uma <b>árvore binária praticamente completa</b>: todos os níveis estão cheios, exceto talvez o último, que é preenchido da esquerda para a direita. A árvore é lida <b>nível por nível, da esquerda para a direita</b>, e essa leitura dá exatamente a ordem do array.</p>
+
+<div class="widget">
+  <div class="wtitle">Explorador: clique em um nó ou em uma célula</div>
+  <div class="controls">
+    <label>Array: <input id="hxIn" value="1, 16, 5, 30, 27, 17, 20, 2, 57, 3, 90" size="34" style="font:inherit;padding:4px 8px;border-radius:6px;border:1px solid var(--line);background:var(--bg);color:var(--ink)"></label>
+    <button class="btn" id="hxGo" type="button">desenhar</button>
+  </div>
+  <div id="hx"></div>
+  <div id="hxInfo" class="box tip" style="margin-top:8px">Clique em um nó para ver o pai e os filhos dele.</div>
+</div>
+
+<h2 id="indices">2. Pai e filhos pelo índice</h2>
+<p>Não existe ponteiro nenhum: a árvore é só uma forma de <b>olhar</b> o array. As propriedades, com índices a partir de 0:</p>
+<ul>
+  <li>o primeiro elemento, $A[0]$, é sempre a <b>raiz</b>;</li>
+  <li>dado um elemento no índice $i$:</li>
+</ul>
+$$\text{Pai}(i) = \left\lfloor \frac{i-1}{2} \right\rfloor \qquad \text{FilhoEsquerdo}(i) = 2i + 1 \qquad \text{FilhoDireito}(i) = 2i + 2$$
+<p><b>Exemplo</b> no array do slide: o nó de índice $3$ (valor 30) tem filhos $2\cdot3+1 = 7$ (valor 2) e $2\cdot3+2 = 8$ (valor 57), e pai $\lfloor (3-1)/2 \rfloor = 1$ (valor 16). Confira no explorador.</p>
+<div class="box tip">
+  <span class="tag">Fatos úteis</span>
+  <ul>
+    <li>Com $n$ elementos, a altura da árvore é $\lfloor \log_2 n \rfloor$: cada nível dobra o número de nós.</li>
+    <li>Os nós de índice $\lfloor n/2 \rfloor$ até $n - 1$ são <b>folhas</b> (não têm filhos). Os de índice $0$ a $\lfloor n/2 \rfloor - 1$ são internos. O BuildMaxHeap usa isso.</li>
+  </ul>
+</div>
+
+<h2 id="atributos">3. comprimento e tamanho_heap</h2>
+<p>Um heap binário é um objeto com <b>dois atributos</b>:</p>
+<ul>
+  <li><i>comprimento</i>[A]: o número total de elementos no array;</li>
+  <li><i>tamanho_heap</i>[A]: o número de elementos que fazem parte do heap.</li>
+</ul>
+<p>Sempre $\textit{tamanho\_heap}[A] \le \textit{comprimento}[A]$. As posições a partir de <i>tamanho_heap</i> estão no array, mas <b>fora do heap</b>. No HeapSort, é ali que os elementos já ordenados vão se acumulando.</p>
+
+<h2 id="maxmin">4. Heap máximo e heap mínimo</h2>
+<div class="box def">
+  <span class="tag">Definições (slides 10 e 11)</span>
+  <p><b>Heap máximo:</b> para todo nó $i$ diferente da raiz, $A[\text{Pai}(i)] \ge A[i]$. Ou seja, o pai é sempre maior ou igual aos filhos. Consequência: <b>o maior elemento está na raiz</b>.</p>
+  <p><b>Heap mínimo:</b> para todo nó $i$ diferente da raiz, $A[\text{Pai}(i)] \le A[i]$.</p>
+</div>
+<p>Atenção: um heap máximo <b>não</b> é um vetor ordenado. Irmãos e primos podem estar em qualquer ordem; só a relação pai–filho é garantida. O HeapSort usa um <b>heap máximo</b>.</p>
+<details class="box">
+  <summary>Exercício do slide 12: o array [23, 17, 14, 6, 13, 10, 15, 7, 12] é um heap máximo? (tente antes de abrir)</summary>
+  <p><b>Não.</b> Verifique pai a pai: o índice 3 (valor 6) tem filhos nos índices 7 (valor 7) e 8 (valor 12). Como $6 &lt; 7$ e $6 &lt; 12$, a propriedade falha. Todos os outros pares estão certos. Desenhe no explorador para ver.</p>
+</details>
+
+<h2 id="heapify">5. MaxHeapify: ideia e pseudocódigo</h2>
+<p>Como garantir a propriedade do heap máximo? Com a função <b>MaxHeapify</b>.</p>
+<p><b>Intuitivamente:</b> suponha que o nó $i$ tem valor $A[i]$ <b>menor que seus filhos</b>, mas que as subárvores abaixo dele já são heaps máximos. O MaxHeapify faz $A[i]$ ir "<b>flutuando</b>" para baixo no heap: troca com o <b>maior</b> dos filhos e repete, até chegar a uma posição "<b>estável</b>", onde não viola a restrição.</p>
+<pre class="code"><span class="fn">MaxHeapify</span>(A, i)
+1.   L = FilhoEsquerdo(i)
+2.   R = FilhoDireito(i)
+3.   maior ← i
+4.   <span class="kw">if</span> L ≤ tamanho_heap[A] <span class="kw">and</span> A[L] &gt; A[maior] <span class="kw">do</span>
+5.       maior ← L
+6.   <span class="kw">if</span> R ≤ tamanho_heap[A] <span class="kw">and</span> A[R] &gt; A[maior] <span class="kw">do</span>
+7.       maior ← R
+8.   <span class="kw">if</span> maior ≠ i <span class="kw">do</span>
+9.       trocar(A[i], A[maior])
+10.      MaxHeapify(A, maior)</pre>
+<ul>
+  <li><b>Linhas 3–7:</b> descobre quem é o maior entre o pai e os (até dois) filhos que existem no heap.</li>
+  <li><b>Linha 8:</b> se o maior já é o pai, nada a fazer.</li>
+  <li><b>Linhas 9–10:</b> senão, troca o pai com o maior filho e continua a partir da posição para onde o valor desceu.</li>
+</ul>
+<div class="box warn">
+  <span class="tag">Detalhe dos índices</span>
+  <p>Com índices a partir de 0, as posições válidas do heap vão de $0$ a <i>tamanho_heap</i>$-1$. O teste correto é <code>L &lt; tamanho_heap[A]</code> (ou $L \le \textit{tamanho\_heap}[A] - 1$). O "≤" do slide vem da versão do Cormen, que indexa a partir de 1. Na prova, escreva a versão coerente com a sua indexação. A animação usa "&lt;".</p>
+</div>
+<div class="box tip">
+  <span class="tag">Por que trocar com o <b>maior</b> filho?</span>
+  <p>Depois da troca, o filho promovido vira pai do outro filho. Se fosse o menor dos dois, ficaria menor que o irmão, e a propriedade quebraria. Promovendo o maior, ele é $\ge$ tudo abaixo.</p>
+</div>
+
+<h2 id="anim">6. Animação (exemplo do slide)</h2>
+<div class="widget">
+  <div class="wtitle">MaxHeapify(A, i), passo a passo</div>
+  <div class="controls" id="mhBtns"></div>
+  <div id="mhPlayer"></div>
+  <p class="caption">Azul: o valor que está descendo (posição $i$ atual). Laranja: o filho comparado ou escolhido como maior. Verde: posição estável. Exemplo do slide: <code>MaxHeapify(A, 1)</code> em [1, 16, 5, 30, 27, 17, 20, 2, 57, 3, 90]. O 16 troca com 30 e depois com 57.</p>
+</div>
+
+<h2 id="custo">7. Quanto custa o MaxHeapify</h2>
+<p>Cada chamada faz trabalho constante (linhas 1–9) e no máximo <b>uma</b> chamada recursiva, um nível abaixo. No pior caso, o valor desce da raiz até uma folha: são no máximo $h = \lfloor \log_2 n \rfloor$ níveis.</p>
+<p class="result">MaxHeapify: $O(\log n)$ (ou $O(h)$, onde $h$ é a altura do nó)</p>
+<p>Como recorrência, à moda da Aula 6: cada descida vai para uma subárvore com no máximo cerca de $2n/3$ nós, dando $T(n) \le T(2n/3) + \Theta(1)$, que resolve em $O(\log n)$ pelo mesmo raciocínio da busca binária.</p>
+
+<h2 id="quiz">8. Quiz de recordação</h2>
+<div id="quiz"></div>
+
+<h2 id="exercicio">9. Exercício</h2>
+<div class="exercise">
+  <span class="tag">Exercício 9.1</span>
+  <ol type="a">
+    <li>No array $A = [4, 14, 7, 2, 8, 1]$, quais são os filhos do índice 1? E o pai do índice 5?</li>
+    <li>Execute <code>MaxHeapify(A, 0)</code> em $A = [4, 14, 7, 2, 8, 1]$ (tamanho_heap = 6). Mostre cada troca e o array final. Confira na animação, com o botão "[4, 14, 7, 2, 8, 1], i = 0".</li>
+    <li>Qual o número máximo de trocas que <code>MaxHeapify(A, 0)</code> pode fazer num heap com 31 elementos? Justifique.</li>
+  </ol>
+  <p class="caption">Responda no chat.</p>
+</div>
+
+<div class="pager">
+  <a href="aula8-1-counting-sort.html"><small>← anterior</small>8 CountingSort</a>
+  <a class="next" href="aula9-2-heapsort.html"><small>próxima →</small>9.2 BuildMaxHeap e HeapSort</a>
+</div>
+</main>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  // explorador
+  let X = [1, 16, 5, 30, 27, 17, 20, 2, 57, 3, 90];
+  function drawX(sel) {
+    const marks = {};
+    if (sel != null) {
+      marks[sel] = 'cold';
+      const p = Math.floor((sel - 1) / 2), l = 2 * sel + 1, r = 2 * sel + 2;
+      if (sel > 0) marks[p] = 'ok';
+      if (l < X.length) marks[l] = 'hot';
+      if (r < X.length) marks[r] = 'hot';
+      const viol = [];
+      if (sel > 0 && X[p] < X[sel]) viol.push(`pai A[${p}] = ${X[p]} &lt; ${X[sel]}`);
+      [l, r].forEach((c) => { if (c < X.length && X[c] > X[sel]) viol.push(`filho A[${c}] = ${X[c]} &gt; ${X[sel]}`); });
+      document.getElementById('hxInfo').innerHTML =
+        `Índice $i = ${sel}$, valor ${X[sel]}. ` +
+        (sel > 0 ? `Pai: $\\lfloor (${sel}-1)/2 \\rfloor = ${p}$ (valor ${X[p]}, verde). ` : 'É a raiz (sem pai). ') +
+        (l < X.length ? `Filho esquerdo: $2\\cdot${sel}+1 = ${l}$ (valor ${X[l]}). ` : `Sem filhos: $2\\cdot${sel}+1 = ${l} \\ge n$, é folha. `) +
+        (r < X.length ? `Filho direito: $2\\cdot${sel}+2 = ${r}$ (valor ${X[r]}).` : (l < X.length ? 'Sem filho direito.' : '')) +
+        `<br>Propriedade de heap máximo neste nó: ${viol.length ? '<b>violada</b> (' + viol.join('; ') + ')' : '<b>ok</b>'}.`;
+      APA.renderMath(document.getElementById('hxInfo'));
+    }
+    const isMax = X.every((v, i) => i === 0 || X[Math.floor((i - 1) / 2)] >= v);
+    document.getElementById('hx').replaceChildren(HeapView.render(X, { marks, onPick: drawX }),
+      APA.el('p', { class: 'caption' }, isMax ? 'Este array É um heap máximo.' : 'Este array NÃO é um heap máximo.'));
+  }
+  document.getElementById('hxGo').onclick = () => {
+    const v = document.getElementById('hxIn').value.split(/[\s,;]+/).filter(Boolean).map(Number);
+    if (v.length && v.length <= 15 && v.every(Number.isFinite)) { X = v; drawX(null); }
+  };
+  drawX(3);
+
+  // MaxHeapify
+  function trace(input, i0) {
+    const A = input.slice(), S = [];
+    const snap = (line, note, marks = {}) => S.push({ line, note, heap: A.slice(), marks, vars: { tamanho_heap: A.length } });
+    snap(0, `Chamada inicial MaxHeapify(A, ${i0}).`, { [i0]: 'cold' });
+    const t = HeapView.heapify(A, i0, A.length, snap);
+    snap(0, `Fim: ${t} troca(s). A = [${A.join(', ')}].`);
+    return S;
+  }
+  const code = ['MaxHeapify(A, i)', 'L = FilhoEsquerdo(i)', 'R = FilhoDireito(i)', 'maior ← i', 'if L < tamanho_heap[A] and A[L] > A[maior]:', '   maior ← L',
+    'if R < tamanho_heap[A] and A[R] > A[maior]:', '   maior ← R', 'if maior ≠ i:', '   trocar(A[i], A[maior])', '   MaxHeapify(A, maior)'];
+  const P = StepPlayer.mount(document.getElementById('mhPlayer'), { code, stack: true, speed: 900,
+    steps: trace([1, 16, 5, 30, 27, 17, 20, 2, 57, 3, 90], 1), extra: (st, box) => box.append(HeapView.render(st.heap, { marks: st.marks })) });
+  const mb = document.getElementById('mhBtns');
+  [['slide: MaxHeapify(A, 1)', [1, 16, 5, 30, 27, 17, 20, 2, 57, 3, 90], 1], ['[4, 14, 7, 2, 8, 1], i = 0', [4, 14, 7, 2, 8, 1], 0], ['nó já estável: i = 2', [1, 16, 5, 30, 27, 17, 20, 2, 57, 3, 90], 2]].forEach(([lab, a, i], k) =>
+    mb.append(APA.el('button', { class: 'btn' + (k ? '' : ' on'), type: 'button', onclick: (e) => {
+      [...mb.children].forEach((b) => b.classList.remove('on')); e.target.classList.add('on'); P.load(trace(a, i)); } }, lab)));
+
+  Quiz.mount(document.getElementById('quiz'), [
+    { q: 'Com índices a partir de 0, quais os filhos do nó $i$?',
+      options: ['$2i$ e $2i+1$', '$2i+1$ e $2i+2$', '$i+1$ e $i+2$', '$\\lfloor i/2 \\rfloor$'], answer: 1, explain: 'E o pai é $\\lfloor (i-1)/2 \\rfloor$.' },
+    { q: 'Num heap máximo, onde está o maior elemento?',
+      options: ['na última posição', 'na raiz, $A[0]$', 'em alguma folha', 'no meio do array'], answer: 1, explain: 'Pai ≥ filhos em todo nó: o topo é o máximo.' },
+    { q: 'Um heap máximo é um vetor ordenado em ordem decrescente?',
+      options: ['Sim, sempre', 'Não: só a relação pai–filho é garantida', 'Só se for completo', 'Sim, se não houver repetidos'], answer: 1, explain: 'Ex.: [90, 57, 20, 30, …] é heap, mas 20 &lt; 30.' },
+    { q: 'O MaxHeapify troca o pai com…',
+      options: ['o menor filho', 'o maior filho (se ele for maior que o pai)', 'o filho esquerdo sempre', 'a raiz'], answer: 1, explain: 'Promover o maior mantém a propriedade com o irmão.' },
+    { q: 'Complexidade do MaxHeapify:',
+      options: ['$O(1)$', '$O(\\log n)$', '$O(n)$', '$O(n\\log n)$'], answer: 1, explain: 'Desce no máximo a altura da árvore.' },
+  ]);
+});
+</script>
+</body>
+</html>

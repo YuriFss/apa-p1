@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Aula 9.2 · BuildMaxHeap e HeapSort</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../assets/style.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="../assets/common.js"></script>
+<script defer src="../assets/player.js"></script>
+<script defer src="../assets/heap.js"></script>
+<script defer src="../assets/chart.js"></script>
+<script defer src="../assets/quiz.js"></script>
+</head>
+<body>
+<nav class="topbar">
+  <a href="../index.html">← Índice</a>
+  <span>Aula 9 · HeapSort</span>
+  <span class="spacer"></span>
+  <a href="../reference/aula9.html">Folha de referência</a>
+  <button class="theme-btn" type="button">tema</button>
+</nav>
+<main>
+<p class="kicker">Aula 9 · Lição 2 de 2</p>
+<h1>BuildMaxHeap e HeapSort</h1>
+<p class="lead">Slides 22 a 43 da Aula 9. O BuildMaxHeap transforma um array qualquer em heap máximo. O HeapSort usa isso para tirar o maior elemento $n - 1$ vezes. Resultado: $O(n\log n)$ no pior caso, ordenando no próprio vetor.</p>
+
+<div class="toc">
+  <b>Nesta lição</b>
+  <ol>
+    <li><a href="#build">BuildMaxHeap</a></li>
+    <li><a href="#build-anim">Animação do BuildMaxHeap (exemplo do slide)</a></li>
+    <li><a href="#heapsort">HeapSort</a></li>
+    <li><a href="#sort-anim">Animação do HeapSort</a></li>
+    <li><a href="#complexidade">Complexidade</a></li>
+    <li><a href="#resumo">Os seis algoritmos de ordenação</a></li>
+    <li><a href="#quiz">Quiz</a> · <a href="#exercicio">Exercício</a></li>
+  </ol>
+</div>
+
+<h2 id="build">1. BuildMaxHeap</h2>
+<p>O MaxHeapify só conserta <b>um</b> nó, supondo que as subárvores abaixo dele já são heaps. Para garantir a propriedade de heap máximo <b>em todo o arranjo</b>, aplicamos o MaxHeapify de baixo para cima:</p>
+<pre class="code"><span class="fn">BuildMaxHeap</span>(A)
+1.  n ← comprimento[A]
+2.  <span class="kw">for</span> i ← ⌊n/2⌋ − 1 <span class="kw">downto</span> 0 <span class="kw">do</span>
+3.      MaxHeapify(A, i)</pre>
+<ul>
+  <li><b>Por que começar em $\lfloor n/2 \rfloor - 1$?</b> Os índices de $\lfloor n/2 \rfloor$ a $n - 1$ são folhas, e uma folha sozinha já é um heap. O último nó interno é $\lfloor n/2 \rfloor - 1$. No exemplo, com $n = 11$, começa em $i = 4$.</li>
+  <li><b>Por que de trás para frente?</b> Quando chamamos MaxHeapify(A, $i$), os filhos de $i$ têm índice maior e já foram processados, então as subárvores deles já são heaps, que é a pré-condição do MaxHeapify.</li>
+</ul>
+<p class="caption">O slide escreve "<code>for i ← ⌊n/2⌋ − 1 to 0</code>". Como o laço desce, o certo é <code>downto</code>.</p>
+
+<h2 id="build-anim">2. Animação do BuildMaxHeap (exemplo do slide)</h2>
+<div class="widget">
+  <div class="wtitle">BuildMaxHeap em A = [1, 16, 5, 30, 27, 17, 20, 2, 57, 3, 90]</div>
+  <div class="controls" id="bBtns"></div>
+  <div id="bPlayer"></div>
+  <p class="caption">Sequência do slide: MaxHeapify(A, 4), (A, 3), (A, 2), (A, 1), (A, 0). O resultado final é [90, 57, 20, 30, 27, 17, 5, 2, 1, 3, 16].</p>
+</div>
+
+<h2 id="heapsort">3. HeapSort</h2>
+<ol class="steps">
+  <li>Começa usando o <b>BuildMaxHeap</b> para construir um heap máximo.</li>
+  <li>O valor máximo está na raiz, $A[0]$. Ele vai direto para a posição final, trocando com o elemento na posição <i>tamanho_heap</i>$[A] - 1$.</li>
+  <li>Diminui <i>tamanho_heap</i> em 1: o máximo sai do heap e fica "guardado" no fim do array.</li>
+  <li>A troca colocou na raiz um elemento pequeno. Restabelece o heap com <b>MaxHeapify(A, 0)</b>.</li>
+  <li>Repete até o heap ter apenas um elemento.</li>
+</ol>
+<pre class="code"><span class="fn">HeapSort</span>(A)
+1.  BuildMaxHeap(A)
+2.  <span class="kw">for</span> i ← comprimento[A] − 1 <span class="kw">downto</span> 1 <span class="kw">do</span>
+3.      trocar(A[0], A[i])
+4.      tamanho_heap[A] ← tamanho_heap[A] − 1
+5.      MaxHeapify(A, 0)</pre>
+<p class="caption">O slide escreve "<code>to 0</code>". Com <code>downto 0</code>, a última iteração troca $A[0]$ com ele mesmo, o que é inofensivo; <code>downto 1</code> é a versão do Cormen.</p>
+<div class="box tip">
+  <span class="tag">A ligação com o SelectionSort</span>
+  <p>As duas ordenações fazem "ache o maior e mande para o fim" $n - 1$ vezes. No SelectionSort, achar o extremo custa uma varredura $O(n)$. No HeapSort, o maior já está na raiz, e reconstruir o heap custa só $O(\log n)$. É toda a diferença entre $n^2$ e $n\log n$.</p>
+</div>
+
+<h2 id="sort-anim">4. Animação do HeapSort</h2>
+<div class="widget">
+  <div class="wtitle">HeapSort completo</div>
+  <div class="controls" id="sBtns"></div>
+  <div class="controls"><label><input type="checkbox" id="sDetail"> mostrar cada linha do MaxHeapify (mais passos)</label></div>
+  <div id="sPlayer"></div>
+  <p class="caption">Cinza: fora do heap, ou seja, a parte já ordenada que cresce do fim para o começo. Azul: a posição que está sendo consertada. Laranja: filho envolvido na troca.</p>
+</div>
+
+<h2 id="complexidade">5. Complexidade</h2>
+<h3>MaxHeapify: $O(\log n)$</h3>
+<p>Desce no máximo a altura da árvore (lição 9.1).</p>
+
+<h3>BuildMaxHeap: $O(n\log n)$… ou melhor, $O(n)$</h3>
+<p><b>Análise rápida (slide 41):</b> o laço da linha 2 executa $O(n)$ vezes e cada MaxHeapify é $O(\log n)$, então BuildMaxHeap é $O(n\log n)$. Esse limite superior é <b>correto</b>, mas folgado.</p>
+<p class="caption">O slide 41 diz "maxHeapify é $O(n\log n)$", mas se refere ao BuildMaxHeap: o próprio slide conclui que MaxHeapify é $O(\log n)$.</p>
+<p><b>Análise justa (slide 42):</b> é possível demonstrar que BuildMaxHeap é $O(n)$. A ideia (fora dos slides, Cormen 6.3): MaxHeapify num nó de altura $h$ custa $O(h)$, não $O(\log n)$. A maioria dos nós está perto das folhas, com $h$ pequeno:</p>
+<div class="table-wrap"><table>
+  <tr><th>altura do nó $h$</th><th>quantos nós (no máximo)</th><th>custo de cada MaxHeapify</th></tr>
+  <tr><td>0 (folhas)</td><td>$\approx n/2$</td><td>0 (nem são chamados)</td></tr>
+  <tr><td>1</td><td>$\approx n/4$</td><td>$\le 1$ troca</td></tr>
+  <tr><td>2</td><td>$\approx n/8$</td><td>$\le 2$ trocas</td></tr>
+  <tr><td>$h$</td><td>$\approx n/2^{h+1}$</td><td>$\le h$ trocas</td></tr>
+</table></div>
+$$\text{total} \le \sum_{h \ge 1} \frac{n}{2^{h+1}}\cdot h = \frac{n}{2}\sum_{h\ge1}\frac{h}{2^h} = \frac{n}{2}\cdot 2 = n = O(n).$$
+
+<h3>HeapSort: $O(n\log n)$</h3>
+$$T(n) = \underbrace{O(n)}_{\text{BuildMaxHeap}} + \underbrace{(n-1)\cdot O(\log n)}_{\text{laço: troca + MaxHeapify}} = O(n\log n).$$
+<p>Pelo limite inferior da Aula 8, nenhum algoritmo por comparação faz melhor que $\Omega(n\log n)$ no pior caso. Então o HeapSort, assim como o MergeSort, é <b>assintoticamente ótimo</b>, e ainda ordena <b>no próprio vetor</b>, sem os vetores auxiliares do MergeSort. Por outro lado, ele <b>não é estável</b>: as trocas com a raiz embaralham a ordem dos iguais.</p>
+
+<div class="widget">
+  <div class="wtitle">Trocas feitas, medidas na execução real (vetores aleatórios)</div>
+  <div id="cChart"></div>
+  <p class="caption">Laranja: trocas do HeapSort inteiro. Azul: trocas só do BuildMaxHeap. Cinza: a curva $n\log_2 n$ como referência. O BuildMaxHeap cresce como uma reta, $O(n)$; o HeapSort acompanha $n\log n$.</p>
+</div>
+
+<h2 id="resumo">6. Os seis algoritmos de ordenação</h2>
+<div class="table-wrap"><table>
+  <tr><th>Algoritmo</th><th>Melhor</th><th>Pior</th><th>Estável?</th><th>Memória extra</th><th>Aula</th></tr>
+  <tr><td>InsertionSort</td><td>$\Theta(n)$</td><td>$\Theta(n^2)$</td><td>sim</td><td>$O(1)$</td><td>2</td></tr>
+  <tr><td>SelectionSort</td><td>$\Theta(n^2)$</td><td>$\Theta(n^2)$</td><td>não</td><td>$O(1)$</td><td>2</td></tr>
+  <tr><td>MergeSort</td><td>$\Theta(n\log n)$</td><td>$\Theta(n\log n)$</td><td>sim</td><td>$\Theta(n)$</td><td>7</td></tr>
+  <tr><td>QuickSort</td><td>$\Theta(n\log n)$</td><td>$\Theta(n^2)$</td><td>não</td><td>pilha da recursão</td><td>7</td></tr>
+  <tr><td>CountingSort</td><td colspan="2">$\Theta(n + k)$</td><td>sim</td><td>$\Theta(n + k)$</td><td>8</td></tr>
+  <tr><td>HeapSort</td><td colspan="2">$O(n\log n)$</td><td>não</td><td>$O(1)$</td><td>9</td></tr>
+</table></div>
+
+<h2 id="quiz">7. Quiz de recordação</h2>
+<div id="quiz"></div>
+
+<h2 id="exercicio">8. Exercício</h2>
+<div class="exercise">
+  <span class="tag">Exercício 9.2</span>
+  <ol type="a">
+    <li>Execute o BuildMaxHeap em $A = [5, 13, 2, 25, 7, 17, 20, 8, 4]$. Liste as chamadas de MaxHeapify (em ordem) e o array depois de cada uma. Confira na animação ("[5, 13, 2, 25, 7, 17, 20, 8, 4]").</li>
+    <li>A partir do heap do item (a), mostre o array depois das <b>duas primeiras</b> iterações do laço do HeapSort.</li>
+    <li>Por que o laço do BuildMaxHeap começa em $\lfloor n/2 \rfloor - 1$ e anda para trás, e não de $0$ para frente?</li>
+    <li>Explique por que a análise "$O(n)$ chamadas × $O(\log n)$ = $O(n\log n)$" do BuildMaxHeap não está errada, mas não é a mais apertada.</li>
+  </ol>
+  <p class="caption">Responda no chat.</p>
+</div>
+
+<div class="pager">
+  <a href="aula9-1-heap.html"><small>← anterior</small>9.1 Heap e MaxHeapify</a>
+  <a class="next" href="../index.html"><small>fim da matéria →</small>Índice</a>
+</div>
+</main>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const code = [{ h: 'HeapSort(A)' }, ['1.', 'BuildMaxHeap(A)'], ['2.', 'for i ← comprimento[A] − 1 downto 1 do'], ['3.', '   trocar(A[0], A[i])'], ['4.', '   tamanho_heap[A] ← tamanho_heap[A] − 1'], ['5.', '   MaxHeapify(A, 0)'],
+    { h: 'BuildMaxHeap(A)' }, ['1.', 'n ← comprimento[A]'], ['2.', 'for i ← ⌊n/2⌋ − 1 downto 0 do'], ['3.', '   MaxHeapify(A, i)'],
+    { h: 'MaxHeapify(A, i)' }, ['1.', 'L = FilhoEsquerdo(i)'], ['2.', 'R = FilhoDireito(i)'], ['3.', 'maior ← i'], ['4.', 'if L < tamanho_heap and A[L] > A[maior]:'], ['5.', '   maior ← L'],
+    ['6.', 'if R < tamanho_heap and A[R] > A[maior]:'], ['7.', '   maior ← R'], ['8.', 'if maior ≠ i:'], ['9.', '   trocar(A[i], A[maior])'], ['10.', '   MaxHeapify(A, maior)']];
+  const sorted = (n, size) => Object.fromEntries([...Array(n).keys()].filter((x) => x >= size).map((x) => [x, 'ok']));
+
+  function trace(input, full, detail) {
+    const A = input.slice(), n = A.length, S = [];
+    let size = n, it = '—';
+    const snap = (line, note, marks = {}) => S.push({ line, note, heap: A.slice(), size, marks: { ...sorted(n, size), ...marks }, vars: { tamanho_heap: size, i: it } });
+    const hsnap = (l, note, marks) => { if (detail || l === 8 || l === 9) snap(10 + l, note, marks); };
+    if (full) snap(1, 'Linha 1: primeiro, constrói o heap máximo.');
+    snap(7, `BuildMaxHeap: n = ${n}. Os índices ${Math.floor(n / 2)} a ${n - 1} são folhas.`);
+    for (let i = Math.floor(n / 2) - 1; i >= 0; i--) {
+      it = i;
+      snap(8, `for i = ${i}.`, { [i]: 'cold' });
+      snap(9, `MaxHeapify(A, ${i}).`, { [i]: 'cold' });
+      HeapView.heapify(A, i, size, hsnap);
+    }
+    snap(8, `Heap máximo pronto: [${A.join(', ')}]. O maior (${A[0]}) está na raiz.`, { 0: 'ok' });
+    if (!full) return S;
+    for (let i = n - 1; i >= 1; i--) {
+      it = i;
+      snap(2, `for i = ${i}: o maior do heap (${A[0]}) vai para a posição ${i}.`, { 0: 'hot', [i]: 'cold' });
+      [A[0], A[i]] = [A[i], A[0]];
+      snap(3, `trocar(A[0], A[${i}]): A[${i}] = ${A[i]} já está na posição final.`, { [i]: 'ok', 0: 'cold' });
+      size--;
+      snap(4, `tamanho_heap ← ${size}: a posição ${i} sai do heap.`, { 0: 'cold' });
+      snap(5, `MaxHeapify(A, 0): conserta a raiz (${A[0]}).`, { 0: 'cold' });
+      HeapView.heapify(A, 0, size, hsnap);
+    }
+    it = '—'; size = 0;
+    snap(0, `Ordenado: [${A.join(', ')}].`);
+    return S;
+  }
+  const extra = (st, box) => box.append(HeapView.render(st.heap, { size: st.size, marks: st.marks }));
+  const SLIDE = [1, 16, 5, 30, 27, 17, 20, 2, 57, 3, 90], EX = [5, 13, 2, 25, 7, 17, 20, 8, 4];
+  const B = StepPlayer.mount(document.getElementById('bPlayer'), { code, stack: true, extra, speed: 700, steps: trace(SLIDE, false, true) });
+  const bb = document.getElementById('bBtns');
+  [['slide', SLIDE], ['[5, 13, 2, 25, 7, 17, 20, 8, 4]', EX]].forEach(([lab, a], k) => bb.append(APA.el('button', { class: 'btn' + (k ? '' : ' on'), type: 'button',
+    onclick: (e) => { [...bb.children].forEach((x) => x.classList.remove('on')); e.target.classList.add('on'); B.load(trace(a, false, true)); } }, lab)));
+
+  let cur = [4, 1, 3, 2, 16, 9, 10, 14, 8, 7];
+  const SP = StepPlayer.mount(document.getElementById('sPlayer'), { code, stack: true, extra, speed: 600, steps: trace(cur, true, false) });
+  const sb = document.getElementById('sBtns'), det = document.getElementById('sDetail');
+  [['[4, 1, 3, 2, 16, 9, 10, 14, 8, 7]', [4, 1, 3, 2, 16, 9, 10, 14, 8, 7]], ['slide', SLIDE], ['[5, 13, 2, 25, 7, 17, 20, 8, 4]', EX]].forEach(([lab, a], k) =>
+    sb.append(APA.el('button', { class: 'btn' + (k ? '' : ' on'), type: 'button', onclick: (e) => {
+      [...sb.children].forEach((x) => x.classList.remove('on')); e.target.classList.add('on'); cur = a; SP.load(trace(cur, true, det.checked)); } }, lab)));
+  det.onchange = () => SP.load(trace(cur, true, det.checked));
+
+  // trocas medidas
+  function count(n) {
+    const A = Array.from({ length: n }, (_, i) => (i * 7919 + 13) % (n * 3));
+    let b = 0, s = 0; const noop = () => {};
+    for (let i = Math.floor(n / 2) - 1; i >= 0; i--) b += HeapView.heapify(A, i, n, noop);
+    s = b; let size = n;
+    for (let i = n - 1; i >= 1; i--) { [A[0], A[i]] = [A[i], A[0]]; s++; size--; s += HeapView.heapify(A, 0, size, noop); }
+    return { b, s };
+  }
+  const memo = {}; const get = (n) => (memo[n] ||= count(n));
+  LineChart.mount(document.getElementById('cChart'), {
+    series: [
+      { name: 'n log₂ n', f: (n) => (n > 1 ? n * Math.log2(n) : 0), color: 'var(--muted)' },
+      { name: 'HeapSort (trocas)', f: (n) => get(n).s, color: 'var(--series-2)' },
+      { name: 'BuildMaxHeap (trocas)', f: (n) => get(n).b, color: 'var(--series-1)' },
+    ],
+    xMin: 1, xMax: 300, xLabel: 'n', yLabel: 'trocas', tableXs: [10, 50, 100, 200, 300],
+  });
+
+  Quiz.mount(document.getElementById('quiz'), [
+    { q: 'Por que o BuildMaxHeap começa em $\\lfloor n/2 \\rfloor - 1$?',
+      options: ['Por convenção', 'Porque os índices a partir de $\\lfloor n/2 \\rfloor$ são folhas, que já são heaps', 'Para economizar memória', 'Porque é o meio do vetor ordenado'], answer: 1, explain: 'É o último nó interno.' },
+    { q: 'Em cada iteração do HeapSort, o que acontece logo depois de trocar $A[0]$ com $A[i]$?',
+      options: ['BuildMaxHeap de novo', 'tamanho_heap diminui e MaxHeapify(A, 0) conserta a raiz', 'merge', 'nada'], answer: 1, explain: 'Linhas 4 e 5.' },
+    { q: 'Complexidade justa do BuildMaxHeap:',
+      options: ['$O(\\log n)$', '$O(n)$', '$O(n\\log n)$', '$O(n^2)$'], answer: 1, explain: '$O(n\\log n)$ também é verdade, mas folgado (slides 41–42).' },
+    { q: 'Complexidade do HeapSort:',
+      options: ['$O(n)$', '$O(n\\log n)$', '$O(n^2)$', '$O(n + k)$'], answer: 1, explain: '$O(n) + (n-1)\\cdot O(\\log n)$.' },
+    { q: 'Com qual algoritmo o HeapSort se parece, segundo o slide 2?',
+      options: ['InsertionSort', 'SelectionSort', 'CountingSort', 'busca binária'], answer: 1, explain: 'Acha o maior e põe na posição final; o heap torna isso $O(\\log n)$.' },
+  ]);
+});
+</script>
+</body>
+</html>
