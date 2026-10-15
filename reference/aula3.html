@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Referência · Aula 3</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../assets/style.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="../assets/common.js"></script>
+</head>
+<body>
+<nav class="topbar">
+  <a href="../index.html">← Índice</a>
+  <span>Folha de referência · Aula 3</span>
+  <span class="spacer"></span>
+  <button class="theme-btn" type="button">tema</button>
+</nav>
+<main>
+<h1>Aula 3: Análise assintótica (Parte 3), notação O</h1>
+
+<h2>Complexidade assintótica</h2>
+<ul>
+  <li>Comportamento quando $n \to \infty$. Ignora <b>coeficientes</b> e <b>termos de menor ordem</b>: interessa a <b>taxa de crescimento</b>.</li>
+  <li>Três notações: $O$ (superior, "$\le$"), $\Omega$ (inferior, "$\ge$"), $\Theta$ (restrito, "$=$").</li>
+  <li>Taxas: $1 \prec \log n \prec n \prec n\log n \prec n^2 \prec n^3 \prec 2^n \prec n!$</li>
+</ul>
+
+<h2>Definição de O</h2>
+<div class="box def">
+  <p>$f(n) = O(g(n)) \iff$ $f, g$ assintoticamente não negativas e existem constantes positivas $c, n_0$ com</p>
+  $$f(n) \le c\cdot g(n) \quad \forall\, n \ge n_0.$$
+  <p>$n_0$: ignora $n$ pequeno. $c$: absorve coeficientes. "Para <b>todo</b> $n \ge n_0$", não "para algum".</p>
+</div>
+
+<h2>Provar pela definição (achar $c$ e $n_0$)</h2>
+<ol>
+  <li><b>Caminho A:</b> escolha $c$ e resolva $f(n) \le c\,g(n)$ para achar $n_0$. Ex.: $2n + 20 \le 3n \iff n \ge 20$, logo $c = 3, n_0 = 20$.</li>
+  <li><b>Caminho B (majorar):</b> descarte negativos e suba cada termo para a maior potência, usando $1 \le n \le n^2 \le \dots$ para $n \ge 1$. Ex.: $5n^2 + 4n - 7 \le 9n^2$, logo $c = 9, n_0 = 1$.</li>
+</ol>
+<p><b>Redação:</b> "Tome $c = \dots$ e $n_0 = \dots$. Para todo $n \ge n_0$, temos [cadeia de desigualdades]. Logo $f = O(g)$. ∎"</p>
+<p><b>Não é $O$:</b> suponha $f \le c\,g$ para todo $n \ge n_0$, divida e chegue a "algo que cresce sem limite $\le c$". Absurdo. Ex.: $n^2 \le cn \Rightarrow n \le c$.</p>
+
+<h2>Provar pelo limite</h2>
+<div class="table-wrap"><table>
+  <tr><th>$\lim f/g$</th><th>conclusão</th></tr>
+  <tr><td>$0$</td><td>$f = O(g)$, $g$ cresce mais rápido</td></tr>
+  <tr><td>constante $0 &lt; L &lt; \infty$</td><td>$f = O(g)$, mesma taxa</td></tr>
+  <tr><td>$\infty$</td><td>$f \ne O(g)$</td></tr>
+</table></div>
+<ul>
+  <li>Polinômios: divida pela maior potência de $n$.</li>
+  <li>L'Hôpital em $\infty/\infty$: $(\log_2 n)' = \frac{1}{n\ln 2}$, $(n^k)' = k n^{k-1}$, $(2^n)' = 2^n\ln 2$.</li>
+  <li>Se $\lim f/g = L &lt; \infty$, então $c = L + 1$ serve a partir de algum $n_0$.</li>
+</ul>
+
+<h2>Uso</h2>
+<ul>
+  <li>Queremos o limite <b>mais apertado</b> (mesma taxa), mas $2n + 20 = O(n^2)$ não está errado.</li>
+  <li>$O$ é usado principalmente no <b>pior caso</b>. No melhor caso é correto, mas $\Omega$ é mais apropriada.</li>
+</ul>
+
+<h2>Exemplos dos slides</h2>
+<div class="table-wrap"><table>
+  <tr><th>$f$</th><th>$g$</th><th>resultado</th></tr>
+  <tr><td>$n^2 - 5n + 8$</td><td>$10n$</td><td>falha a partir de $n \approx 14{,}5$: não é limite</td></tr>
+  <tr><td>$n^2 - 5n + 8$</td><td>$n^2$</td><td>$c = 1$, $n_0 = 2$</td></tr>
+  <tr><td>$2n^2 + 1$</td><td>$n^2$</td><td>$c = 3$, $n_0 = 1$</td></tr>
+  <tr><td>$2n + 20$</td><td>$n$</td><td>$c = 3$, $n_0 = 20$ (ou $c = 22$, $n_0 = 1$); $\lim = 2$</td></tr>
+  <tr><td>$2n + 20$</td><td>$n^2$</td><td>$\lim = 0$: válido, mas folgado</td></tr>
+</table></div>
+</main>
+</body>
+</html>

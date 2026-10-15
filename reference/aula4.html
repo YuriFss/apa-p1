@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Referência · Aula 4</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../assets/style.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="../assets/common.js"></script>
+</head>
+<body>
+<nav class="topbar">
+  <a href="../index.html">← Índice</a>
+  <span>Folha de referência · Aula 4</span>
+  <span class="spacer"></span>
+  <button class="theme-btn" type="button">tema</button>
+</nav>
+<main>
+<h1>Aula 4: Análise assintótica (Parte 4), Ω, Θ e classes</h1>
+
+<h2>As três definições</h2>
+<div class="table-wrap"><table>
+  <tr><th>Notação</th><th>Existem constantes positivas…</th><th>tais que, $\forall n \ge n_0$</th><th>Uso típico</th></tr>
+  <tr><td>$f = O(g)$</td><td>$c, n_0$</td><td>$f(n) \le c\,g(n)$</td><td>pior caso (limite superior)</td></tr>
+  <tr><td>$f = \Omega(g)$</td><td>$c, n_0$</td><td>$f(n) \ge c\,g(n)$</td><td>melhor caso (limite inferior)</td></tr>
+  <tr><td>$f = \Theta(g)$</td><td>$c_1, c_2, n_0$</td><td>$c_1 g(n) \le f(n) \le c_2 g(n)$</td><td>limite assintoticamente restrito</td></tr>
+</table></div>
+<p><b>Teorema:</b> $f = \Theta(g) \iff f = O(g)$ e $f = \Omega(g)$. O $n_0$ do $\Theta$ é o maior dos dois.</p>
+
+<h2>Pelo limite $L = \lim f/g$</h2>
+<div class="table-wrap"><table>
+  <tr><th>$L$</th><th>$O$</th><th>$\Omega$</th><th>$\Theta$</th></tr>
+  <tr><td>$0$</td><td>✔</td><td>✘</td><td>✘</td></tr>
+  <tr><td>$0 &lt; L &lt; \infty$</td><td>✔</td><td>✔</td><td>✔</td></tr>
+  <tr><td>$\infty$</td><td>✘</td><td>✔</td><td>✘</td></tr>
+</table></div>
+
+<h2>Técnicas com $c$ e $n_0$</h2>
+<ul>
+  <li><b>$O$ (majorar):</b> descarte negativos e suba os termos para a maior potência ($n \ge 1$). $5n^2 + 4n - 7 \le 9n^2$.</li>
+  <li><b>$\Omega$ (minorar):</b> descarte positivos de menor ordem, escolha $c$ menor que o coeficiente líder e resolva para $n_0$. $5n^2 + 4n - 7 \ge 5n^2 - 7 \ge 4n^2$ para $n \ge 3$. Ou: $13n - 11 \ge 13n - 11n = 2n$ para $n \ge 1$.</li>
+  <li><b>$\Theta$:</b> faça os dois. Ex.: $5n^2 + 4n - 7$: $c_1 = 4$, $c_2 = 9$, $n_0 = 3$.</li>
+  <li><b>Slide:</b> $n^2 - 3n + 3 = \Theta(n^2)$ com $c_1 = 0{,}2$, $c_2 = 1$, $n_0 = 1$ (discriminante de $0{,}8n^2 - 3n + 3$ negativo).</li>
+  <li><b>Negar:</b> suponha que as constantes existem, divida e chegue a "algo ilimitado $\le$ constante".</li>
+</ul>
+
+<h2>"Sob qualquer entrada"</h2>
+<ul>
+  <li>Melhor caso com $\Omega$: limite inferior sob qualquer entrada. Pior caso com $O$: limite superior sob qualquer entrada.</li>
+  <li>InsertionSort: $O(n^2)$ e $\Omega(n)$ sob qualquer entrada. <b>Não</b> é $\Theta(n^2)$ sob qualquer entrada (melhor caso é $\Theta(n)$).</li>
+  <li>Existe $\Theta(g)$ para qualquer entrada $\iff$ melhor e pior caso são ambos $\Theta(g)$.</li>
+</ul>
+
+<h2>Classes de comportamento</h2>
+<div class="table-wrap"><table>
+  <tr><th>Classe</th><th>Nome</th><th>Marca</th></tr>
+  <tr><td>$O(1)$</td><td>constante</td><td>independe de $n$</td></tr>
+  <tr><td>$O(\log n)$</td><td>logarítmica</td><td>dobrar $\log n$ exige $n^2$</td></tr>
+  <tr><td>$O(n)$</td><td>linear</td><td>dobra com $n$; o melhor possível para ler $n$ itens</td></tr>
+  <tr><td>$O(n\log n)$</td><td>—</td><td>divisão e conquista</td></tr>
+  <tr><td>$O(n^2)$</td><td>quadrática</td><td>pares, laço dentro de laço</td></tr>
+  <tr><td>$O(n^3)$</td><td>cúbica</td><td>$n = 100$: cerca de $10^6$</td></tr>
+  <tr><td>$O(2^n)$</td><td>exponencial</td><td>força bruta; $n = 20$: cerca de $10^6$</td></tr>
+  <tr><td>$O(n!)$</td><td>exponencial (fatorial)</td><td>$20!$ tem 19 dígitos</td></tr>
+</table></div>
+<p>Regras: $(\log n)^a \prec n^b$ e $n^a \prec b^n$ (para $b &gt; 1$).</p>
+</main>
+</body>
+</html>

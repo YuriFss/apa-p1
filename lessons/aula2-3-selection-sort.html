@@ -1,0 +1,307 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Aula 2.3 · SelectionSort</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../assets/style.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="../assets/common.js"></script>
+<script defer src="../assets/player.js"></script>
+<script defer src="../assets/chart.js"></script>
+<script defer src="../assets/quiz.js"></script>
+</head>
+<body>
+<nav class="topbar">
+  <a href="../index.html">← Índice</a>
+  <span>Aula 2 · Análise assintótica (Parte 2)</span>
+  <span class="spacer"></span>
+  <a href="../reference/aula2.html">Folha de referência</a>
+  <button class="theme-btn" type="button">tema</button>
+</nav>
+<main>
+<p class="kicker">Aula 2 · Lição 3 de 4</p>
+<h1>SelectionSort: melhor caso (e o pior como exercício)</h1>
+<p class="lead">Slides 33 a 43 da Aula 2. O SelectionSort tem uma surpresa: mesmo com o vetor já ordenado, ele continua quadrático. O pior caso fica como exercício, igual nos slides.</p>
+
+<div class="toc">
+  <b>Nesta lição</b>
+  <ol>
+    <li><a href="#ideia">Ideia</a></li>
+    <li><a href="#pseudo">Pseudocódigo, linha a linha</a></li>
+    <li><a href="#anim">Animação com contagem</a></li>
+    <li><a href="#op">A coluna # op</a></li>
+    <li><a href="#melhor">Melhor caso</a></li>
+    <li><a href="#comparando">Selection × Insertion</a></li>
+    <li><a href="#quiz">Quiz</a> · <a href="#exercicio">Exercício: o pior caso</a></li>
+  </ol>
+</div>
+
+<h2 id="ideia">1. Ideia</h2>
+<ul>
+  <li>Ordena o vetor <b>da esquerda para a direita</b>.</li>
+  <li>A cada iteração, o <b>menor elemento da parte não ordenada</b> (à direita) é movido para sua <b>posição final</b>.</li>
+</ul>
+<p>Na iteração $i$, as posições $0..i-1$ já têm os $i$ menores elementos, em ordem. O algoritmo procura o mínimo de $A[i..n-1]$ e troca esse mínimo com $A[i]$.</p>
+<div class="box tip">
+  <span class="tag">Insertion × Selection, a diferença central</span>
+  <ul>
+    <li><b>Insertion:</b> pega o próximo elemento e procura o <b>lugar</b> dele na parte ordenada. A busca para cedo se o lugar estiver perto.</li>
+    <li><b>Selection:</b> fixa o lugar $i$ e procura o <b>elemento</b> que vai ali, o mínimo do resto. Para ter certeza de que é o mínimo, precisa olhar <b>todo</b> o resto, sempre.</li>
+  </ul>
+</div>
+
+<h2 id="pseudo">2. Pseudocódigo, linha a linha</h2>
+<pre class="code"><span class="fn">SelectionSort</span>(A, n)
+1. <span class="kw">for</span> i ← 0 <span class="kw">to</span> n − 2:
+2.    i_min ← i
+3.    <span class="kw">for</span> j ← i+1 <span class="kw">to</span> n − 1:
+4.       <span class="kw">if</span> A[j] < A[i_min]:
+5.          i_min ← j
+6.    <span class="kw">if</span> A[i] ≠ A[i_min]:
+7.       temp ← A[i]
+8.       A[i] ← A[i_min]
+9.       A[i_min] ← temp
+10.<span class="kw">return</span> A</pre>
+<div class="table-wrap"><table>
+  <tr><th>Linha</th><th>O que faz</th></tr>
+  <tr><td>1</td><td>Posição $i$ que vai receber o próximo menor. Vai até $n-2$: quando sobra um elemento só, ele já está no lugar.</td></tr>
+  <tr><td>2</td><td>Chute inicial: o mínimo é o próprio $A[i]$.</td></tr>
+  <tr><td>3–5</td><td>Percorre o resto, $A[i+1..n-1]$. Se achar alguém menor que o mínimo atual, atualiza <code>i_min</code>.</td></tr>
+  <tr><td>6</td><td>Só troca se o mínimo não for o próprio $A[i]$.</td></tr>
+  <tr><td>7–9</td><td>Troca $A[i]$ com $A[i_{min}]$ usando uma variável temporária.</td></tr>
+</table></div>
+
+<h2 id="anim">3. Animação com contagem</h2>
+<div class="widget">
+  <div class="wtitle">SelectionSort passo a passo</div>
+  <div class="controls" id="ssBtns"></div>
+  <div class="controls">
+    <label>Sua entrada: <input id="ssIn" value="4, 2, 5, 1" size="18" style="font:inherit;padding:4px 8px;border-radius:6px;border:1px solid var(--line);background:var(--bg);color:var(--ink)"></label>
+    <button class="btn" id="ssGo" type="button">usar</button>
+    <span class="caption" id="ssErr"></span>
+  </div>
+  <div id="ssPlayer"></div>
+  <p class="caption">Verde: parte já ordenada (posições finais). Azul: <code>i_min</code>, o menor visto até agora. Laranja: $A[j]$ sendo comparado.</p>
+</div>
+
+<h2 id="op">4. A coluna # op (slide 41)</h2>
+<div class="table-wrap"><table>
+  <tr><th>Linha</th><th class="num"># op</th><th>Por quê</th></tr>
+  <tr><td class="mono">1. for i ← 0 to n − 2</td><td class="num">2</td><td>comparação + atualização de $i$</td></tr>
+  <tr><td class="mono">2. i_min ← i</td><td class="num">1</td><td>atribuição</td></tr>
+  <tr><td class="mono">3. for j ← i+1 to n − 1</td><td class="num">3</td><td>soma <code>i+1</code> + comparação + atualização de $j$</td></tr>
+  <tr><td class="mono">4. if A[j] &lt; A[i_min]</td><td class="num">3</td><td>2 indexações + comparação</td></tr>
+  <tr><td class="mono">5. i_min ← j</td><td class="num">1</td><td>atribuição</td></tr>
+  <tr><td class="mono">6. if A[i] ≠ A[i_min]</td><td class="num">3</td><td>2 indexações + comparação</td></tr>
+  <tr><td class="mono">7. temp ← A[i]</td><td class="num">2</td><td>indexação + atribuição</td></tr>
+  <tr><td class="mono">8. A[i] ← A[i_min]</td><td class="num">3</td><td>2 indexações + atribuição</td></tr>
+  <tr><td class="mono">9. A[i_min] ← temp</td><td class="num">2</td><td>indexação + atribuição</td></tr>
+  <tr><td class="mono">10. return A</td><td class="num">1</td><td>retorno</td></tr>
+</table></div>
+<div class="box prof">
+  <span class="tag">Repare</span>
+  <p>Aqui o <code>for</code> da linha 3 vale <b>3</b> op, porque inclui a soma <code>i+1</code>. De novo, a regra é contar o que está escrito na linha e justificar.</p>
+</div>
+
+<h2 id="melhor">5. Melhor caso</h2>
+<h3>O que depende dos dados?</h3>
+<ul>
+  <li>Os laços das linhas 1 e 3 são <b>independentes do conteúdo do array</b>. O número de execuções depende só de $n$ (slide 39).</li>
+  <li>O número de execuções da linha 5 <b>varia de acordo com a distribuição</b> dos elementos, assim como as linhas 7–9. <b>Mas a diferença é somente por um fator constante</b> (slide 40).</li>
+</ul>
+<p>O que significa "somente por um fator constante"? A linha 5 roda no máximo uma vez para cada execução da linha 4. Então ela pode mudar o <b>coeficiente</b> do $n^2$, mas não o <b>formato</b>: o algoritmo é quadrático em qualquer caso. Isso é bem diferente do InsertionSort, em que o melhor caso cai para linear.</p>
+
+<h3>Quantas vezes rodam os laços?</h3>
+<p><b>Linha 1:</b> <code>for i ← 0 to n − 2</code> tem $(n-2) - 0 + 1 = n - 1$ iterações.</p>
+<p><b>Linhas 3 e 4:</b> para cada $i$, o laço <code>for j ← i+1 to n − 1</code> roda $(n-1) - (i+1) + 1 = n - 1 - i$ vezes:</p>
+<div class="table-wrap"><table>
+  <tr><th>valor de $i$</th><td class="num">0</td><td class="num">1</td><td class="num">2</td><td class="num">…</td><td class="num">$n-2$</td></tr>
+  <tr><th>iterações de $j$</th><td class="num">$n-1$</td><td class="num">$n-2$</td><td class="num">$n-3$</td><td class="num">…</td><td class="num">1</td></tr>
+</table></div>
+<p>Pela fórmula de bolso: $V = n - 1$ voltas, primeira $p = n - 1$, última $u = 1$:</p>
+$$\#\text{exec(linhas 3, 4)} = (n-1)\cdot\frac{(n-1) + 1}{2} = \frac{(n-1)\,n}{2} = \frac{n^2 - n}{2}.$$
+<p>O slide escreve <code>(n−1)(n−1+1)/2</code>, que é a mesma coisa.</p>
+
+<h3>A entrada do melhor caso: vetor já ordenado</h3>
+<p>Com $A$ ordenado, o mínimo de $A[i..n-1]$ é sempre o próprio $A[i]$. O teste da linha 4 nunca é verdadeiro, então a linha 5 tem # exec $= 0$. O teste da linha 6 dá sempre falso, então as linhas 7–9 têm # exec $= 0$.</p>
+<div class="algo">
+<pre class="panel"><span class="fn">SelectionSort</span>(A, n)
+1. <span class="kw">for</span> i ← 0 <span class="kw">to</span> n − 2:
+2.    i_min ← i
+3.    <span class="kw">for</span> j ← i+1 <span class="kw">to</span> n − 1:
+4.       <span class="kw">if</span> A[j] < A[i_min]:
+5.          i_min ← j
+6.    <span class="kw">if</span> A[i] ≠ A[i_min]:
+7.       temp ← A[i]
+8.       A[i] ← A[i_min]
+9.       A[i_min] ← temp
+10.<span class="kw">return</span> A</pre>
+<pre class="panel count"><b># op</b>2
+1
+3
+3
+1
+3
+2
+3
+2
+1</pre>
+<pre class="panel count"><b># exec</b>n−1
+n−1
+(n−1)(n−1+1)/2
+(n−1)(n−1+1)/2
+<span class="zero">0</span>
+n−1
+<span class="zero">0</span>
+<span class="zero">0</span>
+<span class="zero">0</span>
+1</pre>
+</div>
+<p>Juntando por # exec igual:</p>
+<ul>
+  <li>linhas 1, 2 e 6 ($n-1$ vezes): $2 + 1 + 3 = 6$;</li>
+  <li>linhas 3 e 4 ($\frac{n^2-n}{2}$ vezes): $3 + 3 = 6$;</li>
+  <li>linha 10: $1$.</li>
+</ul>
+$$\begin{aligned}
+T_m(n) &= 6(n-1) + \frac{6(n^2-n)}{2} + 1\\
+&= 6n - 6 + 3n^2 - 3n + 1\\
+&= 3n^2 + 6n - 3n - 5
+\end{aligned}$$
+<p class="result">Melhor caso: $T_m(n) = 3n^2 + 3n - 5$</p>
+<p><b>Confira com $n = 2$</b>, entrada $[1, 2]$: linha 1 (2) + linha 2 (1) + uma iteração com linhas 3 e 4 (6) + linha 6 (3) + return (1) = 13. Pela fórmula, $12 + 6 - 5 = 13$ ✓.</p>
+
+<h2 id="comparando">6. Selection × Insertion</h2>
+<div class="widget">
+  <div class="wtitle">Melhor caso do Selection × melhor e pior caso do Insertion</div>
+  <div class="controls"><label>n até <b id="cxv">30</b> <input type="range" id="cx" min="5" max="200" value="30"></label></div>
+  <div id="cmpChart"></div>
+  <p class="caption">O <b>melhor</b> caso do SelectionSort (laranja) é uma parábola, como o <b>pior</b> do InsertionSort (vermelho). Só o melhor caso do InsertionSort (azul) é uma reta.</p>
+</div>
+<div class="table-wrap"><table>
+  <tr><th></th><th>InsertionSort</th><th>SelectionSort</th></tr>
+  <tr><td>Melhor caso</td><td>ordenado: $13n - 11$ (linear)</td><td>ordenado: $3n^2 + 3n - 5$ (quadrático)</td></tr>
+  <tr><td>Pior caso</td><td>decrescente: $5n^2 + 4n - 7$</td><td><b>exercício abaixo</b></td></tr>
+  <tr><td>Aproveita entrada quase ordenada?</td><td>Sim</td><td>Não: sempre percorre o resto inteiro</td></tr>
+  <tr><td>Nº de trocas</td><td>até $\frac{n^2-n}{2}$ deslocamentos</td><td>no máximo $n-1$ trocas (uma por iteração)</td></tr>
+</table></div>
+<p>A última linha explica por que o SelectionSort ainda tem seu uso: quando <b>escrever</b> na memória é caro (memória flash, por exemplo), fazer no máximo $n-1$ trocas é uma vantagem.</p>
+
+<h2 id="quiz">7. Quiz de recordação</h2>
+<div id="quiz"></div>
+
+<h2 id="exercicio">8. Exercício para a próxima aula (slide 43)</h2>
+<div class="exercise">
+  <span class="tag">Exercício 2.3, do próprio professor</span>
+  <p><b>Identifique o pior caso do SelectionSort e calcule o $T(n)$ associado.</b></p>
+  <p>Roteiro:</p>
+  <ol>
+    <li>Quais linhas têm # exec que depende dos dados? Para cada uma, qual o <b>máximo</b> de vezes que ela pode rodar?</li>
+    <li>Descreva uma entrada que leva a esse máximo e teste na animação acima. Atenção: verifique se a sua entrada realmente faz a linha 5 rodar o máximo de vezes em <b>todas</b> as iterações.</li>
+    <li>Monte a tabela # op / # exec e encontre $T_p(n)$. Confira com $n = 2$.</li>
+  </ol>
+  <p class="caption">Responda no chat. Esse exercício tem uma sutileza que vale discutir na correção.</p>
+</div>
+
+<div class="pager">
+  <a href="aula2-2-insertion-sort.html"><small>← anterior</small>2.2 InsertionSort</a>
+  <a class="next" href="aula2-4-bubble-sort-lab.html"><small>próxima →</small>2.4 Laboratório: BubbleSort</a>
+</div>
+</main>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const OPS = { 1: 2, 2: 1, 3: 3, 4: 3, 5: 1, 6: 3, 7: 2, 8: 3, 9: 2, 10: 1 };
+  function trace(input) {
+    const A = input.slice(), n = A.length, S = [];
+    let i = '—', j = '—', imin = '—', temp = '—';
+    const snap = (line, note, o = {}) => {
+      const marks = {};
+      const done = typeof i === 'number' ? Math.min(i, n) : 0;
+      for (let k = 0; k < done; k++) marks[k] = 'ok';
+      if (typeof imin === 'number') marks[imin] = 'cur';
+      if (typeof j === 'number' && j < n && o.cmp) marks[j] = 'cmp';
+      Object.assign(marks, o.marks || {});
+      const ptrs = {};
+      const add = (k, s) => { if (typeof k === 'number' && k >= 0 && k < n) ptrs[k] = ptrs[k] ? ptrs[k] + ',' + s : s; };
+      add(i, 'i'); add(j, 'j'); add(imin, 'min');
+      S.push({ line, note, skip: o.skip, vars: { n, i, j, i_min: imin, temp }, arrays: [{ name: 'A', values: A.slice(), marks, ptrs }] });
+    };
+    for (i = 0; i <= n - 2; i++) {
+      j = '—'; imin = '—';
+      snap(1, `Linha 1: i = ${i}. Procura o menor de A[${i}..${n - 1}] para a posição ${i}.`);
+      imin = i;
+      snap(2, `Linha 2: i_min ← ${i} (chute inicial: A[${i}] = ${A[i]}).`);
+      for (j = i + 1; j <= n - 1; j++) {
+        snap(3, `Linha 3: j = ${j}. 3 op.`, { cmp: true });
+        const lt = A[j] < A[imin];
+        snap(4, `Linha 4: A[${j}] = ${A[j]} < A[i_min] = ${A[imin]}? <b>${lt ? 'Sim' : 'Não'}</b>. 3 op.`, { cmp: true });
+        if (lt) { imin = j; snap(5, `Linha 5: novo mínimo, i_min ← ${j} (valor ${A[j]}). Linha que depende dos dados.`, { cmp: true }); }
+      }
+      snap(3, `Teste final do laço de j (j = ${n}): não conta.`, { skip: true });
+      j = '—';
+      const diff = A[i] !== A[imin];
+      snap(6, `Linha 6: A[${i}] = ${A[i]} ≠ A[i_min] = ${A[imin]}? <b>${diff ? 'Sim → troca' : 'Não → não troca'}</b>. 3 op.`);
+      if (diff) {
+        temp = A[i]; snap(7, `Linha 7: temp ← ${temp}.`);
+        A[i] = A[imin]; snap(8, `Linha 8: A[${i}] ← ${A[i]}.`, { marks: { [i]: 'ok' } });
+        A[imin] = temp; snap(9, `Linha 9: A[${imin}] ← ${temp}. Agora A[${i}] está na posição final.`);
+        temp = '—';
+      }
+    }
+    j = '—'; imin = '—';
+    snap(1, `Teste final do laço de i (i = ${n - 1}): não conta.`, { skip: true });
+    i = n;
+    const total = S.reduce((s, st) => s + (st.skip ? 0 : OPS[st.line]), 0) + 1;
+    snap(10, `Linha 10: return. Total = <b>${total}</b>. Melhor caso para n = ${n}: $3n^2 + 3n - 5 = ${3 * n * n + 3 * n - 5}$.`);
+    return S;
+  }
+  const inputs = { 'exemplo do slide': [5, 7, 10, 4, 1, 3, 8, 6], 'melhor caso (ordenado)': [1, 3, 4, 5, 6], 'decrescente': [10, 8, 6, 4, 2] };
+  const P = StepPlayer.mount(document.getElementById('ssPlayer'), {
+    code: ['SelectionSort(A, n)', 'for i ← 0 to n − 2:', '   i_min ← i', '   for j ← i+1 to n − 1:', '      if A[j] < A[i_min]:', '         i_min ← j', '   if A[i] ≠ A[i_min]:', '      temp ← A[i]', '      A[i] ← A[i_min]', '      A[i_min] ← temp', 'return A'],
+    ops: OPS, steps: trace(inputs['exemplo do slide']), speed: 600,
+  });
+  const btns = document.getElementById('ssBtns');
+  const pick = (b) => { [...btns.children].forEach((x) => x.classList.remove('on')); if (b) b.classList.add('on'); };
+  Object.entries(inputs).forEach(([label, A], k) => btns.append(APA.el('button', { class: 'btn' + (k ? '' : ' on'), type: 'button',
+    onclick: (e) => { pick(e.target); P.load(trace(A)); } }, label)));
+  document.getElementById('ssGo').onclick = () => {
+    const A = document.getElementById('ssIn').value.split(/[\s,;]+/).filter(Boolean).map(Number);
+    const err = document.getElementById('ssErr');
+    if (A.length < 2 || A.length > 10 || A.some((x) => !Number.isFinite(x))) { err.textContent = 'Use de 2 a 10 números separados por vírgula.'; return; }
+    err.textContent = ''; pick(null); P.load(trace(A));
+  };
+
+  const chart = LineChart.mount(document.getElementById('cmpChart'), {
+    series: [
+      { name: 'Insertion pior: 5n² + 4n − 7', f: (n) => 5 * n * n + 4 * n - 7, color: 'var(--series-8)' },
+      { name: 'Selection melhor: 3n² + 3n − 5', f: (n) => 3 * n * n + 3 * n - 5, color: 'var(--series-2)' },
+      { name: 'Insertion melhor: 13n − 11', f: (n) => 13 * n - 11, color: 'var(--series-1)' },
+    ],
+    xMin: 1, xMax: 30, xLabel: 'n', yLabel: 'operações', tableXs: [2, 5, 10, 30, 100, 200],
+  });
+  const cx = document.getElementById('cx');
+  cx.oninput = () => { document.getElementById('cxv').textContent = cx.value; chart.update({ xMax: +cx.value }); };
+
+  Quiz.mount(document.getElementById('quiz'), [
+    { q: 'Quantas iterações tem <code>for i ← 0 to n − 2</code>?',
+      options: ['$n - 2$', '$n - 1$', '$n$', '$n + 1$'], answer: 1, explain: '$(n-2) - 0 + 1 = n - 1$.' },
+    { q: 'Para um $i$ fixo, quantas vezes roda <code>for j ← i+1 to n − 1</code>?',
+      options: ['$n - i$', '$n - 1 - i$', '$i$', '$n - 1$'], answer: 1, explain: '$(n-1) - (i+1) + 1 = n - 1 - i$.' },
+    { q: 'O melhor caso do SelectionSort é…',
+      options: ['linear, como o do InsertionSort', 'quadrático: as linhas 3 e 4 rodam $\\frac{n^2-n}{2}$ vezes de qualquer jeito', 'constante', 'igual ao pior caso do InsertionSort'], answer: 1,
+      explain: '$T_m(n) = 3n^2 + 3n - 5$. Os laços não dependem do conteúdo do vetor.' },
+    { q: 'O que o slide quer dizer com "a diferença é somente por um fator constante" (linha 5)?',
+      options: ['Que a linha 5 nunca executa', 'Que a linha 5 roda no máximo tantas vezes quanto a linha 4, então só muda o coeficiente de $n^2$, não o formato', 'Que a linha 5 custa tempo constante', 'Que o melhor e o pior caso são idênticos'], answer: 1,
+      explain: 'Melhor e pior caso do SelectionSort são ambos quadráticos.' },
+    { q: 'Quantas trocas (linhas 7–9) o SelectionSort faz no máximo?',
+      options: ['$n - 1$', '$\\frac{n^2-n}{2}$', '$n^2$', '$\\log n$'], answer: 0,
+      explain: 'No máximo uma troca por iteração do laço de fora.' },
+  ]);
+});
+</script>
+</body>
+</html>

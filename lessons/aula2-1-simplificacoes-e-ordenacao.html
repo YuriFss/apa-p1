@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Aula 2.1 · Simplificações e ordenação</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../assets/style.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="../assets/common.js"></script>
+<script defer src="../assets/quiz.js"></script>
+</head>
+<body>
+<nav class="topbar">
+  <a href="../index.html">← Índice</a>
+  <span>Aula 2 · Análise assintótica (Parte 2)</span>
+  <span class="spacer"></span>
+  <a href="../reference/aula2.html">Folha de referência</a>
+  <button class="theme-btn" type="button">tema</button>
+</nav>
+<main>
+<p class="kicker">Aula 2 · Lição 1 de 4</p>
+<h1>Cuidado com as simplificações, e o que é ordenar</h1>
+<p class="lead">Slides 1 a 15 da Aula 2: a correção do exercício da aula passada, o limite da hipótese "toda operação custa o mesmo" e a introdução aos algoritmos de ordenação, que são o assunto do resto da aula.</p>
+
+<div class="toc">
+  <b>Nesta lição</b>
+  <ol>
+    <li><a href="#revisao">Revisão da Aula 1</a></li>
+    <li><a href="#exercicio-anterior">Correção do exercício contaOcorrencias</a></li>
+    <li><a href="#simplificacoes">Até onde vale simplificar</a></li>
+    <li><a href="#ordenacao">Algoritmos de ordenação</a></li>
+    <li><a href="#escolher">Como escolher um algoritmo de ordenação</a></li>
+    <li><a href="#quiz">Quiz</a> · <a href="#exercicio">Exercício</a></li>
+  </ol>
+</div>
+
+<h2 id="revisao">1. Revisão da Aula 1</h2>
+<p>Na aula passada vimos: análise experimental × análise teórica, tamanho da entrada, contagem de passos e melhor caso, pior caso e caso médio.</p>
+<p>Também vimos que a análise precisa de <b>simplificações</b>:</p>
+<ul>
+  <li>analisar por contagem de passos (operações básicas), e não por tempo em segundos;</li>
+  <li>supor que todas as operações básicas têm o <b>mesmo custo</b>.</li>
+</ul>
+
+<h2 id="exercicio-anterior">2. Correção do exercício contaOcorrencias</h2>
+<div class="box warn">
+  <span class="tag">Spoiler do Exercício 1.3</span>
+  <p>Os slides 3 a 5 da Aula 2 resolvem o exercício que fecha a lição 1.3. <b>Só abra o bloco abaixo depois de mandar sua resposta no chat.</b></p>
+</div>
+<details class="box">
+  <summary>Mostrar a correção do professor</summary>
+  <h3>Melhor caso: nenhuma ocorrência de $x$ no vetor $A$</h3>
+  <div class="algo">
+<pre class="panel"><span class="fn">contaOcorrencias</span>(x, A)
+1.  cont = 0
+2.  <span class="kw">for</span> i = 0 <span class="kw">to</span> n−1:
+3.     <span class="kw">if</span> A[i] == x:
+4.        cont++
+5.  <span class="kw">return</span> cont</pre>
+<pre class="panel count"><b># op</b>1
+2
+2
+1
+1</pre>
+<pre class="panel count"><b># exec</b>1
+n
+n
+<span class="zero">0</span>
+1</pre>
+  </div>
+  <p>$T_m(n) = 1 + 2n + 2n + 0 + 1 = 4n + 2$</p>
+  <h3>Pior caso: todos os elementos do vetor $A$ são iguais a $x$</h3>
+  <p>A única diferença é a linha 4, com # exec $= n$. Então $T_p(n) = 1 + 2n + 2n + n + 1 = 5n + 2$.</p>
+  <div class="box prof">
+    <span class="tag">Duas notações novas</span>
+    <ul>
+      <li>$T_m(n)$ = $T(n)$ do <b>m</b>elhor caso; $T_p(n)$ = $T(n)$ do <b>p</b>ior caso. Use na prova para deixar claro de qual caso você está falando.</li>
+      <li><code>cont++</code> foi contado como <b>1</b> operação. Se você contou 2 (soma + atribuição), o pior caso fica $6n + 2$. A forma é a mesma, e a justificativa resolve.</li>
+    </ul>
+  </div>
+</details>
+
+<h2 id="simplificacoes">3. Até onde vale simplificar</h2>
+<p>O professor faz um alerta: <b>é preciso tomar cuidado com o nível de simplificação</b>. Em alguns cenários, exageramos nas simplificações e chegamos a um resultado incorreto.</p>
+<p>A simplificação em risco é esta: "toda operação básica leva uma <b>quantidade constante de tempo</b>".</p>
+
+<h3>O exemplo: fibonacci2</h3>
+<pre class="code"><span class="fn">fibonacci2</span>(n)
+1.  <span class="kw">if</span> n = 0
+2.     return 0
+3.  crie um vetor f[0...n]
+4.  f[0] = 0, f[1] = 1
+
+5.  <span class="kw">for</span> i = 2...n:
+6.     f[i] = f[i−1] + f[i−2]
+
+7.  return f[n]</pre>
+<p>Na análise, consideramos que a linha 6 executava <b>7 operações</b>: <code>i−1</code>, <code>f[i−1]</code>, <code>i−2</code>, <code>f[i−2]</code>, a soma <code>+</code>, <code>f[i]</code> e a atribuição. Também supusemos que a adição era feita em <b>um único passo</b>. Para a maioria das aplicações, essa suposição é válida.</p>
+<p>O problema é que <b>o valor de $f[i]$ cresce muito</b> e rapidamente passa a precisar de mais de 32 bits para ser armazenado:</p>
+
+<div class="table-wrap"><table>
+  <tr><th class="num">$n$</th><th class="num">$F_n$</th><th class="num">bits de $F_n$</th><th>Observação</th></tr>
+  <tr><td class="num">10</td><td class="num">55</td><td class="num">6</td><td></td></tr>
+  <tr><td class="num">47</td><td class="num">2 971 215 073</td><td class="num">32</td><td>já não cabe em um <code>int</code> de 32 bits com sinal (máx. 2 147 483 647)</td></tr>
+  <tr><td class="num">48</td><td class="num">4 807 526 976</td><td class="num">33</td><td>não cabe nem em 32 bits sem sinal</td></tr>
+  <tr><td class="num">94</td><td class="num">19 740 274 219 868 223 167</td><td class="num">65</td><td>estoura até o <code>unsigned long</code> de 64 bits</td></tr>
+  <tr><td class="num">1 000</td><td class="num">(209 dígitos)</td><td class="num">694</td><td></td></tr>
+  <tr><td class="num">10 000</td><td class="num">(2 090 dígitos)</td><td class="num">6 942</td><td>cerca de $0{,}694\,n$ bits</td></tr>
+</table></div>
+
+<div class="box def">
+  <span class="tag">Ideia central (slide 10)</span>
+  <p>Operações aritméticas em números arbitrariamente grandes <b>não podem ser feitas em um único passo de tempo constante</b>. A adição de dois números de $n$ bits leva tempo mais ou menos proporcional ao <b>número de bits</b>, como na soma "com vai-um" que você faz no papel, dígito a dígito.</p>
+</div>
+
+<div class="box extra">
+  <span class="tag">Consequência (Dasgupta, seção 0.3)</span>
+  <p>$F_n$ tem cerca de $0{,}694\,n$ bits. Então, para $n$ grande, cada soma da linha 6 custa algo proporcional a $n$, e não 1. O laço faz cerca de $n$ somas, e o custo real de fibonacci2 fica proporcional a $n \cdot n = n^2$ operações de bit, e não a $n$. Continua muito melhor que fibonacci1, mas a conclusão "é linear" estava errada por causa da simplificação.</p>
+</div>
+<p>Para a prova: a simplificação vale quando os números cabem em uma palavra de máquina (32 ou 64 bits). Se a questão falar de números "arbitrariamente grandes", o custo de uma soma passa a depender do número de bits.</p>
+
+<h2 id="ordenacao">4. Algoritmos de ordenação</h2>
+<div class="box def">
+  <span class="tag">Definição (slide 12)</span>
+  <p><b>Ordenação</b> é o processo de rearranjar um conjunto de objetos em uma ordem, ascendente ou decrescente.</p>
+</div>
+<p><b>Para que serve:</b> facilitar a recuperação posterior dos itens do conjunto ordenado.</p>
+<ul>
+  <li>Exemplo: a <b>busca binária</b> só funciona em vetor ordenado.</li>
+  <li>Imagine tentar encontrar a pessoa com a maior nota em uma lista <b>não ordenada</b> do ENEM, e sem poder usar um algoritmo de busca.</li>
+</ul>
+<p><b>Como funcionam:</b></p>
+<ul>
+  <li>A <b>maioria</b> dos algoritmos de ordenação é <b>baseada em comparações</b> de elementos: $A &gt; B$, $A &lt; B$, $A = B$.</li>
+  <li>Existem métodos que <b>não fazem comparações</b>. Veremos alguns ao longo do curso, como o CountingSort na Aula 8.</li>
+</ul>
+
+<h2 id="escolher">5. Como escolher um algoritmo de ordenação</h2>
+<p>Existem diversos algoritmos de ordenação. Qual é o melhor? <b>Depende muito do contexto prático.</b> Fatores a considerar:</p>
+<ul>
+  <li>complexidade assintótica;</li>
+  <li>tamanho da entrada ($n$ = número de elementos);</li>
+  <li>complexidade da implementação;</li>
+  <li>restrições de hardware (ex.: Arduino, Raspberry Pi Zero).</li>
+</ul>
+<div class="table-wrap"><table>
+  <tr><th></th><th>Algoritmos mais simples</th><th>Algoritmos eficientes</th></tr>
+  <tr><td>Adequados para</td><td>conjuntos de dados <b>pequenos</b></td><td>conjuntos de dados <b>maiores</b></td></tr>
+  <tr><td>Complexidade assintótica</td><td><b>maior</b> (crescem mais rápido)</td><td><b>menor</b></td></tr>
+  <tr><td>Implementação</td><td>mais <b>fácil</b>, códigos menores</td><td>mais complexa</td></tr>
+  <tr><td>Exemplos</td><td>InsertionSort, SelectionSort, BubbleSort</td><td>MergeSort, HeapSort (Aulas 6, 7 e 9)</td></tr>
+</table></div>
+<p>Essa tabela é a base da questão 1 da lista: um algoritmo com complexidade assintótica pior pode ser a melhor escolha para entradas pequenas.</p>
+
+<h2 id="quiz">6. Quiz de recordação</h2>
+<div id="quiz"></div>
+
+<h2 id="exercicio">7. Exercício</h2>
+<div class="exercise">
+  <span class="tag">Exercício 2.1</span>
+  <p>Um colega analisou fibonacci2 contando a linha 6 como 7 operações e concluiu que calcular $F_{100\,000}$ custa "cerca de $7 \times 100\,000$ operações, então é instantâneo".</p>
+  <p>a) Que simplificação ele usou, e por que ela deixa de valer aqui?<br>
+     b) Aproximadamente quantos bits tem $F_{100\,000}$? Use a tabela da seção 3.<br>
+     c) O custo real cresce como função de $n$ de que forma? Justifique em uma ou duas frases.</p>
+  <p class="caption">Responda no chat.</p>
+</div>
+
+<div class="pager">
+  <a href="aula1-3-melhor-pior-caso.html"><small>← anterior</small>1.3 Melhor, pior e caso médio</a>
+  <a class="next" href="aula2-2-insertion-sort.html"><small>próxima →</small>2.2 InsertionSort</a>
+</div>
+</main>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  Quiz.mount(document.getElementById('quiz'), [
+    { q: 'Qual simplificação da análise o professor alerta que pode falhar?',
+      options: ['Usar pseudocódigo em vez de código', 'Supor que toda operação básica custa tempo constante', 'Definir o tamanho da entrada como $n$', 'Analisar o pior caso'],
+      answer: 1, explain: 'Com números arbitrariamente grandes, uma soma custa tempo proporcional ao número de bits.' },
+    { q: 'A soma de dois números de $n$ bits leva tempo…',
+      options: ['constante', 'proporcional a $n$ (número de bits)', 'proporcional a $n^2$', 'proporcional a $2^n$'],
+      answer: 1, explain: 'É a soma "com vai-um", bit a bit (slide 10).' },
+    { q: 'Qual destas afirmações sobre algoritmos de ordenação é verdadeira?',
+      options: ['Todos são baseados em comparações', 'A maioria é baseada em comparações, mas existem métodos sem comparação', 'Nenhum usa comparações', 'Só os algoritmos eficientes usam comparações'],
+      answer: 1, explain: 'Ex.: CountingSort (Aula 8) não compara elementos.' },
+    { q: 'Algoritmos de ordenação "mais simples" (Insertion, Selection) são tipicamente…',
+      options: ['adequados para conjuntos grandes, com complexidade menor', 'adequados para conjuntos pequenos, com complexidade maior e implementação fácil', 'sempre piores que os eficientes', 'mais difíceis de implementar'],
+      answer: 1, explain: 'Para $n$ pequeno, a constante baixa e o código simples compensam.' },
+    { q: 'A partir de que $n$ o valor $F_n$ deixa de caber em um <code>int</code> de 32 bits com sinal?',
+      options: ['$n = 32$', '$n = 47$', '$n = 64$', '$n = 94$'],
+      answer: 1, explain: '$F_{47} = 2\\,971\\,215\\,073 > 2^{31} - 1$. O valor de $F_n$ cresce exponencialmente, mas o número de bits cresce linearmente (cerca de $0{,}694\\,n$).' },
+  ]);
+});
+</script>
+</body>
+</html>

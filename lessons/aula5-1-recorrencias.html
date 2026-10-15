@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Aula 5.1 · Recorrências</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../assets/style.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="../assets/common.js"></script>
+<script defer src="../assets/tree.js"></script>
+<script defer src="../assets/quiz.js"></script>
+</head>
+<body>
+<nav class="topbar">
+  <a href="../index.html">← Índice</a>
+  <span>Aula 5 · Recorrências</span>
+  <span class="spacer"></span>
+  <a href="../reference/aula5.html">Folha de referência</a>
+  <button class="theme-btn" type="button">tema</button>
+</nav>
+<main>
+<p class="kicker">Aula 5 · Lição 1 de 2</p>
+<h1>Recorrências e o método iterativo</h1>
+<p class="lead">Slides 1 a 14 da Aula 5. Até aqui, todos os algoritmos eram iterativos, e achar $T(n)$ era "contar laços". Com recursão, $T(n)$ aparece escrito <b>em termos de si mesmo</b>, e é preciso <b>resolver</b> essa equação. A questão 5 da lista é exatamente isso.</p>
+
+<div class="toc">
+  <b>Nesta lição</b>
+  <ol>
+    <li><a href="#recursao">Algoritmos recursivos</a></li>
+    <li><a href="#recorrencia">Recorrência: definição</a></li>
+    <li><a href="#formula">Fórmula fechada e métodos</a></li>
+    <li><a href="#iterativo">Método iterativo, passo a passo</a></li>
+    <li><a href="#somas">As duas somas que você vai usar: PA e PG</a></li>
+    <li><a href="#exemplo2">Exemplo extra: uma recorrência que vira PA</a></li>
+    <li><a href="#quiz">Quiz</a> · <a href="#exercicio">Exercício do slide 14</a></li>
+  </ol>
+</div>
+
+<h2 id="recursao">1. Algoritmos recursivos</h2>
+<p>Até o momento, todos os algoritmos eram <b>iterativos</b>, e a função $f(n)$ do tempo de execução era relativamente fácil de identificar. A partir de agora, a função do tempo de execução passa a ser chamada de $T(n)$.</p>
+<div class="box def">
+  <span class="tag">Definição (slide 3)</span>
+  <p><b>Algoritmo recursivo</b> é aquele que chama a si mesmo durante sua execução.</p>
+</div>
+<p><b>Exemplo:</b> o fatorial. Para $n = 4$: $4! = 4 \cdot 3!$, $3! = 3 \cdot 2!$, $2! = 2 \cdot 1!$, $1! = 1 \cdot 0!$ e $0! = 1$. Em geral, $n! = n \cdot (n-1)!$.</p>
+<pre class="code"><span class="fn">fatorial</span>(n)
+1.  <span class="kw">if</span> n = 0:
+2.      <span class="kw">return</span> 1
+3.  <span class="kw">else</span>
+4.      <span class="kw">return</span> <span class="kw">fatorial</span>(n−1) * n      ← algoritmo recursivo!</pre>
+
+<div class="widget">
+  <div class="wtitle">Chamadas de fatorial(n): uma corrente</div>
+  <div class="controls" id="facBtns"></div>
+  <div id="facTree" style="overflow-x:auto"></div>
+  <p class="caption">Cada chamada faz <b>uma</b> chamada menor e uma multiplicação. São $n + 1$ chamadas no total, de $n$ até $0$.</p>
+</div>
+<p>Como descrever o tempo de execução $T(n)$ de um algoritmo assim? <b>Por meio de uma recorrência.</b></p>
+
+<h2 id="recorrencia">2. Recorrência: definição</h2>
+<div class="box def">
+  <span class="tag">Definição (slide 7)</span>
+  <p><b>Recorrência</b> é uma equação ou desigualdade que descreve uma função <b>em termos de seu próprio valor para entradas menores</b>.</p>
+</div>
+<p>Recorrência do fatorial:</p>
+$$\begin{cases} T(0) = 1 & \leftarrow \text{caso base} \\ T(n) = T(n-1) + 1 & \leftarrow \text{passo recursivo} \end{cases}$$
+<ul>
+  <li>O número total de passos para $n!$ é o número de passos para resolver $(n-1)!$, que é $T(n-1)$, <b>mais 1 passo</b>.</li>
+  <li>Esse "+1" é a operação de tempo constante feita em cada chamada: a multiplicação.</li>
+  <li>O <b>caso base</b> é onde a recursão para. Sem ele, a equação não define nada.</li>
+</ul>
+
+<div class="box tip">
+  <span class="tag">Como montar a recorrência de um algoritmo recursivo</span>
+  <ol>
+    <li><b>Caso base:</b> quanto custa quando a recursão para? Aqui, $T(0) = 1$.</li>
+    <li><b>Chamadas recursivas:</b> quantas são, e com que tamanho? Aqui, uma chamada com $n-1$, ou seja, $T(n-1)$.</li>
+    <li><b>Trabalho fora das chamadas:</b> quanto a chamada atual faz por conta própria? Aqui, uma multiplicação: $+1$.</li>
+  </ol>
+  <p>$T(n) = (\text{número de chamadas}) \times T(\text{tamanho menor}) + (\text{trabalho próprio})$.</p>
+</div>
+
+<h2 id="formula">3. Fórmula fechada e métodos</h2>
+<p>A complexidade de um algoritmo recursivo envolve <b>resolver</b> sua recorrência. Em $T(n) = T(n-1) + 1$, precisamos saber quantos passos são executados em $T(n-1)$, que depende de $T(n-2)$, e assim por diante.</p>
+<p>O objetivo é encontrar uma <b>fórmula fechada</b>: uma expressão sem $T$ do lado direito, geralmente uma combinação de polinômios, logaritmos, exponenciais etc.</p>
+<p>Existem diversas técnicas:</p>
+<ul>
+  <li><b>método iterativo</b>, o foco da disciplina pela simplicidade;</li>
+  <li>método de substituição;</li>
+  <li>método mestre (aparece na divisão e conquista, Aulas 6 e 7).</li>
+</ul>
+
+<h2 id="iterativo">4. Método iterativo, passo a passo</h2>
+<div class="box def">
+  <span class="tag">O método (slide 10)</span>
+  <ol>
+    <li><b>Expandir</b> a recorrência, simulando múltiplas iterações (chamadas).</li>
+    <li>Usar propriedades algébricas para encontrar um <b>somatório</b>, ou seja, o padrão depois de $k$ passos.</li>
+    <li><b>Resolver o somatório</b> e encontrar uma fórmula fechada.</li>
+  </ol>
+</div>
+
+<h3>Fatorial: $T(0) = 1$, $T(n) = T(n-1) + 1$ para $n \ge 1$</h3>
+<p><b>Observe que</b> a mesma regra vale para qualquer argumento. Basta trocar $n$ por $n-1$, $n-2$, …:</p>
+$$\begin{aligned}
+T(n) &= T(n-1) + 1\\
+T(n-1) &= T(n-2) + 1\\
+T(n-2) &= T(n-3) + 1
+\end{aligned}$$
+<p><b>Expandir</b> é substituir cada $T(\cdot)$ pela sua própria definição:</p>
+<div class="widget">
+  <div class="wtitle">Expansão, um passo por clique</div>
+  <div class="controls">
+    <button class="btn" id="expPrev" type="button">◀ menos</button>
+    <button class="btn primary" id="expNext" type="button">expandir mais ▶</button>
+  </div>
+  <div id="expBox"></div>
+</div>
+<p>Depois de $k$ passos, o padrão é:</p>
+$$T(n) = T(n-k) + k.$$
+<p><b>Quando a expansão termina?</b> No <b>caso base</b>, onde a recursão termina. Aqui o caso base é $T(0)$, então:</p>
+$$n - k = 0 \iff k = n.$$
+<p><b>Substituindo</b> $k = n$:</p>
+$$T(n) = T(n - n) + n = T(0) + n = 1 + n.$$
+<p class="result">$T(n) = n + 1 = \Theta(n)$</p>
+<p><b>Confira:</b> $T(0) = 1$, $T(1) = T(0) + 1 = 2$, $T(2) = 3$, $T(3) = 4$. A fórmula $n + 1$ dá 1, 2, 3, 4 ✓. Conferir os primeiros valores pela recorrência é a forma mais rápida de pegar erro.</p>
+
+<div class="box prof">
+  <span class="tag">Formato que o gabarito usa</span>
+  <ol>
+    <li>Escreva $T(n)$, $T(n-1)$, $T(n-2)$, $T(n-3)$ "observando o comportamento".</li>
+    <li>Expanda marcando <b>passo 1, passo 2, passo 3, passo 4</b>.</li>
+    <li>Escreva "após $k$ passos" com um somatório.</li>
+    <li>Iguale o argumento ao caso base e resolva para $k$.</li>
+    <li>Substitua, resolva o somatório (PA ou PG) e simplifique.</li>
+  </ol>
+</div>
+
+<h2 id="somas">5. As duas somas que você vai usar: PA e PG</h2>
+<h3>PA (soma de termos que crescem de forma constante)</h3>
+$$\sum_{i=1}^{k} i = \frac{k(k+1)}{2} \qquad\text{e, em geral,}\qquad \text{soma} = \frac{(\text{nº de termos})\,(\text{primeiro} + \text{último})}{2}.$$
+<h3>PG (soma de potências)</h3>
+$$\sum_{i=0}^{k-1} r^i = 1 + r + r^2 + \dots + r^{k-1} = \frac{r^k - 1}{r - 1} \qquad (r \ne 1).$$
+<div class="box tip">
+  <span class="tag">Por que a fórmula da PG vale</span>
+  <p>Seja $S = 1 + r + \dots + r^{k-1}$. Multiplique por $r$: $rS = r + r^2 + \dots + r^k$. Subtraia: $rS - S = r^k - 1$, quase tudo se cancela. Logo $S = \frac{r^k - 1}{r - 1}$.</p>
+  <p>Caso mais comum, $r = 2$: $1 + 2 + 4 + \dots + 2^{k-1} = 2^k - 1$. É a Torre de Hanói (lição 5.2).</p>
+</div>
+
+<h2 id="exemplo2">6. Exemplo extra: uma recorrência que vira PA</h2>
+<p>$T(1) = 1$ e $T(n) = T(n-1) + (2n - 1)$ para $n &gt; 1$. Agora o trabalho próprio <b>depende de $n$</b>.</p>
+<p><b>Observando:</b> $T(n-1) = T(n-2) + (2(n-1) - 1) = T(n-2) + (2n - 3)$, e $T(n-2) = T(n-3) + (2n - 5)$.</p>
+$$\begin{aligned}
+T(n) &= T(n-1) + (2n-1) && \text{passo 1}\\
+&= T(n-2) + (2n-3) + (2n-1) && \text{passo 2}\\
+&= T(n-3) + (2n-5) + (2n-3) + (2n-1) && \text{passo 3}\\
+&= T(n-k) + \sum_{i=0}^{k-1} \big(2(n-i) - 1\big) && \text{passo } k
+\end{aligned}$$
+<p><b>Caso base:</b> $n - k = 1 \iff k = n - 1$. Substituindo:</p>
+$$T(n) = T(1) + \underbrace{(2n-1) + (2n-3) + \dots + 3}_{n-1 \text{ termos (ímpares de 3 a } 2n-1)}.$$
+<p>É uma PA com $n - 1$ termos, primeiro $3$ e último $2n - 1$: soma $= \frac{(n-1)(3 + 2n - 1)}{2} = \frac{(n-1)(2n+2)}{2} = (n-1)(n+1) = n^2 - 1$.</p>
+$$T(n) = 1 + n^2 - 1 = n^2.$$
+<p class="result">$T(n) = n^2 = \Theta(n^2)$</p>
+<p><b>Confira:</b> $T(1) = 1$, $T(2) = 1 + 3 = 4$, $T(3) = 4 + 5 = 9$, $T(4) = 9 + 7 = 16$. São os quadrados ✓.</p>
+<div class="box warn">
+  <span class="tag">Erros clássicos</span>
+  <ul>
+    <li>Esquecer que $T(n-1)$ usa $n-1$ <b>também no termo extra</b>: $T(n-1) = T(n-2) + 2(n-1) - 1$, e não $+\,2n - 1$.</li>
+    <li>Errar o caso base: se a base é $T(1)$, então $n - k = 1$ e não $n - k = 0$.</li>
+    <li>Contar errado o número de termos do somatório: vai de $i = 0$ a $k - 1$, que são $k$ termos.</li>
+  </ul>
+</div>
+
+<h2 id="quiz">7. Quiz de recordação</h2>
+<div id="quiz"></div>
+
+<h2 id="exercicio">8. Exercício (slide 14)</h2>
+<div class="exercise">
+  <span class="tag">Exercício 5.1, do próprio professor</span>
+  <p>Resolva a recorrência pelo método iterativo e encontre sua complexidade assintótica:</p>
+  $$\begin{cases} T(1) = 1 \\ T(n) = T(n-1) + 3, & \text{para } n &gt; 1 \end{cases}$$
+  <p>Mostre os passos 1 a 3, o padrão após $k$ passos, o valor de $k$ no caso base e a fórmula fechada. Confira com $T(2)$ e $T(3)$.</p>
+  <p class="caption">Responda no chat. Depois desta lição, a questão 5 da lista fica ao seu alcance.</p>
+</div>
+
+<div class="pager">
+  <a href="aula4-3-classes.html"><small>← anterior</small>4.3 Classes de comportamento</a>
+  <a class="next" href="aula5-2-hanoi.html"><small>próxima →</small>5.2 Torre de Hanói</a>
+</div>
+</main>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  // corrente do fatorial
+  const fb = document.getElementById('facBtns');
+  function showFac(n) {
+    const build = (k) => ({ label: k + '!', cls: k === 0 ? 'ok' : '', children: k > 0 ? [build(k - 1)] : [] });
+    document.getElementById('facTree').replaceChildren(TreeView.render(build(n), {
+      gap: 46, levelH: 46, r: 17, title: 'Chamadas de fatorial(' + n + ')',
+      levelLabel: (d) => d < n ? `fatorial(${n - d}): 1 multiplicação` : 'fatorial(0): caso base, return 1',
+    }));
+    [...fb.children].forEach((b) => b.classList.toggle('on', +b.dataset.n === n));
+  }
+  [2, 4, 6].forEach((n) => fb.append(APA.el('button', { class: 'btn', type: 'button', 'data-n': n, onclick: () => showFac(n) }, 'n = ' + n)));
+  showFac(4);
+
+  // expansão interativa
+  let k = 1;
+  const box = document.getElementById('expBox');
+  function drawExp() {
+    const lines = [];
+    lines.push(`T(n) &= T(n-1) + 1 && \\text{passo 1}`);
+    for (let s = 2; s <= k; s++) {
+      const ones = Array(s - 1).fill('1').join(' + ');
+      lines.push(`&= \\big(\\textcolor{#2a78d6}{T(n-${s}) + 1}\\big) + ${ones} && \\text{substitui } T(n-${s - 1})`);
+      lines.push(`&= T(n-${s}) + ${s} && \\text{passo ${s}}`);
+    }
+    box.innerHTML = `$$\\begin{aligned}${lines.join('\\\\')}\\end{aligned}$$` +
+      (k >= 3 ? `<p>Padrão: depois de $k$ passos, $T(n) = T(n-k) + k$.</p>` : '<p>Continue expandindo até enxergar o padrão.</p>');
+    APA.renderMath(box);
+    document.getElementById('expPrev').disabled = k <= 1;
+    document.getElementById('expNext').disabled = k >= 5;
+  }
+  document.getElementById('expPrev').onclick = () => { k--; drawExp(); };
+  document.getElementById('expNext').onclick = () => { k++; drawExp(); };
+  drawExp();
+
+  Quiz.mount(document.getElementById('quiz'), [
+    { q: 'O que é uma recorrência?',
+      options: ['Um laço for', 'Uma equação ou desigualdade que descreve uma função em termos de seu próprio valor para entradas menores', 'Uma fórmula fechada', 'Um algoritmo iterativo'], answer: 1, explain: 'Slide 7.' },
+    { q: 'Na recorrência do fatorial, $T(n) = T(n-1) + 1$, o "+1" representa…',
+      options: ['o caso base', 'o trabalho constante feito em cada chamada (a multiplicação)', 'a chamada recursiva', 'o valor de $n!$'], answer: 1, explain: 'É o trabalho próprio da chamada.' },
+    { q: 'No método iterativo, a expansão para quando…',
+      options: ['$k = 1$', 'o argumento chega ao caso base', 'o somatório fica grande', '$n = 0$'], answer: 1, explain: 'Iguale o argumento ao caso base (ex.: $n - k = 0$) e resolva para $k$.' },
+    { q: 'Quanto vale $1 + 2 + 4 + \\dots + 2^{k-1}$?',
+      options: ['$2^k$', '$2^k - 1$', '$2^{k-1}$', '$k^2$'], answer: 1, explain: 'PG de razão 2: $\\frac{2^k - 1}{2 - 1}$.' },
+    { q: 'Se o caso base é $T(1)$ e o padrão é $T(n) = T(n-k) + \\dots$, então $k$ vale…',
+      options: ['$n$', '$n - 1$', '$n + 1$', '$1$'], answer: 1, explain: '$n - k = 1 \\iff k = n - 1$.' },
+  ]);
+});
+</script>
+</body>
+</html>

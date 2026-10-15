@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Referência · Aula 2</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../assets/style.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="../assets/common.js"></script>
+</head>
+<body>
+<nav class="topbar">
+  <a href="../index.html">← Índice</a>
+  <span>Folha de referência · Aula 2</span>
+  <span class="spacer"></span>
+  <button class="theme-btn" type="button">tema</button>
+</nav>
+<main>
+<h1>Aula 2: Análise assintótica (Parte 2)</h1>
+<p class="lead">Simplificações, ordenação, InsertionSort e SelectionSort.</p>
+
+<h2>Notação</h2>
+<ul>
+  <li>$T_m(n)$: $T(n)$ do <b>melhor</b> caso. $T_p(n)$: $T(n)$ do <b>pior</b> caso.</li>
+  <li><code>cont++</code> vale 1 op na contagem do professor.</li>
+</ul>
+
+<h2>Limite das simplificações</h2>
+<ul>
+  <li>Supor operação básica = tempo constante vale enquanto os números cabem em 32/64 bits.</li>
+  <li>A soma de dois números de $n$ bits custa tempo ∝ número de bits.</li>
+  <li>$F_n$ tem cerca de $0{,}694\,n$ bits. $F_{47}$ estoura o <code>int</code> de 32 bits com sinal. Para $n$ grande, fibonacci2 custa ∝ $n^2$ operações de bit (Dasgupta 0.3).</li>
+</ul>
+
+<h2>Ordenação</h2>
+<ul>
+  <li>Rearranjar objetos em ordem (ascendente ou decrescente). Facilita a recuperação posterior (busca binária).</li>
+  <li>A maioria é baseada em comparações ($&gt;, &lt;, =$). Existem métodos sem comparação (CountingSort, Aula 8).</li>
+  <li>Fatores na escolha: complexidade assintótica, tamanho $n$, complexidade da implementação, restrições de hardware.</li>
+  <li>Simples: bons para $n$ pequeno, complexidade maior, código fácil. Eficientes: bons para $n$ grande, complexidade menor, código mais difícil.</li>
+</ul>
+
+<h2>InsertionSort</h2>
+<div class="algo">
+<pre class="panel"><span class="fn">InsertionSort</span>(A, n)
+1. pivo ← null
+2. <span class="kw">for</span> i ← 1 <span class="kw">to</span> n − 1:
+3.    pivo ← A[i]
+4.    j ← i − 1
+5.    <span class="kw">while</span> j ≥ 0 <span class="kw">and</span> A[j] > pivo:
+6.       A[j+1] ← A[j]
+7.       j ← j − 1
+8.    A[j+1] ← pivo
+9. <span class="kw">return</span> A</pre>
+<pre class="panel count"><b># op</b>1
+2
+2
+2
+4
+4
+2
+3
+1</pre>
+<pre class="panel count"><b>melhor</b>1
+n−1
+n−1
+n−1
+n−1
+0
+0
+n−1
+1</pre>
+</div>
+<div class="table-wrap"><table>
+  <tr><th>Caso</th><th>Entrada</th><th># exec linhas 5, 6, 7</th><th>$T(n)$</th></tr>
+  <tr><td>Melhor</td><td>já ordenado</td><td>$n-1$, $0$, $0$</td><td>$1 + 13(n-1) + 1 = 13n - 11$</td></tr>
+  <tr><td>Pior</td><td>estritamente decrescente</td><td>$\frac{(n-1)(1+n-1)}{2} = \frac{n^2-n}{2}$ cada</td><td>$1 + 9(n-1) + \frac{10(n^2-n)}{2} + 1 = 5n^2 + 4n - 7$</td></tr>
+</table></div>
+
+<h2>SelectionSort</h2>
+<div class="algo">
+<pre class="panel"><span class="fn">SelectionSort</span>(A, n)
+1. <span class="kw">for</span> i ← 0 <span class="kw">to</span> n − 2:
+2.    i_min ← i
+3.    <span class="kw">for</span> j ← i+1 <span class="kw">to</span> n − 1:
+4.       <span class="kw">if</span> A[j] < A[i_min]:
+5.          i_min ← j
+6.    <span class="kw">if</span> A[i] ≠ A[i_min]:
+7.       temp ← A[i]
+8.       A[i] ← A[i_min]
+9.       A[i_min] ← temp
+10.<span class="kw">return</span> A</pre>
+<pre class="panel count"><b># op</b>2
+1
+3
+3
+1
+3
+2
+3
+2
+1</pre>
+<pre class="panel count"><b>melhor</b>n−1
+n−1
+(n²−n)/2
+(n²−n)/2
+0
+n−1
+0
+0
+0
+1</pre>
+</div>
+<div class="table-wrap"><table>
+  <tr><th>Caso</th><th>Entrada</th><th>$T(n)$</th></tr>
+  <tr><td>Melhor</td><td>já ordenado (linha 5 e troca nunca executam)</td><td>$6(n-1) + \frac{6(n^2-n)}{2} + 1 = 3n^2 + 3n - 5$</td></tr>
+  <tr><td>Pior</td><td colspan="2">exercício do slide 43 (lição 2.3)</td></tr>
+</table></div>
+<ul>
+  <li>Os laços das linhas 1 e 3 não dependem do conteúdo: o algoritmo é sempre quadrático.</li>
+  <li>A linha 5 varia com os dados, "mas a diferença é somente por um fator constante".</li>
+  <li>Faz no máximo $n-1$ trocas.</li>
+</ul>
+
+<h2>Somas que apareceram</h2>
+$$\sum_{i=1}^{n-1} i = \frac{(n-1)(1 + n - 1)}{2} = \frac{n^2-n}{2} \qquad \sum_{i=0}^{n-2}(n-1-i) = \frac{(n-1)(n-1+1)}{2} = \frac{n^2-n}{2}$$
+<p>Fórmula de bolso: $\#\text{exec} = V \cdot \frac{p + u}{2}$, onde $V$ = voltas do laço de fora, $p$ = iterações na primeira volta e $u$ = iterações na última.</p>
+
+<h2>Truque de conta</h2>
+<p>Agrupe as linhas com o mesmo # exec e some os # op delas antes de multiplicar. Exemplo do Insertion no pior caso: linhas 2, 3, 4, 8 → $2+2+2+3 = 9$; linhas 5, 6, 7 → $4+4+2 = 10$.</p>
+
+<details class="box">
+  <summary>contaOcorrencias (slides 3–5): abra só depois de entregar o Exercício 1.3</summary>
+  <p>Melhor caso, nenhuma ocorrência de $x$: $T_m(n) = 4n + 2$. Pior caso, todos iguais a $x$: $T_p(n) = 5n + 2$.</p>
+</details>
+</main>
+</body>
+</html>

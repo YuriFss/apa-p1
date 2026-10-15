@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Referência · Aula 5</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../assets/style.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="../assets/common.js"></script>
+</head>
+<body>
+<nav class="topbar">
+  <a href="../index.html">← Índice</a>
+  <span>Folha de referência · Aula 5</span>
+  <span class="spacer"></span>
+  <button class="theme-btn" type="button">tema</button>
+</nav>
+<main>
+<h1>Aula 5: Recorrências</h1>
+
+<h2>Definições</h2>
+<ul>
+  <li><b>Algoritmo recursivo:</b> chama a si mesmo durante a execução.</li>
+  <li><b>Recorrência:</b> equação ou desigualdade que descreve uma função em termos de seu próprio valor para entradas menores. Tem <b>caso base</b> + <b>passo recursivo</b>.</li>
+  <li><b>Fórmula fechada:</b> expressão sem $T$ do lado direito.</li>
+  <li>Métodos: iterativo (foco), substituição, mestre.</li>
+</ul>
+
+<h2>Montar a recorrência</h2>
+<p>$T(n) = (\text{número de chamadas}) \cdot T(\text{tamanho menor}) + (\text{trabalho próprio})$, mais o caso base.</p>
+
+<h2>Método iterativo</h2>
+<ol>
+  <li>Escreva $T(n)$, $T(n-1)$, $T(n-2)$, …, trocando $n$ em <b>todos</b> os lugares.</li>
+  <li>Expanda (passo 1, 2, 3…) e ache o padrão "após $k$ passos".</li>
+  <li>Iguale o argumento ao caso base: $n - k = 0$ ou $n - k = 1$, e resolva para $k$.</li>
+  <li>Substitua, resolva o somatório e simplifique. Confira com $T$ pequeno.</li>
+</ol>
+
+<h2>Somas</h2>
+$$\sum_{i=1}^{k} i = \frac{k(k+1)}{2} \qquad \sum_{i=0}^{k-1} r^i = \frac{r^k - 1}{r - 1} \qquad \sum_{i=0}^{k-1} 2^i = 2^k - 1$$
+<p>PA: soma $= \frac{\text{termos}\cdot(\text{primeiro} + \text{último})}{2}$.</p>
+
+<h2>Resultados</h2>
+<div class="table-wrap"><table>
+  <tr><th>Recorrência</th><th>Após $k$ passos</th><th>Base</th><th>Solução</th></tr>
+  <tr><td>Fatorial: $T(0) = 1$, $T(n) = T(n-1) + 1$</td><td>$T(n-k) + k$</td><td>$k = n$</td><td>$n + 1 = \Theta(n)$</td></tr>
+  <tr><td>$T(1) = 1$, $T(n) = T(n-1) + 2n - 1$</td><td>$T(n-k) + \sum_{i=0}^{k-1}(2(n-i)-1)$</td><td>$k = n-1$</td><td>$n^2 = \Theta(n^2)$</td></tr>
+  <tr><td>Hanói: $T(1) = 1$, $T(n) = 2T(n-1) + 1$</td><td>$2^k T(n-k) + \sum_{i=0}^{k-1} 2^i$</td><td>$k = n-1$</td><td>$2^n - 1 = \Theta(2^n)$</td></tr>
+</table></div>
+
+<h2>Torre de Hanói</h2>
+<ul>
+  <li>Regras: um disco por vez; maior nunca sobre menor.</li>
+  <li>Estratégia: $n-1$ de origem → intermediário; base → destino; $n-1$ de intermediário → destino.</li>
+  <li>Árvore: nível $d$ tem $2^d$ chamadas; níveis de 0 a $n-1$.</li>
+  <li>64 discos: $\approx 1{,}84\times10^{19}$ movimentos; a 1/s, cerca de $5{,}8\times10^{11}$ anos (~42× a idade do universo).</li>
+</ul>
+</main>
+</body>
+</html>

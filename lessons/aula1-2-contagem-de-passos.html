@@ -1,0 +1,533 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Aula 1.2 · Contagem de passos</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../assets/style.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="../assets/common.js"></script>
+<script defer src="../assets/player.js"></script>
+<script defer src="../assets/quiz.js"></script>
+</head>
+<body>
+<nav class="topbar">
+  <a href="../index.html">← Índice</a>
+  <span>Aula 1 · Análise assintótica (Parte 1)</span>
+  <span class="spacer"></span>
+  <a href="../reference/aula1.html">Folha de referência</a>
+  <button class="theme-btn" type="button">tema</button>
+</nav>
+<main>
+<p class="kicker">Aula 1 · Lição 2 de 3</p>
+<h1>Contagem de passos: a tabela # op / # exec</h1>
+<p class="lead">Esta é a técnica que aparece em quase toda questão da lista: "determine sua função $T(n)$ por meio da contagem de operações básicas". Cobre os slides 13 a 17 da Aula 1, com uma seção extra sobre laços aninhados que a lista exige (questão 2, BubbleSort).</p>
+
+<div class="toc">
+  <b>Nesta lição</b>
+  <ol>
+    <li><a href="#porque">Por que contar operações</a></li>
+    <li><a href="#ops">Operações básicas e # op de cada linha</a></li>
+    <li><a href="#exec"># exec: quantas vezes cada linha roda</a></li>
+    <li><a href="#soma">Exemplo 1: SomaVetor, com animação</a></li>
+    <li><a href="#matriz">Exemplo 2: soma de matrizes (laços aninhados)</a></li>
+    <li><a href="#triangular">Laços com limite dependente e a soma da PA</a></li>
+    <li><a href="#receita">Receita para a prova</a></li>
+    <li><a href="#quiz">Quiz</a> · <a href="#exercicio">Exercício</a></li>
+  </ol>
+</div>
+
+<h2 id="porque">1. Por que contar operações</h2>
+<p>Calcular o tempo exato de execução, em segundos, é inviável de modo geral, porque ele depende de:</p>
+<ul><li>hardware;</li><li>linguagem de programação;</li><li>custo exato de cada instrução;</li><li>etc.</li></ul>
+<p>Por isso a avaliação é feita em termos do <b>número de operações básicas</b> (ou etapas, ou passos) executadas, como função do tamanho da entrada $n$. Essa função se chama $T(n)$.</p>
+
+<h2 id="ops">2. Operações básicas e # op de cada linha</h2>
+<div class="box def">
+  <span class="tag">Definição (slide 14)</span>
+  <p><b>Operações básicas</b> são:</p>
+  <ul>
+    <li>expressões de avaliação (comparações, somas, <code>and</code>, <code>mod</code>…);</li>
+    <li>atribuições de valores a variáveis;</li>
+    <li>indexação de um array (<code>A[i]</code>);</li>
+    <li>chamada de funções;</li>
+    <li>retorno de funções.</li>
+  </ul>
+  <p>São fáceis de identificar no pseudocódigo. Supõe-se que cada uma leva uma <b>quantidade constante de tempo</b>. Isso é uma simplificação: na máquina real, uma multiplicação pode custar mais que uma soma, mas aqui todas valem 1.</p>
+</div>
+
+<p>Para preencher a coluna <b># op</b>, você "desmonta" a linha e conta cada operação básica. Estes são os casos que aparecem nos slides:</p>
+<div class="table-wrap"><table>
+  <tr><th>Linha</th><th class="num"># op</th><th>Por quê</th></tr>
+  <tr><td class="mono">soma = 0</td><td class="num">1</td><td>1 atribuição</td></tr>
+  <tr><td class="mono">currentMax = A[0]</td><td class="num">2</td><td>1 indexação + 1 atribuição</td></tr>
+  <tr><td class="mono">soma = soma + A[i]</td><td class="num">3</td><td>indexação <code>A[i]</code> + soma <code>+</code> + atribuição <code>=</code></td></tr>
+  <tr><td class="mono">i = i + 1</td><td class="num">2</td><td>soma + atribuição</td></tr>
+  <tr><td class="mono">cont++</td><td class="num">1</td><td>o professor conta o incremento como uma operação só (slide 5 da Aula 2)</td></tr>
+  <tr><td class="mono">if A[i] > currentMax:</td><td class="num">2</td><td>indexação + comparação</td></tr>
+  <tr><td class="mono">for i = 0 to n − 1:</td><td class="num">2</td><td>comparação (<code>i ≤ n−1</code>) + atualização de <code>i</code></td></tr>
+  <tr><td class="mono">while i &lt; n and A[i] ≠ x:</td><td class="num">4</td><td><code>&lt;</code>, indexação, <code>≠</code>, <code>and</code></td></tr>
+  <tr><td class="mono">C[i][j] = A[i][j] + B[i][j]</td><td class="num">8</td><td>6 indexações (<code>A[i]</code>, <code>[j]</code>, <code>B[i]</code>, <code>[j]</code>, <code>C[i]</code>, <code>[j]</code>) + soma + atribuição</td></tr>
+  <tr><td class="mono">return soma</td><td class="num">1</td><td>1 retorno</td></tr>
+  <tr><td class="mono">f(a, b)</td><td class="num">?</td><td>chamada de função: conte as operações básicas que a função executa por dentro (pense numa implementação simples e justifique)</td></tr>
+</table></div>
+
+<div class="box prof">
+  <span class="tag">Convenção do professor</span>
+  <p>O valor exato de # op de uma linha tem alguma folga. O próprio professor conta o <code>for</code> com 2 op no SomaVetor e com 1 op na soma de matrizes. O que ele cobra:</p>
+  <ol>
+    <li>uma contagem <b>razoável e coerente</b> (justifique em uma frase se tiver dúvida);</li>
+    <li>a coluna <b># exec</b> <b>certa</b>, que é a parte que muda a forma de $T(n)$.</li>
+  </ol>
+  <p>Um <code>for</code> com 1 ou 2 op muda só os coeficientes de $T(n)$, não o formato. Errar # exec (por exemplo, escrever $n$ onde deveria ser $n^2$) muda a resposta inteira.</p>
+</div>
+
+<h2 id="exec">3. # exec: quantas vezes cada linha roda</h2>
+<p>A coluna <b># exec</b> diz quantas vezes cada linha é executada, em função de $n$. Depois, multiplica-se linha a linha e soma-se tudo:</p>
+$$T(n) = \sum_{\text{linhas}} (\#\text{op}) \times (\#\text{exec}).$$
+
+<p>Regras para preencher # exec:</p>
+<ul>
+  <li><b>Fora de laços:</b> a linha roda 1 vez.</li>
+  <li><b>Corpo de um laço:</b> roda uma vez por iteração. <code>for i = 0 to n − 1</code> tem $n$ iterações ($i = 0, 1, \dots, n-1$). <code>for i = 1 to n − 1</code> tem $n - 1$.</li>
+  <li><b>Laço dentro de laço:</b> multiplique. O corpo roda (iterações do laço de fora) × (iterações do laço de dentro), ou uma soma quando o laço de dentro depende do de fora (seção 6).</li>
+  <li><b>Cabeçalho do laço</b> (a própria linha do <code>for</code>): veja a convenção abaixo.</li>
+</ul>
+
+<div class="box prof">
+  <span class="tag">Convenção do professor: cabeçalho do laço</span>
+  <p>O professor conta o cabeçalho do <code>for</code> com o <b>mesmo # exec do corpo</b>. Em <code>for i = 0 to n − 1</code>, a linha do <code>for</code> tem # exec = $n$.</p>
+  <p>Na execução real, o teste roda $n + 1$ vezes: o último teste ($i = n$) falha e encerra o laço. O <b>Cormen</b> conta esse teste extra ($n + 1$). <b>O professor não conta.</b> Na prova, siga a tabela do professor. A diferença é uma constante e não muda o formato de $T(n)$.</p>
+  <p>Na animação abaixo, esse último teste aparece em cinza, marcado como "não conta".</p>
+</div>
+
+<h2 id="soma">4. Exemplo 1: SomaVetor</h2>
+<div class="algo">
+<pre class="panel"><span class="fn">SomaVetor</span>(A, n)
+1.  soma = 0
+2.  <span class="kw">for</span> i = 0 <span class="kw">to</span> n − 1:
+3.     soma = soma + A[i]
+4.
+5.  <span class="kw">return</span> soma</pre>
+<pre class="panel count"><b># op</b>1
+2
+3
+
+1</pre>
+<pre class="panel count"><b># exec</b>1
+n
+n
+
+1</pre>
+</div>
+
+<p>Linha por linha:</p>
+<ol class="steps">
+  <li><b>Linha 1</b>, <code>soma = 0</code>: 1 atribuição, roda 1 vez → $1 \times 1 = 1$.</li>
+  <li><b>Linha 2</b>, <code>for</code>: 2 op (comparação + atualização de $i$). O laço tem $n$ iterações ($i = 0$ até $n-1$) → $2 \times n = 2n$.</li>
+  <li><b>Linha 3</b>, corpo: 3 op (indexação, soma, atribuição), roda uma vez por iteração → $3 \times n = 3n$.</li>
+  <li><b>Linha 5</b>, <code>return</code>: 1 op, 1 vez → $1$.</li>
+  <li>Somando: $T(n) = 1 + 2n + 3n + 1$.</li>
+</ol>
+<p class="result">$T(n) = 5n + 2$</p>
+
+<div class="widget">
+  <div class="wtitle">Animação: SomaVetor preenchendo a tabela</div>
+  <div class="controls">
+    <span>Tamanho do vetor:</span>
+    <span id="somaN"></span>
+  </div>
+  <div id="somaPlayer"></div>
+  <p class="caption">Use ◀ ▶ ou as setas do teclado (clique no quadro primeiro). No último passo, o total de operações bate com $5n + 2$.</p>
+</div>
+
+<h2 id="matriz">5. Exemplo 2: soma de matrizes quadradas</h2>
+<div class="algo">
+<pre class="panel"><span class="fn">somaMatrizesQuadradas</span>(A, B, n)
+1. C = Matriz(n, n)
+
+2. <span class="kw">for</span> i = 1...n:
+3.   <span class="kw">for</span> j = 1...n:
+4.     C[i][j] = A[i][j] + B[i][j]
+5.
+6. <span class="kw">return</span> C</pre>
+<pre class="panel count"><b># op</b>1
+
+1
+1
+8
+
+1</pre>
+<pre class="panel count"><b># exec</b>1
+
+n
+n²
+n²
+
+1</pre>
+</div>
+
+<p>A novidade é o <b>laço aninhado</b>:</p>
+<ol class="steps">
+  <li><b>Linha 1:</b> criar a matriz é tratado como 1 op (uma chamada), 1 vez.</li>
+  <li><b>Linha 2</b> (laço de fora): $i$ vai de 1 a $n$ → $n$ execuções. Aqui o professor contou o <code>for</code> com 1 op.</li>
+  <li><b>Linha 3</b> (laço de dentro): para <b>cada</b> valor de $i$, o laço de $j$ roda $n$ vezes. São $n$ valores de $i$ × $n$ execuções = $n^2$.</li>
+  <li><b>Linha 4</b> (corpo do laço de dentro): roda uma vez para cada par $(i, j)$ → $n^2$. São 8 op (6 indexações + soma + atribuição).</li>
+  <li>$T(n) = 1\cdot 1 + 1\cdot n + 1\cdot n^2 + 8\cdot n^2 + 1\cdot 1 = 9n^2 + n + 2$.</li>
+</ol>
+<p class="result">$T(n) = 9n^2 + n + 2$</p>
+
+<div class="widget">
+  <div class="wtitle">Cada quadrado = uma execução da linha 4</div>
+  <div class="controls"><label>n = <b id="mnv">4</b> <input type="range" id="mn" min="1" max="8" value="4"></label></div>
+  <div style="display:flex;gap:20px;flex-wrap:wrap;align-items:flex-start">
+    <div id="mgrid"></div>
+    <div class="table-wrap" style="flex:1;min-width:260px" id="mtable"></div>
+  </div>
+  <p class="caption">Linha $i$ da grade = uma iteração do laço de fora. Cada linha da grade tem $n$ quadrados (o laço de dentro). Total: $n \times n$.</p>
+</div>
+
+<div class="box tip">
+  <span class="tag">E se o for valesse 2 op?</span>
+  <p>Ficaria $T(n) = 1 + 2n + 2n^2 + 8n^2 + 1 = 10n^2 + 2n + 2$. O formato é o mesmo, $an^2 + bn + c$. Por isso o professor tolera essa variação, mas não tolera um # exec errado.</p>
+</div>
+
+<h2 id="triangular">6. Laços com limite dependente e a soma da PA</h2>
+<p>Na soma de matrizes, o laço de dentro roda sempre $n$ vezes. Muitos algoritmos (BubbleSort, InsertionSort, SelectionSort) têm um laço de dentro cujo tamanho <b>depende do $i$ do laço de fora</b>. Aí não dá para multiplicar: é preciso <b>somar</b> as iterações de cada volta.</p>
+
+<div class="algo">
+<pre class="panel"><span class="fn">SomaPrefixos</span>(A, n)
+1.  total = 0
+2.  <span class="kw">for</span> i = 0 <span class="kw">to</span> n − 1:
+3.     <span class="kw">for</span> j = 0 <span class="kw">to</span> i:
+4.        total = total + A[j]
+5.  <span class="kw">return</span> total</pre>
+<pre class="panel count"><b># op</b>1
+2
+2
+3
+1</pre>
+<pre class="panel count"><b># exec</b>1
+n
+n(n+1)/2
+n(n+1)/2
+1</pre>
+</div>
+
+<p>A pergunta é: <b>quantas vezes a linha 4 roda, no total?</b> Vamos responder em 6 passos curtos.</p>
+
+<h3>Passo 1: olhe só o laço de dentro, com $i$ congelado</h3>
+<p>Primeiro uma regra de contagem: <code>for j = a to b</code> roda <b>$b - a + 1$</b> vezes, porque conta os valores $a, a+1, \dots, b$. Por exemplo, <code>for j = 0 to 3</code> passa por $j = 0, 1, 2, 3$: são $3 - 0 + 1 = 4$ vezes.</p>
+<p>No nosso laço de dentro, <code>for j = 0 to i</code>, o fim é $i$. Então ele roda <b>$i - 0 + 1 = i + 1$</b> vezes. O número depende de quanto vale $i$ naquele momento:</p>
+<div class="table-wrap"><table>
+  <tr><th>se $i$ vale…</th><th>$j$ passa por…</th><th class="num">linha 4 roda…</th></tr>
+  <tr><td>0</td><td>0</td><td class="num">1 vez</td></tr>
+  <tr><td>1</td><td>0, 1</td><td class="num">2 vezes</td></tr>
+  <tr><td>2</td><td>0, 1, 2</td><td class="num">3 vezes</td></tr>
+  <tr><td>3</td><td>0, 1, 2, 3</td><td class="num">4 vezes</td></tr>
+  <tr><td>$i$</td><td>$0, 1, \dots, i$</td><td class="num">$i + 1$ vezes</td></tr>
+</table></div>
+
+<h3>Passo 2: desenrole o laço de fora</h3>
+<p>O laço de fora faz $i$ assumir $0, 1, 2, \dots, n-1$, um valor por volta. Em cada volta, o de dentro roda $i + 1$ vezes, conforme o passo 1. Para $n = 4$, escrevendo <b>todas</b> as execuções da linha 4, uma por par $(i, j)$:</p>
+<pre class="code">volta i = 0:  (0,0)                         → 1 execução
+volta i = 1:  (1,0) (1,1)                   → 2 execuções
+volta i = 2:  (2,0) (2,1) (2,2)             → 3 execuções
+volta i = 3:  (3,0) (3,1) (3,2) (3,3)       → 4 execuções
+                                       total: 1 + 2 + 3 + 4 = 10</pre>
+<p>Cada volta tem <b>uma execução a mais</b> que a anterior, então o desenho forma um triângulo. Para um $n$ qualquer, a última volta é $i = n - 1$, com $(n-1) + 1 = n$ execuções. O total é:</p>
+$$\#\text{exec(linha 4)} = \underbrace{1}_{i=0} + \underbrace{2}_{i=1} + \underbrace{3}_{i=2} + \dots + \underbrace{n}_{i=n-1}.$$
+
+<div class="widget">
+  <div class="wtitle">Desenrolando o laço: cada quadrado é uma execução da linha 4 (o número dentro é o $j$)</div>
+  <div class="controls"><label>n = <b id="tnv">4</b> <input type="range" id="tn" min="1" max="10" value="4"></label></div>
+  <div id="tgrid" style="overflow-x:auto"></div>
+  <div id="tinfo"></div>
+</div>
+
+<h3>Passo 3: por que não dá para multiplicar?</h3>
+<p>Na soma de matrizes, toda volta do laço de fora tinha o <b>mesmo</b> tamanho ($n$). Por isso o total era "voltas × tamanho de cada volta" $= n \times n$.</p>
+<p>Aqui as voltas têm tamanhos <b>diferentes</b> (1, 2, 3, …, $n$). Não existe um único "tamanho da volta" para multiplicar. Mas dá para usar o <b>tamanho médio</b>:</p>
+<ul>
+  <li>são <b>$n$ voltas</b>;</li>
+  <li>os tamanhos sobem de 1 em 1, de $1$ até $n$, então a média é o ponto do meio: $\dfrac{1 + n}{2}$;</li>
+  <li>total = voltas × tamanho médio = $n \cdot \dfrac{n+1}{2}$.</li>
+</ul>
+<p>Conferindo com $n = 4$: média $= \frac{1+4}{2} = 2{,}5$, e $4 \times 2{,}5 = 10$ ✓. É exatamente o 10 do passo 2.</p>
+<div class="box tip">
+  <span class="tag">Por que a média é (primeiro + último)/2?</span>
+  <p>Porque os tamanhos sobem sempre do mesmo tanto (de 1 em 1). Então eles se equilibram em volta do meio: 1 e 4 dão média 2,5, e 2 e 3 também dão média 2,5. Isso só funciona quando o aumento é constante (uma PA). Se o laço de dentro dobrasse de tamanho a cada volta, por exemplo, a conta seria outra.</p>
+</div>
+
+<h3>Passo 4: por que $1 + 2 + \dots + n = \dfrac{n(n+1)}{2}$</h3>
+<p><b>(a) Com números (Gauss, $n = 10$).</b> Junte o primeiro com o último, o segundo com o penúltimo, e assim por diante:</p>
+$$\underbrace{(1+10)}_{11} + \underbrace{(2+9)}_{11} + \underbrace{(3+8)}_{11} + \underbrace{(4+7)}_{11} + \underbrace{(5+6)}_{11} = 5 \times 11 = 55 = \frac{10 \cdot 11}{2}.$$
+<p>Todo par soma $n + 1 = 11$, e há $n/2 = 5$ pares.</p>
+
+<p><b>(b) Com desenho.</b> Pegue o triângulo de execuções, em azul, faça uma cópia, gire e encaixe ao lado, em laranja. As duas escadas formam um <b>retângulo</b> de $n$ linhas por $n + 1$ colunas:</p>
+<div class="widget">
+  <div class="wtitle">Duas escadas iguais = um retângulo n × (n+1)</div>
+  <div class="controls"><label>n = <b id="rnv">4</b> <input type="range" id="rn" min="1" max="10" value="4"></label></div>
+  <div style="display:flex;gap:20px;flex-wrap:wrap;align-items:center">
+    <div id="rgrid"></div>
+    <div id="rinfo" style="flex:1;min-width:240px"></div>
+  </div>
+</div>
+
+<p><b>(c) Com álgebra</b> (o mesmo truque do item a, escrito em geral). Escreva a soma duas vezes, uma de trás para frente, e some coluna a coluna:</p>
+$$\begin{aligned}
+S &= 1 + 2 + \dots + (n-1) + n\\
+S &= n + (n-1) + \dots + 2 + 1\\ \hline
+2S &= \underbrace{(n+1) + (n+1) + \dots + (n+1)}_{n \text{ parcelas}} = n(n+1)
+\end{aligned}
+\quad\Longrightarrow\quad S = \frac{n(n+1)}{2}.$$
+
+<h3>Passo 5: o mesmo com a notação $\Sigma$</h3>
+<p>No gabarito, o professor escreve a soma com $\Sigma$. Leia $\displaystyle\sum_{i=0}^{n-1} (i+1)$ como: "para $i$ indo de $0$ até $n-1$, some o valor $i + 1$". Cada parcela é o número de execuções do laço de dentro naquela volta:</p>
+$$\sum_{i=0}^{n-1} (i+1) = \underbrace{(0+1)}_{i=0} + \underbrace{(1+1)}_{i=1} + \dots + \underbrace{((n-1)+1)}_{i=n-1} = 1 + 2 + \dots + n = \frac{n(n+1)}{2}.$$
+<p>Receita geral: <b># exec do corpo de dentro = $\sum$ (iterações do laço de dentro para cada valor de $i$)</b>. Quando as iterações são constantes, a soma vira uma multiplicação, como no caso $n \times n$ das matrizes.</p>
+
+<h3>Passo 6: e as outras linhas?</h3>
+<ul>
+  <li><b>Linha 2</b> (laço de fora): $n$ voltas → # exec $= n$.</li>
+  <li><b>Linha 3</b> (cabeçalho do laço de dentro): pela convenção do professor, mesmo # exec do seu corpo → $\frac{n(n+1)}{2}$.</li>
+  <li><b>Linha 4</b> (corpo de dentro): $\frac{n(n+1)}{2}$, como acabamos de ver.</li>
+</ul>
+
+<h3>Atalho para a prova</h3>
+<div class="box prof">
+  <span class="tag">Fórmula de bolso</span>
+  <p>Quando o laço de dentro aumenta ou diminui <b>de 1 em 1</b> a cada volta do de fora:</p>
+  $$\#\text{exec(corpo de dentro)} = V \times \frac{p + u}{2}$$
+  <ul>
+    <li>$V$ = quantas voltas o laço de <b>fora</b> dá;</li>
+    <li>$p$ = quantas vezes o laço de dentro roda na <b>primeira</b> volta;</li>
+    <li>$u$ = quantas vezes ele roda na <b>última</b> volta.</li>
+  </ul>
+</div>
+<p>Com o laço de fora <code>for i = 0 to n − 1</code> ($n$ voltas):</p>
+<div class="table-wrap"><table>
+  <tr><th>Laço de dentro</th><th class="num">iterações para cada $i$</th><th class="num">$p$ (volta $i=0$)</th><th class="num">$u$ (volta $i=n-1$)</th><th class="num">total</th></tr>
+  <tr><td class="mono">for j = 0 to i</td><td class="num">$i+1$</td><td class="num">$1$</td><td class="num">$n$</td><td class="num">$\frac{n(n+1)}{2}$</td></tr>
+  <tr><td class="mono">for j = 0 to i − 1</td><td class="num">$i$</td><td class="num">$0$</td><td class="num">$n-1$</td><td class="num">$\frac{n(n-1)}{2}$</td></tr>
+  <tr><td class="mono">for j = i to n − 1</td><td class="num">$n-i$</td><td class="num">$n$</td><td class="num">$1$</td><td class="num">$\frac{n(n+1)}{2}$</td></tr>
+  <tr><td class="mono">for j = i + 1 to n − 1</td><td class="num">$n-1-i$</td><td class="num">$n-1$</td><td class="num">$0$</td><td class="num">$\frac{n(n-1)}{2}$</td></tr>
+</table></div>
+<p>Repare: subir de $1$ até $n$ e descer de $n$ até $1$ dão o mesmo total, porque a soma é a mesma, só em outra ordem. Usar <b>$\frac{n(n+1)}{2}$ ou $\frac{n(n-1)}{2}$</b> depende de o laço chegar até $n$ ou parar em $n-1$ (uma volta com 0 iterações).</p>
+
+<details class="box tip">
+  <summary>Teste rápido: tente antes de abrir</summary>
+  <p>Laço de fora <code>for i = 1 to n − 1</code>; laço de dentro <code>for j = 0 to i − 1</code>. Quantas vezes roda o corpo de dentro?</p>
+  <p><b>Resposta:</b> o laço de fora dá $n - 1$ voltas. Na 1ª ($i = 1$), $j$ vai de 0 a 0: 1 iteração. Na última ($i = n-1$), $j$ vai de 0 a $n-2$: $n - 1$ iterações. Total $= (n-1) \cdot \frac{1 + (n-1)}{2} = \frac{n(n-1)}{2}$. Esse é o formato do laço do InsertionSort no pior caso.</p>
+</details>
+
+<p>Fechando a conta:</p>
+$$\begin{aligned}
+T(n) &= 1\cdot 1 + 2\cdot n + 2\cdot\tfrac{n(n+1)}{2} + 3\cdot\tfrac{n(n+1)}{2} + 1\cdot 1\\
+&= 2 + 2n + 5\cdot\tfrac{n^2+n}{2}
+= 2 + 2n + \tfrac{5n^2}{2} + \tfrac{5n}{2}\\
+&= \frac{5n^2 + 9n + 4}{2}.
+\end{aligned}$$
+<p><b>Confira com n = 2</b>, que é sempre uma boa prática: $\frac{20 + 18 + 4}{2} = 21$. Na mão: linha 1 (1) + linha 2 roda 2× (4) + linhas 3 e 4 rodam 1 + 2 = 3× (3·2 + 3·3 = 15) + return (1) = 21 ✓.</p>
+
+<div class="widget">
+  <div class="wtitle">Animação: SomaPrefixos com n = 4</div>
+  <div id="prefPlayer"></div>
+  <p class="caption">Total esperado no fim: $(5\cdot 16 + 9\cdot 4 + 4)/2 = 60$.</p>
+</div>
+
+<h2 id="receita">7. Receita para a prova</h2>
+<ol class="steps">
+  <li><b>Defina $n$</b> (ex.: "$n$ = número de elementos de $A$").</li>
+  <li><b>Coluna # op:</b> para cada linha, desmonte e conte as operações básicas.</li>
+  <li><b>Coluna # exec:</b> fora de laço = 1; corpo de laço = nº de iterações; laço aninhado = produto ou somatório. Cabeçalho = mesmo # exec do corpo (convenção do professor).</li>
+  <li><b>Monte $T(n) = \sum$ op × exec</b>, escrevendo a soma por extenso antes de simplificar (o professor mostra essa linha no gabarito).</li>
+  <li><b>Simplifique</b> e confira com um $n$ pequeno ($n = 1$ ou $2$), simulando na mão.</li>
+</ol>
+<p>Se o algoritmo tem <code>if</code> ou saída antecipada (<code>return</code> dentro do laço, <code>while</code> com condição sobre os dados), # exec depende de <b>como os dados estão organizados</b>. Esse é o assunto da próxima lição: melhor e pior caso.</p>
+
+<h2 id="quiz">8. Quiz de recordação</h2>
+<div id="quiz"></div>
+
+<h2 id="exercicio">9. Exercício (estilo da lista)</h2>
+<div class="exercise">
+  <span class="tag">Exercício 1.2</span>
+  <p>Considere o algoritmo abaixo, que calcula a média dos elementos de uma matriz $n \times n$.</p>
+<pre class="code"><span class="fn">MediaMatriz</span>(M, n)
+1.  total = 0
+2.  <span class="kw">for</span> i = 0 <span class="kw">to</span> n − 1:
+3.     <span class="kw">for</span> j = 0 <span class="kw">to</span> n − 1:
+4.        total = total + M[i][j]
+5.  <span class="kw">return</span> total / (n * n)</pre>
+  <p>Considere como operações básicas expressões de avaliação, atribuições, indexação de arrays e retorno de funções.</p>
+  <p>a) Monte a tabela <b># op / # exec</b>, justificando o # op das linhas 4 e 5.<br>
+     b) Determine $T(n)$ e confira o resultado para $n = 1$.</p>
+  <p class="caption">Responda no chat.</p>
+</div>
+
+<div class="pager">
+  <a href="aula1-1-por-que-analisar.html"><small>← anterior</small>1.1 Por que analisar</a>
+  <a class="next" href="aula1-3-melhor-pior-caso.html"><small>próxima →</small>1.3 Melhor, pior e caso médio</a>
+</div>
+</main>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  // ---------- SomaVetor ----------
+  function traceSoma(A) {
+    const n = A.length, S = [];
+    let soma;
+    const snap = (line, note, o = {}) => S.push({
+      line, note, skip: o.skip,
+      vars: { n, i: o.i ?? '—', soma: soma ?? '—' },
+      arrays: [{ name: 'A', values: A, marks: o.marks || {}, ptrs: o.ptrs || {} }],
+    });
+    const done = (k) => Object.fromEntries([...Array(k).keys()].map((x) => [x, 'ok']));
+    soma = 0;
+    snap(1, 'Linha 1: <code>soma = 0</code> é uma atribuição → <b>1 op</b>.');
+    for (let i = 0; i < n; i++) {
+      snap(2, `Linha 2: o laço compara $i \\le n-1$ e atualiza $i$ → <b>2 op</b>. Iteração com i = ${i}.`,
+        { i, marks: done(i), ptrs: { [i]: 'i' } });
+      const old = soma; soma += A[i];
+      snap(3, `Linha 3: indexa A[${i}] = ${A[i]}, soma ${old} + ${A[i]} e atribui → <b>3 op</b>. soma = ${soma}.`,
+        { i, marks: { ...done(i), [i]: 'cur' }, ptrs: { [i]: 'i' } });
+    }
+    snap(2, `Linha 2 com i = ${n}: o teste $i \\le n-1$ falha e o laço termina. O professor não conta este último teste (o Cormen contaria). Por isso # exec da linha 2 fica em $n = ${n}$.`,
+      { i: n, skip: true, marks: done(n) });
+    snap(5, `Linha 5: <code>return</code> → <b>1 op</b>. Total = ${5 * n + 2} = $5 \\cdot ${n} + 2$ ✓`, { i: n, marks: done(n) });
+    return S;
+  }
+  const somaP = StepPlayer.mount(document.getElementById('somaPlayer'), {
+    code: ['SomaVetor(A, n)', 'soma = 0', 'for i = 0 to n − 1:', '   soma = soma + A[i]', '', 'return soma'],
+    ops: { 1: 1, 2: 2, 3: 3, 5: 1 },
+    steps: traceSoma([3, 1, 4, 1]),
+  });
+  const somaN = document.getElementById('somaN');
+  [2, 4, 6].forEach((n) => somaN.append(APA.el('button', { class: 'btn' + (n === 4 ? ' on' : ''), type: 'button', onclick: (e) => {
+    [...somaN.children].forEach((b) => b.classList.remove('on')); e.target.classList.add('on');
+    somaP.load(traceSoma(Array.from({ length: n }, () => 1 + Math.floor(Math.random() * 9))));
+  } }, 'n = ' + n)));
+
+  // ---------- grade da matriz ----------
+  function gridEl(n, on) {
+    const g = APA.el('div', { class: 'grid-exec' });
+    g.style.gridTemplateColumns = `repeat(${n}, 22px)`;
+    for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) g.append(APA.el('span', { class: on(i, j) ? '' : 'off' }));
+    return g;
+  }
+  function rowsTable(rows, total, formula) {
+    const t = APA.el('table');
+    t.append(APA.el('tr', {}, ...['linha', '# op', '# exec', 'op × exec'].map((h) => APA.el('th', { class: h === 'linha' ? '' : 'num' }, h))));
+    for (const r of rows) t.append(APA.el('tr', {}, APA.el('td', {}, r[0]), APA.el('td', { class: 'num' }, String(r[1])),
+      APA.el('td', { class: 'num' }, r[2]), APA.el('td', { class: 'num' }, String(r[3]))));
+    t.append(APA.el('tr', {}, APA.el('td', { colspan: '3', html: '<b>T(n)</b> ' + formula }), APA.el('td', { class: 'num' }, APA.el('b', {}, String(total)))));
+    return t;
+  }
+  const mn = document.getElementById('mn');
+  function drawM() {
+    const n = +mn.value; document.getElementById('mnv').textContent = n;
+    document.getElementById('mgrid').replaceChildren(gridEl(n, () => true));
+    const rows = [['1', 1, '1', 1], ['2', 1, `n = ${n}`, n], ['3', 1, `n² = ${n * n}`, n * n], ['4', 8, `n² = ${n * n}`, 8 * n * n], ['6', 1, '1', 1]];
+    const total = rows.reduce((s, r) => s + r[3], 0);
+    document.getElementById('mtable').replaceChildren(rowsTable(rows, total, `$= 9\\cdot${n}^2 + ${n} + 2$`));
+    APA.renderMath(document.getElementById('mtable'));
+  }
+  mn.oninput = drawM; drawM();
+
+  // ---------- triângulo ----------
+  const tn = document.getElementById('tn');
+  function drawT() {
+    const n = +tn.value; document.getElementById('tnv').textContent = n;
+    const box = APA.el('div', { class: 'unroll' });
+    let acc = 0;
+    for (let i = 0; i < n; i++) {
+      acc += i + 1;
+      const g = APA.el('div', { class: 'grid-exec' });
+      g.style.gridTemplateColumns = `repeat(${n}, 22px)`;
+      for (let j = 0; j < n; j++) g.append(APA.el('span', { class: j <= i ? '' : 'off' }, j <= i ? String(j) : ''));
+      box.append(APA.el('div', { class: 'row' }, APA.el('span', { class: 'rl' }, `i = ${i}`), g,
+        APA.el('span', { class: 'rr' }, `${i + 1} exec. · acumulado ${acc}`)));
+    }
+    document.getElementById('tgrid').replaceChildren(box);
+    const tri = n * (n + 1) / 2;
+    const terms = Array.from({ length: n }, (_, i) => i + 1).join(' + ');
+    document.getElementById('tinfo').innerHTML =
+      `<p>Somando as voltas: $${terms} = ${tri}$.</p>` +
+      `<p>Pela média: $${n}$ voltas $\\times \\dfrac{1 + ${n}}{2} = ${n} \\times ${String((1 + n) / 2).replace('.', '{,}')} = ${tri}$ ✓</p>` +
+      `<p>Pela fórmula: $\\dfrac{n(n+1)}{2} = \\dfrac{${n}\\cdot${n + 1}}{2} = ${tri}$ ✓</p>`;
+    APA.renderMath(document.getElementById('tinfo'));
+  }
+  tn.oninput = drawT; drawT();
+
+  // ---------- retângulo (duas escadas) ----------
+  const rn = document.getElementById('rn');
+  function drawR() {
+    const n = +rn.value; document.getElementById('rnv').textContent = n;
+    const g = APA.el('div', { class: 'grid-exec' });
+    g.style.gridTemplateColumns = `repeat(${n + 1}, 22px)`;
+    for (let i = 0; i < n; i++) for (let j = 0; j <= n; j++) g.append(APA.el('span', { class: j <= i ? '' : 'alt' }));
+    document.getElementById('rgrid').replaceChildren(g);
+    document.getElementById('rinfo').innerHTML =
+      `<p>Azul: $1 + 2 + \\dots + ${n}$. Laranja: a mesma escada, girada.</p>` +
+      `<p>Retângulo inteiro: $${n} \\times ${n + 1} = ${n * (n + 1)}$ quadrados.</p>` +
+      `<p>Cada escada é metade: $\\dfrac{${n * (n + 1)}}{2} = ${n * (n + 1) / 2}$.</p>`;
+    APA.renderMath(document.getElementById('rinfo'));
+  }
+  rn.oninput = drawR; drawR();
+
+  // ---------- SomaPrefixos ----------
+  function tracePref(A) {
+    const n = A.length, S = [];
+    let total;
+    const snap = (line, note, o = {}) => S.push({
+      line, note, skip: o.skip,
+      vars: { n, i: o.i ?? '—', j: o.j ?? '—', total: total ?? '—' },
+      arrays: [{ name: 'A', values: A, marks: o.marks || {}, ptrs: o.ptrs || {} }],
+    });
+    total = 0;
+    snap(1, 'Linha 1: <code>total = 0</code> → 1 op.');
+    for (let i = 0; i < n; i++) {
+      snap(2, `Linha 2: nova iteração do laço de fora, i = ${i}. O laço de dentro vai rodar ${i + 1} vez(es) (j = 0…${i}).`, { i, ptrs: { [i]: 'i' } });
+      for (let j = 0; j <= i; j++) {
+        const p = { [j]: j === i ? 'i,j' : 'j' }; if (j !== i) p[i] = 'i';
+        snap(3, `Linha 3: laço de dentro, j = ${j}.`, { i, j, ptrs: p });
+        total += A[j];
+        snap(4, `Linha 4: total += A[${j}] → total = ${total}. 3 op.`, { i, j, ptrs: p, marks: { [j]: 'cur' } });
+      }
+      snap(3, `Teste final do laço de dentro (j = ${i + 1} > i): não entra na contagem.`, { i, j: i + 1, skip: true, ptrs: { [i]: 'i' } });
+    }
+    snap(2, `Teste final do laço de fora (i = ${n}): não entra na contagem.`, { i: n, skip: true });
+    snap(5, `Linha 5: return. Total = ${(5 * n * n + 9 * n + 4) / 2} = $\\frac{5n^2+9n+4}{2}$ com n = ${n} ✓. Veja a coluna # exec: linhas 3 e 4 rodaram $1+2+3+4 = 10 = \\frac{4\\cdot5}{2}$ vezes.`, { i: n });
+    return S;
+  }
+  StepPlayer.mount(document.getElementById('prefPlayer'), {
+    code: ['SomaPrefixos(A, n)', 'total = 0', 'for i = 0 to n − 1:', '   for j = 0 to i:', '      total = total + A[j]', 'return total'],
+    ops: { 1: 1, 2: 2, 3: 2, 4: 3, 5: 1 },
+    steps: tracePref([2, 5, 1, 3]),
+    speed: 700,
+  });
+
+  // ---------- quiz ----------
+  Quiz.mount(document.getElementById('quiz'), [
+    { q: 'Quantas operações básicas tem a linha <code>x = A[i] + A[j]</code>?',
+      options: ['1', '2', '3', '4'], answer: 3,
+      explain: 'Duas indexações (A[i], A[j]) + uma soma + uma atribuição = 4.' },
+    { q: 'Na convenção do professor, qual o # exec da linha <code>for i = 1 to n − 1</code>?',
+      options: ['$n$', '$n - 1$', '$n + 1$', '$n - 2$'], answer: 1,
+      explain: 'São $n-1$ iterações ($i = 1, \\dots, n-1$). O professor conta o cabeçalho igual ao corpo, sem o teste final que falha (o Cormen contaria $n$).' },
+    { q: 'Dois laços aninhados, ambos <code>for … = 1 to n</code>. Quantas vezes roda o corpo do laço de dentro?',
+      options: ['$2n$', '$n$', '$n^2$', '$n(n+1)/2$'], answer: 2,
+      explain: 'Para cada um dos $n$ valores do laço de fora, o de dentro roda $n$ vezes: $n \\cdot n = n^2$.' },
+    { q: 'Laço de fora <code>for i = 1 to n</code>; de dentro <code>for j = 1 to i</code>. Quantas vezes roda o corpo do laço de dentro?',
+      options: ['$n^2$', '$\\frac{n(n+1)}{2}$', '$\\frac{n(n-1)}{2}$', '$n \\log n$'], answer: 1,
+      explain: 'Para $i$ fixo, $j$ roda $i$ vezes: $1 + 2 + \\dots + n = \\frac{n(n+1)}{2}$.' },
+    { q: 'Quanto vale $0 + 1 + 2 + \\dots + (n-1)$?',
+      options: ['$\\frac{n(n+1)}{2}$', '$\\frac{n(n-1)}{2}$', '$n^2$', '$\\frac{n^2}{2}$'], answer: 1,
+      explain: '$n$ termos, primeiro $0$, último $n-1$: $n \\cdot \\frac{0 + (n-1)}{2} = \\frac{n(n-1)}{2}$.' },
+  ]);
+});
+</script>
+</body>
+</html>

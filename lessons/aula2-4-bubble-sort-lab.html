@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Aula 2.4 · Laboratório BubbleSort</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../assets/style.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="../assets/common.js"></script>
+<script defer src="../assets/player.js"></script>
+</head>
+<body>
+<nav class="topbar">
+  <a href="../index.html">← Índice</a>
+  <span>Aula 2 · Análise assintótica (Parte 2)</span>
+  <span class="spacer"></span>
+  <a href="../reference/aula2.html">Folha de referência</a>
+  <button class="theme-btn" type="button">tema</button>
+</nav>
+<main>
+<p class="kicker">Aula 2 · Lição 4 de 4 · complementar</p>
+<h1>Laboratório: BubbleSort (questão 2 da lista)</h1>
+<p class="lead">O BubbleSort não está nos slides da Aula 2, mas é o algoritmo da questão 2 da lista, que pede melhor e pior caso por contagem de passos: exatamente o que você praticou com Insertion e Selection. Esta página só mostra <b>como ele funciona</b>. A análise é sua.</p>
+
+<h2>1. Ideia</h2>
+<ul>
+  <li>Percorre o vetor comparando <b>vizinhos</b>: $A[i]$ com $A[i+1]$. Se estiverem fora de ordem, troca os dois.</li>
+  <li>Cada percorrida completa é uma <b>passada</b>. Em cada passada, o maior elemento ainda fora do lugar "borbulha" até o fim, como uma bolha subindo.</li>
+  <li>O algoritmo repete passadas <b>até uma passada inteira terminar sem nenhuma troca</b>. Aí o vetor está ordenado. Quem controla isso é a flag <code>houveTroca</code>.</li>
+</ul>
+
+<h2>2. Pseudocódigo da lista (Algoritmo 1)</h2>
+<pre class="code">1  <span class="kw">Função</span> BubbleSort(entrada: Lista) : Lista
+2     <span class="kw">repita</span>
+3        houveTroca = Falso;
+4        <span class="kw">para</span> i = 0 até Tamanho(entrada) − 2 <span class="kw">faça</span>
+5           <span class="kw">se</span> entrada[i] > entrada[i+1] <span class="kw">então</span>
+6              Troca(entrada[i], entrada[i+1]);
+7              houveTroca = Verdadeiro;
+8           <span class="kw">fim</span>
+9        <span class="kw">fim</span>
+10    até !houveTroca;
+11 <span class="kw">fim</span></pre>
+<div class="box prof">
+  <span class="tag">Novidades em relação a Insertion/Selection</span>
+  <ul>
+    <li><b><code>repita … até</code>:</b> o teste fica no <b>fim</b>, então o corpo roda pelo menos uma vez. Quantas passadas acontecem depende dos dados.</li>
+    <li><b><code>Troca(…)</code> é uma chamada de função.</b> Para contar, você precisa decidir quantas operações básicas ela executa. Pense numa implementação simples e justifique na resposta.</li>
+    <li>O laço da linha 4 sempre tem o mesmo número de iterações por passada. O que varia é <b>quantas passadas</b> ocorrem e <b>quantas vezes</b> o <code>se</code> dá verdadeiro.</li>
+  </ul>
+</div>
+
+<h2>3. Laboratório</h2>
+<div class="widget">
+  <div class="wtitle">BubbleSort passo a passo</div>
+  <div class="controls" id="bsBtns"></div>
+  <div class="controls">
+    <label>Sua entrada: <input id="bsIn" value="3, 1, 4, 2" size="18" style="font:inherit;padding:4px 8px;border-radius:6px;border:1px solid var(--line);background:var(--bg);color:var(--ink)"></label>
+    <button class="btn" id="bsGo" type="button">usar</button>
+    <span class="caption" id="bsErr"></span>
+  </div>
+  <div id="bsPlayer"></div>
+  <p class="caption">Laranja: par de vizinhos comparado. Azul: par que acabou de ser trocado. Verde: fim do vetor já garantido no lugar. Os contadores (passadas, comparações, trocas) ficam nas variáveis.</p>
+</div>
+
+<h2>4. Sua vez: questão 2 da lista</h2>
+<div class="exercise">
+  <span class="tag">Questão 2, itens (a) e (b)</span>
+  <p>Use o laboratório para formar hipóteses e responda no chat:</p>
+  <ol type="a">
+    <li>Identifique em que situação ocorre o <b>pior caso</b> e determine $T(n)$ por contagem de operações básicas.</li>
+    <li>Faça o mesmo para o <b>melhor caso</b>.</li>
+  </ol>
+  <p>Operações básicas, conforme o enunciado: expressões de avaliação, atribuição de valores a variáveis, indexação de arrays e retorno de funções.</p>
+  <p>Perguntas que ajudam a chegar lá:</p>
+  <ul>
+    <li>Quantas passadas acontecem, no mínimo e no máximo? Por quê?</li>
+    <li>Em cada passada do pior caso, quantas vezes o <code>se</code> dá verdadeiro? Isso muda de uma passada para a outra?</li>
+    <li>A soma que aparece é uma PA? Quais são $V$, $p$ e $u$ da fórmula de bolso?</li>
+  </ul>
+  <p class="caption">Os itens (c), (d) e (e) usam as notações $O$, $\Omega$ e $\Theta$, que vêm nas Aulas 3 e 4. Por enquanto, só (a) e (b).</p>
+</div>
+
+<div class="pager">
+  <a href="aula2-3-selection-sort.html"><small>← anterior</small>2.3 SelectionSort</a>
+  <a class="next" href="../reference/aula2.html"><small>resumo →</small>Folha de referência da Aula 2</a>
+</div>
+</main>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  function trace(input) {
+    const A = input.slice(), n = A.length, S = [];
+    let pass = 0, cmps = 0, swaps = 0, houve = '—', i = '—', fixed = 0;
+    const snap = (line, note, marks = {}) => {
+      const m = {};
+      for (let k = n - fixed; k < n; k++) m[k] = 'ok';
+      Object.assign(m, marks);
+      const ptrs = typeof i === 'number' ? { [i]: 'i', [i + 1]: 'i+1' } : {};
+      S.push({ line, note, vars: { passada: pass, houveTroca: houve, i, 'comparações': cmps, trocas: swaps }, arrays: [{ name: 'entrada', values: A.slice(), marks: m, ptrs }] });
+    };
+    snap(1, 'Início.');
+    do {
+      pass++; i = '—';
+      snap(2, `Linha 2: começa a passada ${pass}.`);
+      houve = false;
+      snap(3, 'Linha 3: houveTroca = Falso.');
+      let swappedThisPass = 0;
+      for (i = 0; i <= n - 2; i++) {
+        snap(4, `Linha 4: i = ${i}.`);
+        cmps++;
+        const gt = A[i] > A[i + 1];
+        snap(5, `Linha 5: entrada[${i}] = ${A[i]} > entrada[${i + 1}] = ${A[i + 1]}? <b>${gt ? 'Sim' : 'Não'}</b>.`, { [i]: 'cmp', [i + 1]: 'cmp' });
+        if (gt) {
+          [A[i], A[i + 1]] = [A[i + 1], A[i]]; swaps++; swappedThisPass++;
+          snap(6, `Linha 6: Troca → agora entrada[${i}] = ${A[i]}, entrada[${i + 1}] = ${A[i + 1]}.`, { [i]: 'cur', [i + 1]: 'cur' });
+          houve = true;
+          snap(7, 'Linha 7: houveTroca = Verdadeiro.', { [i]: 'cur', [i + 1]: 'cur' });
+        }
+      }
+      i = '—';
+      if (fixed < n) fixed++;
+      snap(10, `Linha 10: fim da passada ${pass}, com ${swappedThisPass} troca(s). ` + (houve ? 'houveTroca = Verdadeiro → <b>repete</b>.' : 'houveTroca = Falso → <b>termina</b>.'));
+    } while (houve);
+    fixed = n;
+    snap(11, `Fim. ${pass} passada(s), ${cmps} comparações, ${swaps} trocas, com n = ${n}.`);
+    return S;
+  }
+  const inputs = { 'aleatório': [5, 1, 4, 2, 8], 'ordenado': [1, 2, 3, 4, 5], 'decrescente': [5, 4, 3, 2, 1], 'menor no fim': [2, 3, 4, 5, 1] };
+  const P = StepPlayer.mount(document.getElementById('bsPlayer'), {
+    code: ['Lista 1 · Algoritmo 1', 'Função BubbleSort(entrada)', ' repita', '  houveTroca = Falso;', '  para i = 0 até Tamanho(entrada)−2 faça', '   se entrada[i] > entrada[i+1] então', '    Troca(entrada[i], entrada[i+1]);', '    houveTroca = Verdadeiro;', '   fim', '  fim', ' até !houveTroca;', 'fim'],
+    steps: trace(inputs['aleatório']), speed: 600,
+  });
+  const btns = document.getElementById('bsBtns');
+  const pick = (b) => { [...btns.children].forEach((x) => x.classList.remove('on')); if (b) b.classList.add('on'); };
+  Object.entries(inputs).forEach(([label, A], k) => btns.append(APA.el('button', { class: 'btn' + (k ? '' : ' on'), type: 'button',
+    onclick: (e) => { pick(e.target); P.load(trace(A)); } }, label)));
+  document.getElementById('bsGo').onclick = () => {
+    const A = document.getElementById('bsIn').value.split(/[\s,;]+/).filter(Boolean).map(Number);
+    const err = document.getElementById('bsErr');
+    if (A.length < 2 || A.length > 10 || A.some((x) => !Number.isFinite(x))) { err.textContent = 'Use de 2 a 10 números separados por vírgula.'; return; }
+    err.textContent = ''; pick(null); P.load(trace(A));
+  };
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,340 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Aula 2.2 · InsertionSort</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../assets/style.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="../assets/common.js"></script>
+<script defer src="../assets/player.js"></script>
+<script defer src="../assets/chart.js"></script>
+<script defer src="../assets/quiz.js"></script>
+</head>
+<body>
+<nav class="topbar">
+  <a href="../index.html">← Índice</a>
+  <span>Aula 2 · Análise assintótica (Parte 2)</span>
+  <span class="spacer"></span>
+  <a href="../reference/aula2.html">Folha de referência</a>
+  <button class="theme-btn" type="button">tema</button>
+</nav>
+<main>
+<p class="kicker">Aula 2 · Lição 2 de 4</p>
+<h1>InsertionSort: melhor e pior caso</h1>
+<p class="lead">Slides 16 a 32 da Aula 2. É o primeiro algoritmo "de verdade" em que o laço de dentro depende tanto de $i$ quanto dos dados. Ele junta tudo da Aula 1: tabela # op / # exec, laço com limite dependente, soma da PA e melhor/pior caso.</p>
+
+<div class="toc">
+  <b>Nesta lição</b>
+  <ol>
+    <li><a href="#ideia">Ideia: ordenar cartas na mão</a></li>
+    <li><a href="#pseudo">Pseudocódigo, linha a linha</a></li>
+    <li><a href="#anim">Animação com contagem</a></li>
+    <li><a href="#op">A coluna # op</a></li>
+    <li><a href="#melhor">Melhor caso: vetor já ordenado</a></li>
+    <li><a href="#pior">Pior caso: vetor ordenado ao contrário</a></li>
+    <li><a href="#comparando">Comparando os dois casos</a></li>
+    <li><a href="#quiz">Quiz</a> · <a href="#exercicio">Exercício</a></li>
+  </ol>
+</div>
+
+<h2 id="ideia">1. Ideia: ordenar cartas na mão</h2>
+<p>O InsertionSort é parecido com o jeito de ordenar cartas de baralho na mão:</p>
+<ul>
+  <li>o baralho está virado com a face para baixo, e a mão começa vazia;</li>
+  <li>uma a uma, as cartas são reveladas e adicionadas à mão, <b>na posição correta</b>, de modo que a mão fica sempre ordenada;</li>
+  <li>para achar a posição, você compara a carta nova com as cartas da mão <b>da direita para a esquerda</b>.</li>
+</ul>
+<p>No vetor, a "mão" é o prefixo $A[0..i-1]$, que já está ordenado. A "carta nova" é $A[i]$, o <b>pivô</b>. Os elementos maiores que o pivô andam uma casa para a direita, abrindo um buraco, e o pivô entra no buraco.</p>
+
+<h2 id="pseudo">2. Pseudocódigo, linha a linha</h2>
+<pre class="code"><span class="fn">InsertionSort</span>(A, n)
+1. pivo ← null
+2. <span class="kw">for</span> i ← 1 <span class="kw">to</span> n − 1:
+3.    pivo ← A[i]
+4.    j ← i − 1
+5.    <span class="kw">while</span> j ≥ 0 <span class="kw">and</span> A[j] > pivo:
+6.       A[j+1] ← A[j]
+7.       j ← j − 1
+8.    A[j+1] ← pivo
+9. <span class="kw">return</span> A</pre>
+<div class="table-wrap"><table>
+  <tr><th>Linha</th><th>O que faz</th></tr>
+  <tr><td>2</td><td>Percorre as "cartas novas", de $i = 1$ até $n-1$. $A[0]$ sozinho já é uma "mão ordenada".</td></tr>
+  <tr><td>3</td><td>Guarda a carta nova em <code>pivo</code>, porque a posição $i$ pode ser sobrescrita pelos deslocamentos.</td></tr>
+  <tr><td>4</td><td>$j$ começa no último elemento da mão.</td></tr>
+  <tr><td>5</td><td>Continua enquanto não saiu do vetor (<code>j ≥ 0</code>) <b>e</b> o elemento da mão é maior que o pivô.</td></tr>
+  <tr><td>6–7</td><td>Desloca $A[j]$ uma casa para a direita e anda $j$ para a esquerda.</td></tr>
+  <tr><td>8</td><td>O laço parou: $A[j] \le$ pivô ou $j = -1$. O buraco é a posição $j+1$, e o pivô entra ali.</td></tr>
+</table></div>
+
+<div class="box prof">
+  <span class="tag">As duas partes do algoritmo (slide 22)</span>
+  <ul>
+    <li>Linha 2: o número de execuções depende <b>somente de $n$</b>, sempre $n - 1$.</li>
+    <li>Linha 5: o número de execuções depende da <b>distribuição dos valores no array</b>. Daí vêm o melhor e o pior caso.</li>
+  </ul>
+</div>
+
+<h2 id="anim">3. Animação com contagem</h2>
+<div class="widget">
+  <div class="wtitle">InsertionSort passo a passo</div>
+  <div class="controls" id="isBtns"></div>
+  <div class="controls">
+    <label>Sua entrada: <input id="isIn" value="4, 2, 5, 1" size="18" style="font:inherit;padding:4px 8px;border-radius:6px;border:1px solid var(--line);background:var(--bg);color:var(--ink)"></label>
+    <button class="btn" id="isGo" type="button">usar</button>
+    <span class="caption" id="isErr"></span>
+  </div>
+  <div id="isPlayer"></div>
+  <p class="caption">Verde: a "mão" já ordenada. Laranja: elemento comparado com o pivô. Azul: casa escrita neste passo. Teste em cinza = teste final do laço, que o professor não conta.</p>
+</div>
+
+<h2 id="op">4. A coluna # op (slide 25)</h2>
+<div class="table-wrap"><table>
+  <tr><th>Linha</th><th class="num"># op</th><th>Por quê</th></tr>
+  <tr><td class="mono">1. pivo ← null</td><td class="num">1</td><td>atribuição</td></tr>
+  <tr><td class="mono">2. for i ← 1 to n − 1</td><td class="num">2</td><td>comparação + atualização de $i$</td></tr>
+  <tr><td class="mono">3. pivo ← A[i]</td><td class="num">2</td><td>indexação + atribuição</td></tr>
+  <tr><td class="mono">4. j ← i − 1</td><td class="num">2</td><td>subtração + atribuição</td></tr>
+  <tr><td class="mono">5. while j ≥ 0 and A[j] > pivo</td><td class="num">4</td><td><code>≥</code>, indexação <code>A[j]</code>, <code>&gt;</code>, <code>and</code></td></tr>
+  <tr><td class="mono">6. A[j+1] ← A[j]</td><td class="num">4</td><td><code>j+1</code>, indexação <code>A[j+1]</code>, indexação <code>A[j]</code>, atribuição</td></tr>
+  <tr><td class="mono">7. j ← j − 1</td><td class="num">2</td><td>subtração + atribuição</td></tr>
+  <tr><td class="mono">8. A[j+1] ← pivo</td><td class="num">3</td><td><code>j+1</code>, indexação, atribuição</td></tr>
+  <tr><td class="mono">9. return A</td><td class="num">1</td><td>retorno</td></tr>
+</table></div>
+<p>A coluna # op é a mesma nos dois casos. Só a coluna # exec muda.</p>
+
+<h2 id="melhor">5. Melhor caso: vetor já ordenado</h2>
+<p>Exemplo: $[1, 3, 4, 5, 6, 7, 8, 10]$. <b>Não executa nenhuma operação de troca</b> (deslocamento).</p>
+<p><b>Por quê?</b> Em cada iteração, o pivô $A[i]$ é maior ou igual a tudo que está na mão, inclusive a $A[i-1]$, o último da mão. O primeiro teste da linha 5, <code>A[i−1] &gt; pivo</code>, já dá falso, e o corpo (linhas 6–7) não roda nenhuma vez.</p>
+<div class="algo">
+<pre class="panel"><span class="fn">InsertionSort</span>(A, n)
+1. pivo ← null
+2. <span class="kw">for</span> i ← 1 <span class="kw">to</span> n − 1:
+3.    pivo ← A[i]
+4.    j ← i − 1
+5.    <span class="kw">while</span> j ≥ 0 <span class="kw">and</span> A[j] > pivo:
+6.       A[j+1] ← A[j]
+7.       j ← j − 1
+8.    A[j+1] ← pivo
+9. <span class="kw">return</span> A</pre>
+<pre class="panel count"><b># op</b>1
+2
+2
+2
+4
+4
+2
+3
+1</pre>
+<pre class="panel count"><b># exec</b>1
+n−1
+n−1
+n−1
+n−1
+<span class="zero">0</span>
+<span class="zero">0</span>
+n−1
+1</pre>
+</div>
+<div class="box prof">
+  <span class="tag">Linha 5 com # exec = n − 1 no melhor caso</span>
+  <p>O corpo do <code>while</code> roda 0 vezes, mas o teste roda <b>1 vez por iteração do for</b>, e o professor conta esse teste. É a mesma regra da busca sequencial (lição 1.3): quando o laço não executa nenhuma vez, o único teste conta.</p>
+</div>
+<p><b>Truque de conta:</b> junte as linhas que têm o mesmo # exec. As linhas 2, 3, 4, 5 e 8 rodam $n-1$ vezes, e a soma dos # op delas é $2 + 2 + 2 + 4 + 3 = 13$:</p>
+$$T_m(n) = \underbrace{1}_{\text{linha 1}} + 13(n-1) + \underbrace{1}_{\text{linha 9}} = 13n - 13 + 2$$
+<p class="result">Melhor caso: $T_m(n) = 13n - 11$</p>
+<p><b>Confira com $n = 2$</b>, entrada $[1, 2]$: linha 1 (1) + uma iteração com linhas 2, 3, 4, 5 e 8 (13) + return (1) = 15. Pela fórmula, $26 - 11 = 15$ ✓.</p>
+
+<h2 id="pior">6. Pior caso: vetor ordenado ao contrário</h2>
+<p>Exemplo: $[10, 8, 7, 6, 5, 4, 3, 1]$. Tem o <b>maior número de execuções do laço da linha 5</b>, e o algoritmo executa todas as trocas possíveis.</p>
+<p><b>Por quê?</b> Cada pivô novo é <b>menor que todos</b> os elementos da mão. Então ele precisa andar até a posição 0, e todos os $i$ elementos da mão ($A[0..i-1]$) são deslocados. O <code>while</code> só para quando $j$ chega a $-1$.</p>
+
+<h3>Quantas vezes roda o corpo do while?</h3>
+<p>Mesmo raciocínio da seção 6 da lição 1.2. Para cada $i$, o corpo roda $i$ vezes:</p>
+<div class="table-wrap"><table>
+  <tr><th>valor de $i$</th><td class="num">1</td><td class="num">2</td><td class="num">3</td><td class="num">…</td><td class="num">$n-1$</td></tr>
+  <tr><th>deslocamentos (linhas 6–7)</th><td class="num">1</td><td class="num">2</td><td class="num">3</td><td class="num">…</td><td class="num">$n-1$</td></tr>
+</table></div>
+<p>Pela fórmula de bolso: $V = n-1$ voltas, primeira volta $p = 1$, última $u = n-1$:</p>
+$$\#\text{exec(linhas 6, 7)} = \sum_{i=1}^{n-1} i = (n-1)\cdot\frac{1 + (n-1)}{2} = \frac{(n-1)\,n}{2} = \frac{n^2 - n}{2}.$$
+<p>O professor escreve exatamente assim no slide: <code>(n−1)(1+n−1)/2</code>. A linha 5 (cabeçalho) tem o mesmo # exec do corpo, porque o teste final, que falha por $j = -1$, não é contado.</p>
+
+<div class="algo">
+<pre class="panel"><span class="fn">InsertionSort</span>(A, n)
+1. pivo ← null
+2. <span class="kw">for</span> i ← 1 <span class="kw">to</span> n − 1:
+3.    pivo ← A[i]
+4.    j ← i − 1
+5.    <span class="kw">while</span> j ≥ 0 <span class="kw">and</span> A[j] > pivo:
+6.       A[j+1] ← A[j]
+7.       j ← j − 1
+8.    A[j+1] ← pivo
+9. <span class="kw">return</span> A</pre>
+<pre class="panel count"><b># op</b>1
+2
+2
+2
+4
+4
+2
+3
+1</pre>
+<pre class="panel count"><b># exec</b>1
+n−1
+n−1
+n−1
+(n−1)(1+n−1)/2
+(n−1)(1+n−1)/2
+(n−1)(1+n−1)/2
+n−1
+1</pre>
+</div>
+
+<p>Juntando por # exec igual:</p>
+<ul>
+  <li>linhas 2, 3, 4 e 8 ($n - 1$ vezes): $2 + 2 + 2 + 3 = 9$;</li>
+  <li>linhas 5, 6 e 7 ($\frac{n^2-n}{2}$ vezes): $4 + 4 + 2 = 10$;</li>
+  <li>linhas 1 e 9: $1 + 1$.</li>
+</ul>
+$$\begin{aligned}
+T_p(n) &= 1 + 9(n-1) + \frac{10(n^2 - n)}{2} + 1\\
+&= 1 + 9n - 9 + 5n^2 - 5n + 1\\
+&= 5n^2 - 5n + 9n - 7
+\end{aligned}$$
+<p class="result">Pior caso: $T_p(n) = 5n^2 + 4n - 7$</p>
+<p><b>Confira com $n = 2$</b>, entrada $[2, 1]$: linha 1 (1); $i = 1$: linhas 2, 3, 4 (6); um teste verdadeiro e um deslocamento, linhas 5, 6, 7 (10); teste final não conta; linha 8 (3); return (1). Total 21. Pela fórmula, $20 + 8 - 7 = 21$ ✓.</p>
+
+<div class="box tip">
+  <span class="tag">Detalhe que vale ponto</span>
+  <p>O teste é <code>A[j] &gt; pivo</code>, com $&gt;$ estrito. Com elementos repetidos, um valor igual ao pivô para o laço. O pior caso exige elementos <b>distintos</b> em ordem <b>estritamente</b> decrescente. É o mesmo argumento do ArrayMax.</p>
+</div>
+
+<h2 id="comparando">7. Comparando os dois casos</h2>
+<p>Qualquer entrada de tamanho $n$ custa entre $T_m(n) = 13n - 11$ e $T_p(n) = 5n^2 + 4n - 7$. O melhor caso cresce como uma reta. O pior cresce como uma parábola.</p>
+<div class="widget">
+  <div class="wtitle">Melhor × pior caso do InsertionSort</div>
+  <div class="controls"><label>n até <b id="cxv">30</b> <input type="range" id="cx" min="5" max="200" value="30"></label></div>
+  <div id="isChart"></div>
+  <p class="caption">Passe o mouse para ver os valores. Com $n = 1000$, o pior caso dá cerca de 5 milhões de operações e o melhor, cerca de 13 mil.</p>
+</div>
+<p>Por isso o InsertionSort é ótimo para vetores <b>quase ordenados</b>: poucos deslocamentos deixam o custo perto do melhor caso. O exercício abaixo mostra isso.</p>
+
+<h2 id="quiz">8. Quiz de recordação</h2>
+<div id="quiz"></div>
+
+<h2 id="exercicio">9. Exercício (estilo da lista)</h2>
+<div class="exercise">
+  <span class="tag">Exercício 2.2</span>
+  <p>a) Execute o InsertionSort passo a passo na entrada $[3, 1, 2]$, mostrando o vetor e o valor de <code>pivo</code> ao fim de cada iteração do <code>for</code>. Quantas vezes a linha 6 executa?</p>
+  <p>b) Considere a família de entradas em que o vetor está ordenado <b>exceto</b> o menor elemento, que está no fim: $[2, 3, 4, \dots, n, 1]$. Monte a tabela # op / # exec e encontre $T(n)$.<br>
+  <i>Dica: as iterações $i = 1, \dots, n-2$ se comportam como no melhor caso. Só a última é diferente.</i></p>
+  <p>c) Esse $T(n)$ cresce como o melhor caso ou como o pior? O que isso diz sobre usar InsertionSort em vetores quase ordenados?</p>
+  <p class="caption">Responda no chat. Confira o item (b) com $n = 2$ e $n = 3$, simulando na mão.</p>
+</div>
+
+<div class="pager">
+  <a href="aula2-1-simplificacoes-e-ordenacao.html"><small>← anterior</small>2.1 Simplificações e ordenação</a>
+  <a class="next" href="aula2-3-selection-sort.html"><small>próxima →</small>2.3 SelectionSort</a>
+</div>
+</main>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const OPS = { 1: 1, 2: 2, 3: 2, 4: 2, 5: 4, 6: 4, 7: 2, 8: 3, 9: 1 };
+  function trace(input) {
+    const A = input.slice(), n = A.length, S = [];
+    let i = '—', j = '—', pivo = 'null';
+    const snap = (line, note, o = {}) => {
+      const marks = {};
+      const sortedUpTo = o.sorted ?? (typeof i === 'number' ? i : 0);
+      for (let k = 0; k < sortedUpTo; k++) marks[k] = 'ok';
+      Object.assign(marks, o.marks || {});
+      const ptrs = {};
+      if (typeof i === 'number' && i < n) ptrs[i] = 'i';
+      if (typeof j === 'number' && j >= 0) ptrs[j] = ptrs[j] ? ptrs[j] + ',j' : 'j';
+      S.push({ line, note, skip: o.skip, vars: { n, i, j, pivo }, arrays: [{ name: 'A', values: A.slice(), marks, ptrs }] });
+    };
+    snap(1, 'Linha 1: pivo ← null. 1 op.', { sorted: 1 });
+    for (i = 1; i < n; i++) {
+      j = '—';
+      snap(2, `Linha 2: i = ${i}. A "mão" ordenada é A[0..${i - 1}], e a carta nova é A[${i}] = ${A[i]}.`, { sorted: i });
+      pivo = A[i];
+      snap(3, `Linha 3: pivo ← A[${i}] = ${pivo}. 2 op.`, { sorted: i, marks: { [i]: 'cur' } });
+      j = i - 1;
+      snap(4, `Linha 4: j ← ${j}. Começa a comparar pelo fim da mão.`, { sorted: i });
+      let body = 0;
+      while (true) {
+        const ok = j >= 0 && A[j] > pivo;
+        if (!ok) {
+          const why = j < 0 ? 'j = −1: chegou ao início do vetor' : `A[${j}] = ${A[j]} não é > ${pivo}`;
+          snap(5, `Linha 5: teste falha (${why}). ` + (body > 0
+            ? 'Teste final do while: não conta.'
+            : '<b>O corpo não rodou nenhuma vez, então este teste conta (4 op).</b> É o que acontece em toda iteração do melhor caso.'),
+            { skip: body > 0, sorted: i, marks: j >= 0 ? { [j]: 'cmp' } : {} });
+          break;
+        }
+        snap(5, `Linha 5: j = ${j} ≥ 0 e A[${j}] = ${A[j]} > pivo = ${pivo} → desloca. 4 op.`, { sorted: i, marks: { [j]: 'cmp' } });
+        A[j + 1] = A[j];
+        snap(6, `Linha 6: A[${j + 1}] ← A[${j}] = ${A[j]}. O ${A[j]} anda uma casa para a direita. 4 op.`, { sorted: i, marks: { [j + 1]: 'cur' } });
+        j--; body++;
+        snap(7, `Linha 7: j ← ${j}. 2 op.`, { sorted: i });
+      }
+      A[j + 1] = pivo;
+      snap(8, `Linha 8: A[${j + 1}] ← pivo = ${pivo}. ${body} deslocamento(s) nesta iteração. 3 op.`, { sorted: i + 1, marks: { [j + 1]: 'cur' } });
+    }
+    j = '—';
+    snap(2, `Teste final do for (i = ${n}): não conta.`, { skip: true, sorted: n });
+    const total = S.reduce((s, st) => s + (st.skip ? 0 : OPS[st.line]), 0) + 1;
+    snap(9, `Linha 9: return. Total = <b>${total}</b>. Para n = ${n}: melhor caso $13n - 11 = ${13 * n - 11}$; pior caso $5n^2 + 4n - 7 = ${5 * n * n + 4 * n - 7}$.`, { sorted: n });
+    return S;
+  }
+  const inputs = { 'exemplo do slide': [5, 7, 10, 4, 1, 3, 8, 6], 'melhor caso (ordenado)': [1, 3, 4, 5, 6], 'pior caso (decrescente)': [10, 8, 6, 4, 2], 'quase ordenado': [2, 3, 4, 5, 1] };
+  const P = StepPlayer.mount(document.getElementById('isPlayer'), {
+    code: ['InsertionSort(A, n)', 'pivo ← null', 'for i ← 1 to n − 1:', '   pivo ← A[i]', '   j ← i − 1', '   while j ≥ 0 and A[j] > pivo:', '      A[j+1] ← A[j]', '      j ← j − 1', '   A[j+1] ← pivo', 'return A'],
+    ops: OPS, steps: trace(inputs['exemplo do slide']), speed: 650,
+  });
+  const btns = document.getElementById('isBtns');
+  const pick = (b) => { [...btns.children].forEach((x) => x.classList.remove('on')); if (b) b.classList.add('on'); };
+  Object.entries(inputs).forEach(([label, A], k) => btns.append(APA.el('button', { class: 'btn' + (k ? '' : ' on'), type: 'button',
+    onclick: (e) => { pick(e.target); P.load(trace(A)); } }, label)));
+  document.getElementById('isGo').onclick = () => {
+    const A = document.getElementById('isIn').value.split(/[\s,;]+/).filter(Boolean).map(Number);
+    const err = document.getElementById('isErr');
+    if (A.length < 2 || A.length > 10 || A.some((x) => !Number.isFinite(x))) { err.textContent = 'Use de 2 a 10 números separados por vírgula.'; return; }
+    err.textContent = ''; pick(null); P.load(trace(A));
+  };
+
+  const chart = LineChart.mount(document.getElementById('isChart'), {
+    series: [
+      { name: 'pior caso: 5n² + 4n − 7', f: (n) => 5 * n * n + 4 * n - 7, color: 'var(--series-2)' },
+      { name: 'melhor caso: 13n − 11', f: (n) => 13 * n - 11, color: 'var(--series-1)' },
+    ],
+    xMin: 1, xMax: 30, xLabel: 'n', yLabel: 'operações', tableXs: [2, 5, 10, 30, 100, 200],
+  });
+  const cx = document.getElementById('cx');
+  cx.oninput = () => { document.getElementById('cxv').textContent = cx.value; chart.update({ xMax: +cx.value }); };
+
+  Quiz.mount(document.getElementById('quiz'), [
+    { q: 'No InsertionSort, qual linha tem # exec que depende <b>somente</b> de $n$?',
+      options: ['Linha 5 (while)', 'Linha 2 (for)', 'Linha 6', 'Linha 7'], answer: 1,
+      explain: 'O for sempre roda $n-1$ vezes. O while depende da distribuição dos valores.' },
+    { q: 'Qual o melhor caso do InsertionSort?',
+      options: ['Vetor ordenado ao contrário', 'Vetor já ordenado', 'Vetor com todos os elementos iguais ao pivô', '$n = 1$'], answer: 1,
+      explain: 'Nenhum deslocamento: o primeiro teste do while falha em toda iteração. $T_m(n) = 13n - 11$.' },
+    { q: 'No melhor caso, qual é o # exec da linha 5 (while)?',
+      options: ['$0$', '$n - 1$', '$n$', '$\\frac{n(n-1)}{2}$'], answer: 1,
+      explain: 'O teste roda uma vez em cada uma das $n-1$ iterações do for e falha logo. Como o corpo não executou, esse teste conta.' },
+    { q: 'No pior caso, as linhas 6 e 7 executam quantas vezes?',
+      options: ['$n - 1$', '$(n-1)^2$', '$\\frac{(n-1)(1 + n - 1)}{2} = \\frac{n^2 - n}{2}$', '$n^2$'], answer: 2,
+      explain: 'Para cada $i$ são $i$ deslocamentos: $1 + 2 + \\dots + (n-1)$.' },
+    { q: 'Em $T_p(n) = 1 + 9(n-1) + \\frac{10(n^2-n)}{2} + 1$, de onde vem o 10?',
+      options: ['Da linha 6 sozinha', 'Da soma dos # op das linhas 5, 6 e 7 (4 + 4 + 2)', 'Do número de elementos', 'Das linhas 2, 3, 4 e 8'], answer: 1,
+      explain: 'As três linhas têm o mesmo # exec, então dá para somar os # op delas antes de multiplicar.' },
+  ]);
+});
+</script>
+</body>
+</html>

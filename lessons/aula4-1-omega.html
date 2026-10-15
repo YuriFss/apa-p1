@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Aula 4.1 · Notação Ω</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../assets/style.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="../assets/common.js"></script>
+<script defer src="../assets/chart.js"></script>
+<script defer src="../assets/quiz.js"></script>
+</head>
+<body>
+<nav class="topbar">
+  <a href="../index.html">← Índice</a>
+  <span>Aula 4 · Análise assintótica (Parte 4)</span>
+  <span class="spacer"></span>
+  <a href="../reference/aula4.html">Folha de referência</a>
+  <button class="theme-btn" type="button">tema</button>
+</nav>
+<main>
+<p class="kicker">Aula 4 · Lição 1 de 3</p>
+<h1>Revisão de O e a notação Ω (limite inferior)</h1>
+<p class="lead">Slides 1 a 18 da Aula 4. A revisão de Big-O reforça <b>por que</b> existem $c$ e $n_0$. Depois vem a notação $\Omega$, que é o espelho de $O$: um limite <b>inferior</b>, ideal para o melhor caso.</p>
+
+<div class="toc">
+  <b>Nesta lição</b>
+  <ol>
+    <li><a href="#revisao">Revisão de Big-O, de forma intuitiva</a></li>
+    <li><a href="#omega">Notação $\Omega$: definição</a></li>
+    <li><a href="#melhor">$\Omega$ e o melhor caso</a></li>
+    <li><a href="#prova">Como provar $\Omega$ pela definição</a></li>
+    <li><a href="#nao">Como provar que <b>não</b> é $\Omega$</a></li>
+    <li><a href="#limite">$\Omega$ pelo limite</a></li>
+    <li><a href="#widget">Laboratório: $c$ e $n_0$ para $\Omega$</a></li>
+    <li><a href="#quiz">Quiz</a> · <a href="#exercicio">Exercício do slide 18</a></li>
+  </ol>
+</div>
+
+<h2 id="revisao">1. Revisão de Big-O, de forma intuitiva</h2>
+<p>O que queremos com a análise assintótica? Descobrir a <b>taxa de crescimento</b> do tempo de execução: como ele se comporta quando o tamanho da entrada aumenta. É linear? Quadrático? Exponencial?</p>
+<p>Em muitos casos, achar essa taxa de <b>modo informal</b> é fácil: pegue o <b>termo de maior ordem</b> e ignore o coeficiente. Se $f_1(n) = 2n^2 + n + 10$, o tempo cresce seguindo uma <b>curva quadrática</b>, e $g_1(n) = n^2$ descreve o comportamento de modo aproximado.</p>
+<div class="box def">
+  <span class="tag">O que Big-O pede (slide 5)</span>
+  <p>Uma taxa de crescimento que descreva <b>exatamente</b> o comportamento do algoritmo <b>OU</b> que seja <b>pelo menos um limite superior</b>. Mas <b>não pode ser um limite inferior!</b></p>
+</div>
+<h3>Por que $n_0$?</h3>
+<p>Porque queremos o comportamento <b>geral</b>, não o de entradas "pequenas". Exemplo: $f(n) = n^2 - 4n + 15$ é aproximadamente $n^2$, mas para $n$ pequeno o gráfico de $n^2$ fica <b>abaixo</b> de $f$: $f(1) = 12 &gt; 1$. Só a partir de $n_0 = 4$ vale $f(n) \le n^2$, porque $-4n + 15 \le 0 \iff n \ge 3{,}75$. O $n_0$ formaliza o "$n$ grande o suficiente".</p>
+<h3>Por que $c$?</h3>
+<p>Seja $f(n) = n^2 + 1$. Pelo que entendemos de assintótica, $g(n) = n^2$ deveria aproximar $f$, e deveria ser possível provar que $f = O(n^2)$. Mas $n^2 + 1 &gt; n^2$ <b>sempre</b>: sem $c$, isso seria impossível. Com $c = 2$: $n^2 + 1 \le 2n^2 \iff n \ge 1$. O $c$ completa a definição para descrever exatamente o que queremos.</p>
+<div class="box prof">
+  <span class="tag">Resumo de Big-O (slide 10)</span>
+  <p>Para um limite superior de $f(n)$ precisamos de uma $g(n)$ com taxa de crescimento <b>maior ou igual</b> à de $f(n)$, e de constantes $c$ e $n_0$ tais que $f(n) \le c\,g(n)$ para todo $n \ge n_0$. Big-O é usado principalmente no <b>pior caso</b>. Usá-lo no melhor caso é correto, mas existe notação mais apropriada para isso.</p>
+</div>
+
+<h2 id="omega">2. Notação $\Omega$: definição</h2>
+<div class="box def">
+  <span class="tag">Definição (slide 16)</span>
+  <p>$\Omega$ é o <b>limite assintótico inferior</b>. $f(n) = \Omega(g(n))$ <b>se, e somente se</b>, existem duas constantes positivas $c$ e $n_0$ tais que</p>
+  $$f(n) \ge c \cdot g(n) \quad \text{para todo } n \ge n_0.$$
+</div>
+<svg viewBox="0 0 420 220" style="max-width:420px;display:block;margin:8px auto" role="img" aria-label="Figura: f(n) acima de c·g(n) a partir de n0">
+  <line x1="40" y1="190" x2="400" y2="190" stroke="var(--axis)"/>
+  <line x1="40" y1="190" x2="40" y2="15" stroke="var(--axis)"/>
+  <path d="M40,150 C70,90 90,170 115,150 C140,120 150,110 165,105 C200,80 260,70 390,40" fill="none" stroke="var(--series-2)" stroke-width="2"/>
+  <path d="M40,120 C80,130 120,115 165,108 C230,100 300,95 390,85" fill="none" stroke="var(--series-1)" stroke-width="2"/>
+  <line x1="160" y1="190" x2="160" y2="106" stroke="var(--muted)" stroke-dasharray="4 4"/>
+  <text x="160" y="207" text-anchor="middle" fill="var(--ink-2)" font-size="13">n₀</text>
+  <text x="392" y="34" fill="var(--series-2)" font-size="13" text-anchor="end">f(n)</text>
+  <text x="392" y="102" fill="var(--series-1)" font-size="13" text-anchor="end">c·g(n)</text>
+  <text x="400" y="207" fill="var(--ink-2)" font-size="13" text-anchor="end">n</text>
+</svg>
+<p>É a definição de $O$ com a desigualdade virada. Analogia: $f = \Omega(g)$ é uma leve analogia a $f \ge g$, ou seja, $f$ <b>não cresce mais devagar</b> que $g$.</p>
+
+<h2 id="melhor">3. $\Omega$ e o melhor caso</h2>
+<p>Por prover um limite inferior, $\Omega$ é considerada <b>mais apropriada para a análise do melhor caso</b>: o algoritmo nunca gasta <b>menos</b> que isso.</p>
+<p>Exemplo do slide 17: no melhor caso do InsertionSort, $f(n) = 13n - 11$. Podemos afirmar que $f = \Omega(n)$. <b>Como provar isso?</b></p>
+
+<h2 id="prova">4. Como provar $\Omega$ pela definição</h2>
+<p>Queremos $c &gt; 0$ e $n_0$ tais que $13n - 11 \ge c\,n$ para todo $n \ge n_0$.</p>
+<h3>Caminho A: escolha $c$ menor que o coeficiente líder e resolva</h3>
+<p>Tome $c = 12$:</p>
+$$13n - 11 \ge 12n \iff n \ge 11.$$
+<p>Logo, $c = 12$ e $n_0 = 11$.</p>
+<h3>Caminho B: "minorar" os termos negativos</h3>
+<p>Para $n \ge 1$, vale $11 \le 11n$, e portanto $-11 \ge -11n$. Então:</p>
+$$13n - 11 \;\ge\; 13n - 11n \;=\; 2n \quad \text{para todo } n \ge 1.$$
+<p>Logo, $c = 2$ e $n_0 = 1$.</p>
+
+<div class="box prof">
+  <span class="tag">Modelo de redação</span>
+  <p><b>Afirmação:</b> $13n - 11 = \Omega(n)$.</p>
+  <p><b>Prova:</b> Basta exibir constantes positivas $c$ e $n_0$ com $13n - 11 \ge c\,n$ para todo $n \ge n_0$. Tome $c = 2$ e $n_0 = 1$. Para $n \ge 1$ temos $11 \le 11n$, logo $13n - 11 \ge 13n - 11n = 2n = c\,n$. Portanto $13n - 11 = \Omega(n)$. ∎</p>
+</div>
+
+<h3>Receita para limites inferiores de polinômios</h3>
+<ol class="steps">
+  <li><b>Jogue fora os termos positivos de menor ordem.</b> Eles só aumentam $f$; se $f$ sem eles fica acima de $c\,g$, $f$ com eles também fica.</li>
+  <li><b>Escolha $c$ um pouco menor que o coeficiente líder</b> (por exemplo, a metade), para sobrar uma "folga" que absorve os termos negativos.</li>
+  <li><b>Resolva a desigualdade</b> para achar $n_0$.</li>
+</ol>
+<p><b>Exemplo:</b> $5n^2 + 4n - 7 = \Omega(n^2)$ (pior caso do InsertionSort). Jogando fora o $4n$: $5n^2 + 4n - 7 \ge 5n^2 - 7$. Com $c = 4$: $5n^2 - 7 \ge 4n^2 \iff n^2 \ge 7 \iff n \ge 3$ (para inteiros). Logo, $c = 4$ e $n_0 = 3$.</p>
+<div class="box warn">
+  <span class="tag">Armadilha</span>
+  <p>Subir os negativos até o termo líder, como em $-7 \ge -7n^2$, pode deixar o coeficiente negativo: $5n^2 - 7n^2 = -2n^2$, o que não prova nada. Quando isso acontecer, use o caminho A: escolha $c$ e resolva para $n_0$.</p>
+</div>
+
+<h2 id="nao">5. Como provar que <b>não</b> é $\Omega$</h2>
+<div class="box prof">
+  <span class="tag">Exemplo: $n \ne \Omega(n^2)$</span>
+  <p>Suponha, por absurdo, que existem $c &gt; 0$ e $n_0$ com $n \ge c\,n^2$ para todo $n \ge n_0$. Dividindo por $c\,n &gt; 0$: $n \le \frac{1}{c}$ para todo $n \ge n_0$. Isso é falso para $n = \max\!\left(n_0, \lceil 1/c \rceil + 1\right)$. Absurdo. Logo $n \ne \Omega(n^2)$. ∎</p>
+</div>
+
+<h2 id="limite">6. $\Omega$ pelo limite</h2>
+<div class="table-wrap"><table>
+  <tr><th>$L = \lim_{n\to\infty} f(n)/g(n)$</th><th>$f = O(g)$?</th><th>$f = \Omega(g)$?</th></tr>
+  <tr><td>$0$</td><td>Sim</td><td><b>Não</b></td></tr>
+  <tr><td>constante $0 &lt; L &lt; \infty$</td><td>Sim</td><td>Sim</td></tr>
+  <tr><td>$\infty$</td><td><b>Não</b></td><td>Sim</td></tr>
+</table></div>
+<p>Exemplo: $\lim \frac{13n - 11}{n} = 13$, uma constante positiva, então $13n - 11 = \Omega(n)$. Também é $O(n)$, o que leva ao $\Theta$ da próxima lição.</p>
+<p>Na prova, justifique sempre em palavras: "como o limite é uma constante positiva finita, as funções têm a mesma taxa de crescimento".</p>
+
+<h2 id="widget">7. Laboratório: $c$ e $n_0$ para $\Omega$</h2>
+<div class="widget">
+  <div class="wtitle">Escolha $f$, $g$ e $c$. A página acha o menor $n_0$ com $f(n) \ge c\cdot g(n)$.</div>
+  <div class="controls" id="pairBtns"></div>
+  <div class="controls">
+    <label>$c$ = <b id="cv">2</b> <input type="range" id="cr" min="0.1" max="15" step="0.1" value="2"></label>
+    <label>n até <b id="nv">30</b> <input type="range" id="nr" min="5" max="200" value="30"></label>
+  </div>
+  <div id="labChart"></div>
+  <div id="labInfo" class="box tip" style="margin-top:8px"></div>
+</div>
+
+<h2 id="quiz">8. Quiz de recordação</h2>
+<div id="quiz"></div>
+
+<h2 id="exercicio">9. Exercício (slide 18)</h2>
+<div class="exercise">
+  <span class="tag">Exercício 4.1, do próprio professor</span>
+  <p>Sejam $f(n) = n^3 + 10n - 2$ e $g(n) = n^2$.</p>
+  <ol>
+    <li>Mostre que o limite $f = \Omega(g)$ é válido, com $c$ e $n_0$ explícitos <b>e</b> pelo limite.</li>
+    <li>Demonstre que $f = O(g)$ <b>não</b> é um limite válido, por contradição <b>e</b> pelo limite.</li>
+  </ol>
+  <p class="caption">Responda no chat.</p>
+</div>
+
+<div class="pager">
+  <a href="aula3-2-notacao-o.html"><small>← anterior</small>3.2 Notação O</a>
+  <a class="next" href="aula4-2-theta.html"><small>próxima →</small>4.2 Notação Θ</a>
+</div>
+</main>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const pairs = [
+    { label: '13n − 11 vs n', fn: 'f(n) = 13n − 11', gn: 'n', f: (n) => 13 * n - 11, g: (n) => n, c: 2 },
+    { label: '5n² + 4n − 7 vs n²', fn: 'f(n) = 5n² + 4n − 7', gn: 'n²', f: (n) => 5 * n * n + 4 * n - 7, g: (n) => n * n, c: 4 },
+    { label: 'n² − 4n + 15 vs n²', fn: 'f(n) = n² − 4n + 15', gn: 'n²', f: (n) => n * n - 4 * n + 15, g: (n) => n * n, c: 0.5 },
+    { label: 'n vs n² (não é Ω)', fn: 'f(n) = n', gn: 'n²', f: (n) => n, g: (n) => n * n, c: 0.1 },
+  ];
+  let cur = pairs[0];
+  const cr = document.getElementById('cr'), nr = document.getElementById('nr');
+  const chart = LineChart.mount(document.getElementById('labChart'), { series: [], xMin: 1, xMax: 30, xLabel: 'n', yLabel: 'valor', tableXs: [1, 2, 5, 10, 20, 30] });
+  const fc = (c) => String(+c.toFixed(2)).replace('.', ',');
+  function n0For(c) {
+    const LIM = 100000; let last = 0;
+    for (let n = 1; n <= LIM; n++) if (cur.f(n) < c * cur.g(n)) last = n;
+    return last >= LIM - 1000 ? null : last + 1;
+  }
+  function draw() {
+    const c = +cr.value, N = +nr.value;
+    document.getElementById('cv').textContent = fc(c); document.getElementById('nv').textContent = N;
+    chart.update({ xMax: N, series: [
+      { name: cur.fn, f: cur.f, color: 'var(--series-2)' },
+      { name: `c·g(n) = ${fc(c)}·${cur.gn}`, f: (n) => c * cur.g(n), color: 'var(--series-1)' },
+    ] });
+    const n0 = n0For(c), info = document.getElementById('labInfo');
+    info.innerHTML = n0 === null
+      ? `<b>Nenhum $n_0$ funciona com $c = ${fc(c)}$</b>: $c\\cdot g$ passa $f$ e não volta mais. Se isso acontece para todo $c &gt; 0$ (tente valores bem pequenos), então $f \\ne \\Omega(g)$.`
+      : `Com $c = ${fc(c)}$, o menor $n_0$ é <b>${n0}</b>: $f(n) \\ge ${fc(c)}\\cdot ${cur.gn.replace('²', '^2')}$ para todo $n \\ge ${n0}$ (verificado até $100\\,000$).`;
+    APA.renderMath(info);
+  }
+  const btns = document.getElementById('pairBtns');
+  pairs.forEach((p, k) => btns.append(APA.el('button', { class: 'btn' + (k ? '' : ' on'), type: 'button', onclick: (e) => {
+    [...btns.children].forEach((b) => b.classList.remove('on')); e.target.classList.add('on'); cur = p; cr.value = p.c; draw();
+  } }, p.label)));
+  cr.oninput = draw; nr.oninput = draw; draw();
+
+  Quiz.mount(document.getElementById('quiz'), [
+    { q: 'Big-O pode descrever o comportamento exato ou um limite superior. Ele pode ser…',
+      options: ['um limite inferior', 'nunca um limite inferior', 'qualquer função', 'só funções lineares'], answer: 1,
+      explain: 'Slide 5: "mas não pode ser um limite inferior!"' },
+    { q: '$f = \\Omega(g)$ significa que…',
+      options: ['$f$ não cresce mais rápido que $g$', '$f$ não cresce mais devagar que $g$ (a partir de $n_0$, $f \\ge c\\,g$)', '$f$ e $g$ são iguais', '$f$ é constante'], answer: 1,
+      explain: 'É o espelho de $O$.' },
+    { q: 'Por que $\\Omega$ é mais apropriada para o melhor caso?',
+      options: ['Porque o melhor caso é sempre constante', 'Porque dá um limite inferior: nenhuma entrada custa menos que isso', 'Porque $O$ não pode ser usado no melhor caso', 'Porque é mais fácil de calcular'], answer: 1,
+      explain: 'Ver também a lição 4.2: $\\Omega$ no melhor caso vale para qualquer entrada.' },
+    { q: 'Qual par prova $13n - 11 = \\Omega(n)$?',
+      options: ['$c = 13, n_0 = 1$', '$c = 2, n_0 = 1$', '$c = 14, n_0 = 100$', 'nenhum'], answer: 1,
+      explain: '$13n - 11 \\ge 13n - 11n = 2n$ para $n \\ge 1$. Com $c = 13$ falha sempre (o $-11$); com $c = 14$ falha também.' },
+    { q: '$\\lim f/g = 0$. Então…',
+      options: ['$f = \\Omega(g)$', '$f \\ne \\Omega(g)$, mas $f = O(g)$', '$f = \\Theta(g)$', 'nada se conclui'], answer: 1,
+      explain: '$g$ cresce mais rápido: não pode ser limite inferior de $f$.' },
+  ]);
+});
+</script>
+</body>
+</html>

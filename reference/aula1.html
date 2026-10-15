@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Referência · Aula 1</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../assets/style.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="../assets/common.js"></script>
+</head>
+<body>
+<nav class="topbar">
+  <a href="../index.html">← Índice</a>
+  <span>Folha de referência · Aula 1</span>
+  <span class="spacer"></span>
+  <button class="theme-btn" type="button">tema</button>
+</nav>
+<main>
+<h1>Aula 1: Análise assintótica (Parte 1)</h1>
+<p class="lead">Contagem de passos, melhor/pior/caso médio. Uma página para revisar antes da prova.</p>
+
+<h2>Definições</h2>
+<div class="table-wrap"><table>
+  <tr><th>Termo</th><th>Definição</th></tr>
+  <tr><td>Análise de complexidade</td><td>Objetivo: possibilitar medir a eficiência de algoritmos. Prever recursos: tempo (complexidade <b>temporal</b>) e memória (complexidade <b>espacial</b>).</td></tr>
+  <tr><td>Análise experimental</td><td>Implementa, executa variando a entrada e mede o tempo. Contras: exige implementação, pode ser tendenciosa conforme as entradas testadas e só compara algoritmos no mesmo ambiente (hw + sw).</td></tr>
+  <tr><td>Análise teórica</td><td>Usa o pseudocódigo, sem implementar. Considera todas as entradas, não depende do ambiente e expressa a eficiência em função do tamanho da entrada. É uma aproximação.</td></tr>
+  <tr><td>Tamanho da entrada $n$</td><td>Depende do problema. Ordenação: nº de elementos. Grafos: nº de vértices e arestas. Sempre diga o que é $n$ (ex.: $n = |A|$).</td></tr>
+  <tr><td>Operações básicas</td><td>Expressões de avaliação, atribuições, indexação de array, chamada de função, retorno de função. Cada uma custa tempo constante.</td></tr>
+  <tr><td>$T(n)$</td><td>Número de operações básicas executadas, como função de $n$.</td></tr>
+  <tr><td>Melhor caso</td><td>Entrada organizada da melhor forma: menor nº possível de passos (otimista).</td></tr>
+  <tr><td>Pior caso</td><td>Entrada organizada da pior forma <b>para o algoritmo</b>: maior nº possível de passos (pessimista). É o mais usado: limite superior para qualquer entrada e mais simples de avaliar.</td></tr>
+  <tr><td>Caso médio</td><td>Média dos tempos sobre as entradas possíveis (ponderada pela probabilidade). Frequentemente difícil de determinar. <b>Não</b> é (melhor + pior)/2.</td></tr>
+</table></div>
+
+<h2>Fórmula da contagem</h2>
+$$T(n) = \sum_{\text{linhas}} (\#\text{op}) \times (\#\text{exec})$$
+
+<h3># op típico</h3>
+<div class="table-wrap"><table>
+  <tr><th>Linha</th><th class="num"># op</th></tr>
+  <tr><td class="mono">x = 0</td><td class="num">1</td></tr>
+  <tr><td class="mono">x = A[i]</td><td class="num">2</td></tr>
+  <tr><td class="mono">x = x + A[i]</td><td class="num">3</td></tr>
+  <tr><td class="mono">i = i + 1</td><td class="num">2</td></tr>
+  <tr><td class="mono">cont++</td><td class="num">1 (slide 5 da Aula 2)</td></tr>
+  <tr><td class="mono">if A[i] > x</td><td class="num">2</td></tr>
+  <tr><td class="mono">for i = a to b</td><td class="num">2 (às vezes 1)</td></tr>
+  <tr><td class="mono">while i &lt; n and A[i] ≠ x</td><td class="num">4</td></tr>
+  <tr><td class="mono">C[i][j] = A[i][j] + B[i][j]</td><td class="num">8</td></tr>
+  <tr><td class="mono">return x</td><td class="num">1</td></tr>
+  <tr><td class="mono">chamada de função f(...)</td><td class="num">nº de op internas de f (justifique)</td></tr>
+</table></div>
+
+<h3># exec: regras</h3>
+<ul>
+  <li>Fora de laço: 1.</li>
+  <li><code>for i = a to b</code>: o corpo roda $b - a + 1$ vezes. Ex.: <code>0 to n−1</code> → $n$; <code>1 to n−1</code> → $n-1$.</li>
+  <li>Laços aninhados independentes: produto ($n \cdot n = n^2$).</li>
+  <li>Laço de dentro dependente de $i$: somatório $\sum_i (\text{iterações para aquele } i)$.</li>
+  <li>Dentro de <code>if</code>: depende dos dados → melhor/pior caso.</li>
+</ul>
+<div class="box prof">
+  <span class="tag">Convenção do professor: cabeçalho de laço</span>
+  <p># exec do cabeçalho = # exec do corpo (o teste final, que falha, não conta). Exceção: se o corpo roda 0 vezes, o único teste conta 1. O Cormen conta +1 sempre; a diferença é só uma constante.</p>
+</div>
+
+<h2>Somas que aparecem</h2>
+$$\sum_{i=1}^{n} i = \frac{n(n+1)}{2} \qquad \sum_{i=0}^{n-1} i = \sum_{i=0}^{n-1}(n-1-i) = \frac{n(n-1)}{2} \qquad \sum_{i=1}^{n} c = cn$$
+<p>PA em geral: $\text{soma} = \dfrac{(\text{número de termos}) \times (\text{primeiro} + \text{último})}{2}$.</p>
+
+<h2>Resultados dos slides</h2>
+<div class="table-wrap"><table>
+  <tr><th>Algoritmo</th><th>Melhor caso</th><th>Pior caso</th></tr>
+  <tr><td>SomaVetor</td><td colspan="2">$T(n) = 5n + 2$ (não depende dos dados)</td></tr>
+  <tr><td>somaMatrizesQuadradas</td><td colspan="2">$T(n) = 9n^2 + n + 2$ (for contado com 1 op)</td></tr>
+  <tr><td>ArrayMax</td><td>$A[0]$ é o maior: $4n - 1$</td><td>valores únicos em ordem crescente: $6n - 3$</td></tr>
+  <tr><td>buscaSequencial</td><td>$A[0] = x$: $7$</td><td>$x \notin A$: $6n + 3$</td></tr>
+  <tr><td>fibonacci1 (chamadas)</td><td colspan="2">$C(n) = 2F_{n+1} - 1$: exponencial</td></tr>
+  <tr><td>fibonacci2 (iterações)</td><td colspan="2">$n - 1$: linear</td></tr>
+</table></div>
+
+<h2>Checklist de questão "determine T(n)"</h2>
+<ol class="steps">
+  <li>Defina $n$.</li>
+  <li>Ache as linhas variáveis (<code>if</code>, <code>while</code> com dados, <code>return</code>/<code>quebra</code> no laço, flag).</li>
+  <li>Descreva a entrada do melhor e a do pior caso (arrumação dos dados, nunca "n pequeno").</li>
+  <li>Uma tabela # op / # exec por caso.</li>
+  <li>Escreva a soma por extenso, simplifique e confira com $n = 1$ ou $2$.</li>
+</ol>
+</main>
+</body>
+</html>

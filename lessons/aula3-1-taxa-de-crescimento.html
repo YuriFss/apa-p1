@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Aula 3.1 · Taxa de crescimento</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../assets/style.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="../assets/common.js"></script>
+<script defer src="../assets/chart.js"></script>
+<script defer src="../assets/quiz.js"></script>
+</head>
+<body>
+<nav class="topbar">
+  <a href="../index.html">← Índice</a>
+  <span>Aula 3 · Análise assintótica (Parte 3)</span>
+  <span class="spacer"></span>
+  <a href="../reference/aula3.html">Folha de referência</a>
+  <button class="theme-btn" type="button">tema</button>
+</nav>
+<main>
+<p class="kicker">Aula 3 · Lição 1 de 2</p>
+<h1>Análise assintótica e taxa de crescimento</h1>
+<p class="lead">Até aqui calculamos $T(n)$ exato, como $5n^2 + 4n - 7$. A partir de agora interessa só o <b>formato</b> do crescimento. Esta lição cobre os slides 1 a 9 e 19 a 20 da Aula 3 e traz o gráfico comparando as funções mais comuns.</p>
+
+<div class="toc">
+  <b>Nesta lição</b>
+  <ol>
+    <li><a href="#ideia">O que é complexidade assintótica</a></li>
+    <li><a href="#notacoes">As três notações</a></li>
+    <li><a href="#pequeno">Por que $n$ pequeno não importa</a></li>
+    <li><a href="#taxa">Taxa (curva) de crescimento</a></li>
+    <li><a href="#grafico">Gráfico interativo das funções</a></li>
+    <li><a href="#quiz">Quiz</a> · <a href="#exercicio">Exercício</a></li>
+  </ol>
+</div>
+
+<h2 id="ideia">1. O que é complexidade assintótica</h2>
+<p>Na análise de algoritmos, na maioria das vezes se estuda a <b>complexidade assintótica</b>:</p>
+<ul>
+  <li>é <b>outra aproximação</b>, em cima da contagem de passos;</li>
+  <li>olha o comportamento quando <b>$n$ tende ao infinito</b>;</li>
+  <li>dispensa a preocupação com <b>coeficientes</b> e <b>termos de menor ordem</b>;</li>
+  <li>o que interessa é a <b>taxa de crescimento</b>.</li>
+</ul>
+<div class="box tip">
+  <span class="tag">Na prática</span>
+  <p>Em $T(n) = 5n^2 + 4n - 7$:</p>
+  <ul>
+    <li>os termos $4n$ e $-7$ são de <b>menor ordem</b>: para $n$ grande, ficam desprezíveis perto de $5n^2$;</li>
+    <li>o 5 é um <b>coeficiente</b>: muda de máquina para máquina, de convenção para convenção (o <code>for</code> vale 1 ou 2 op?);</li>
+    <li>sobra o <b>$n^2$</b>: a taxa de crescimento é <b>quadrática</b>.</li>
+  </ul>
+  <p>Com $n = 1000$: $5n^2 = 5\,000\,000$, enquanto $4n - 7 = 3\,993$, menos de 0,1% do total.</p>
+</div>
+<p>É por isso que a discussão sobre o <code>for</code> valer 1 ou 2 op nunca muda a resposta assintótica.</p>
+
+<h2 id="notacoes">2. As três notações</h2>
+<p>As 3 notações mais usadas estabelecem tipos diferentes de <b>limite</b> para uma função $f(n)$:</p>
+<div class="table-wrap"><table>
+  <tr><th>Notação</th><th>Nome</th><th>Tipo de limite</th><th>Analogia</th><th>Onde</th></tr>
+  <tr><td>$O$</td><td>"Big-O"</td><td>superior</td><td>$f \le g$</td><td>esta aula</td></tr>
+  <tr><td>$\Omega$</td><td>Omega</td><td>inferior</td><td>$f \ge g$</td><td>Aula 4</td></tr>
+  <tr><td>$\Theta$</td><td>Theta</td><td>restrito (justo)</td><td>$f = g$</td><td>Aula 4</td></tr>
+</table></div>
+
+<h2 id="pequeno">3. Por que $n$ pequeno não importa</h2>
+<p>A ideia é entender o consumo de um recurso em função do tamanho da entrada, <b>de forma geral</b>.</p>
+<ul>
+  <li>Para valores de entrada <b>pequenos</b>, um algoritmo pode aparentar um comportamento que só se mantém até certo tamanho. Depois disso, o comportamento muda.</li>
+  <li>Então é mais interessante estudar o comportamento quando o tamanho da entrada é <b>grande o suficiente</b>, livre de casos especiais e detalhes que só aparecem com entradas muito pequenas.</li>
+</ul>
+<p>Exemplo do slide: $f(n) = n^2 - 5n + 8$. Entre $n = 0$ e $n = 2{,}5$ ela <b>diminui</b>, o que parece um algoritmo que fica mais rápido com mais dados. Mas isso é só o começo da parábola. Do ponto de vista assintótico, esse trecho não importa.</p>
+
+<div class="widget">
+  <div class="wtitle">$f(n) = n^2 - 5n + 8$: o começo engana</div>
+  <div class="controls"><label>n até <b id="pxv">6</b> <input type="range" id="px" min="5" max="60" value="6"></label></div>
+  <div id="parab"></div>
+  <p class="caption">Com n até 6, parece uma curva que desce e sobe. Arraste até 60: o termo $n^2$ domina e o "−5n + 8" some visualmente.</p>
+</div>
+
+<h2 id="taxa">4. Taxa (curva) de crescimento</h2>
+<p>No final das contas, queremos determinar a <b>taxa de crescimento</b> do tempo de execução do algoritmo, também chamada de <b>curva de crescimento</b>. Algumas delas:</p>
+<div class="table-wrap"><table>
+  <tr><th>Nome</th><th>Função</th><th>Exemplo</th><th>O que acontece quando $n$ dobra</th></tr>
+  <tr><td>constante</td><td>$1$</td><td>melhor caso da busca sequencial ($T = 7$)</td><td>nada muda</td></tr>
+  <tr><td>logarítmica</td><td>$\log n$</td><td>busca binária (Aula 6)</td><td>soma 1 passo</td></tr>
+  <tr><td>linear</td><td>$n$</td><td>SomaVetor, ArrayMax, melhor caso do Insertion</td><td>dobra</td></tr>
+  <tr><td>$n \log n$</td><td>$n \log n$</td><td>MergeSort, HeapSort (Aulas 6–9)</td><td>um pouco mais que dobra</td></tr>
+  <tr><td>quadrática</td><td>$n^2$</td><td>pior caso do Insertion, Selection, Bubble</td><td>multiplica por 4</td></tr>
+  <tr><td>cúbica</td><td>$n^3$</td><td>3 laços aninhados de 1 a $n$</td><td>multiplica por 8</td></tr>
+  <tr><td>exponencial</td><td>$2^n$</td><td>fibonacci1 (cerca de $1{,}6^n$), Torre de Hanói</td><td><b>eleva ao quadrado</b></td></tr>
+  <tr><td>fatorial</td><td>$n!$</td><td>testar todas as permutações</td><td>explode</td></tr>
+</table></div>
+<p>Na disciplina, $\log n$ é sempre $\log_2 n$, a menos que se diga outra coisa. A base não importa assintoticamente: $\log_2 n = \frac{\log_{10} n}{\log_{10} 2}$ é só uma constante vezes $\log_{10} n$.</p>
+
+<h2 id="grafico">5. Gráfico interativo das funções</h2>
+<div class="widget">
+  <div class="wtitle">Crescimento de $\log n$, $n$, $n \log n$, $n^2$, $n^3$, $2^n$ e $n!$</div>
+  <div class="controls">
+    <label>n até <b id="gxv">10</b> <input type="range" id="gx" min="3" max="100" value="10"></label>
+    <button class="btn" id="glog" type="button">escala log</button>
+  </div>
+  <div id="growth"></div>
+  <p class="caption">Clique em um nome na legenda para esconder ou mostrar a função. O eixo $y$ se reajusta. Experimente esconder $n!$ e $2^n$ para comparar $n \log n$ com $n^2$. Com a escala log, as sete curvas cabem juntas.</p>
+</div>
+
+<h3>Em tempo de relógio</h3>
+<p>Supondo 1 operação por nanossegundo ($10^9$ op/s):</p>
+<div class="table-wrap"><table>
+  <tr><th>$T(n)$</th><th class="num">$n = 10$</th><th class="num">$n = 1\,000$</th><th class="num">$n = 1\,000\,000$</th></tr>
+  <tr><td>$\log_2 n$</td><td class="num">3 ns</td><td class="num">10 ns</td><td class="num">20 ns</td></tr>
+  <tr><td>$n$</td><td class="num">10 ns</td><td class="num">1 µs</td><td class="num">1 ms</td></tr>
+  <tr><td>$n \log_2 n$</td><td class="num">33 ns</td><td class="num">10 µs</td><td class="num">20 ms</td></tr>
+  <tr><td>$n^2$</td><td class="num">100 ns</td><td class="num">1 ms</td><td class="num">16,7 min</td></tr>
+  <tr><td>$n^3$</td><td class="num">1 µs</td><td class="num">1 s</td><td class="num">31,7 anos</td></tr>
+  <tr><td>$2^n$</td><td class="num">1 µs</td><td class="num">$\approx 3 \times 10^{284}$ anos</td><td class="num">—</td></tr>
+  <tr><td>$n!$</td><td class="num">3,6 ms</td><td class="num">—</td><td class="num">—</td></tr>
+</table></div>
+<p>Para $n = 1\,000\,000$, a diferença entre um algoritmo $n \log n$ (20 ms) e um $n^2$ (16 minutos) é o que separa MergeSort de InsertionSort.</p>
+
+<h2 id="quiz">6. Quiz de recordação</h2>
+<div id="quiz"></div>
+
+<h2 id="exercicio">7. Exercício</h2>
+<div class="exercise">
+  <span class="tag">Exercício 3.1</span>
+  <p>Para cada $T(n)$, diga a taxa de crescimento (constante, logarítmica, linear, $n\log n$, quadrática, cúbica ou exponencial) e justifique em uma linha qual termo domina:</p>
+  <ol type="a">
+    <li>$T(n) = 13n - 11$</li>
+    <li>$T(n) = \frac{19n^2 - 15n}{2}$</li>
+    <li>$T(n) = 3n^2 + 1000\,n\log n + 10^6$</li>
+    <li>$T(n) = 2^n + n^{10}$</li>
+    <li>$T(n) = 42$</li>
+  </ol>
+  <p class="caption">Responda no chat. No item (c), quem ganha para $n$ grande: $3n^2$ ou $1000\,n\log n$? A partir de mais ou menos que $n$? Use o gráfico.</p>
+</div>
+
+<div class="pager">
+  <a href="aula2-4-bubble-sort-lab.html"><small>← anterior</small>2.4 Laboratório BubbleSort</a>
+  <a class="next" href="aula3-2-notacao-o.html"><small>próxima →</small>3.2 Notação O</a>
+</div>
+</main>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const par = LineChart.mount(document.getElementById('parab'), {
+    series: [{ name: 'f(n) = n² − 5n + 8', f: (n) => n * n - 5 * n + 8, color: 'var(--series-2)' }],
+    xMin: 0, xMax: 6, xLabel: 'n', yLabel: 'f(n)', tableXs: [0, 1, 2, 3, 4, 6, 20, 60],
+  });
+  const px = document.getElementById('px');
+  px.oninput = () => { document.getElementById('pxv').textContent = px.value; par.update({ xMax: +px.value }); };
+
+  const fact = (n) => { let r = 1; for (let i = 2; i <= n; i++) r *= i; return r; };
+  const lg = (n) => (n <= 1 ? 0 : Math.log2(n));
+  const g = LineChart.mount(document.getElementById('growth'), {
+    series: [
+      { name: 'n!', f: fact, color: 'var(--series-8)' },
+      { name: '2ⁿ', f: (n) => Math.pow(2, n), color: 'var(--series-5)' },
+      { name: 'n³', f: (n) => n ** 3, color: 'var(--series-7)' },
+      { name: 'n²', f: (n) => n * n, color: 'var(--series-2)' },
+      { name: 'n log n', f: (n) => n * lg(n), color: 'var(--series-4)' },
+      { name: 'n', f: (n) => n, color: 'var(--series-1)' },
+      { name: 'log n', f: lg, color: 'var(--series-3)' },
+    ],
+    xMin: 1, xMax: 10, xLabel: 'n', yLabel: 'T(n)', tableXs: [2, 5, 10, 20, 50, 100],
+  });
+  const gx = document.getElementById('gx');
+  gx.oninput = () => { document.getElementById('gxv').textContent = gx.value; g.update({ xMax: +gx.value }); };
+  const glog = document.getElementById('glog');
+  glog.onclick = () => { const on = !glog.classList.contains('on'); glog.classList.toggle('on', on); g.update({ log: on }); };
+
+  Quiz.mount(document.getElementById('quiz'), [
+    { q: 'Na análise assintótica, o que descartamos de $T(n) = 9n^2 + n + 2$?',
+      options: ['O termo $9n^2$', 'O coeficiente 9 e os termos de menor ordem ($n + 2$)', 'Nada', 'Só o $+2$'], answer: 1,
+      explain: 'Sobra a taxa de crescimento: quadrática, $n^2$.' },
+    { q: 'Por que o comportamento para $n$ pequeno não importa?',
+      options: ['Porque algoritmos nunca recebem entradas pequenas', 'Porque o comportamento para $n$ pequeno pode não se manter; queremos a visão geral, para $n$ grande o suficiente', 'Porque $n$ pequeno sempre é o melhor caso', 'Porque o professor mandou'], answer: 1,
+      explain: 'É o que justifica a constante $n_0$ da definição formal, na próxima lição.' },
+    { q: 'Se $n$ dobra, um algoritmo quadrático leva…',
+      options: ['o dobro do tempo', '4 vezes o tempo', '8 vezes o tempo', 'o mesmo tempo'], answer: 1,
+      explain: '$(2n)^2 = 4n^2$.' },
+    { q: 'Qual a ordem correta, da que cresce mais devagar para a que cresce mais rápido?',
+      options: ['$n, \\log n, n^2, n\\log n$', '$\\log n, n, n\\log n, n^2, 2^n, n!$', '$\\log n, n\\log n, n, n^2$', '$n!, 2^n, n^2, n$'], answer: 1,
+      explain: 'Decore essa escada: ela resolve a maioria das comparações da lista (questão 3).' },
+    { q: '$\\log_2 n$ e $\\log_{10} n$ têm a mesma taxa de crescimento?',
+      options: ['Não, $\\log_2$ cresce muito mais', 'Sim: diferem só por um fator constante ($\\log_2 n = \\log_{10} n / \\log_{10} 2$)', 'Não, $\\log_{10}$ cresce mais', 'Depende de $n$'], answer: 1,
+      explain: 'Por isso a base do log não aparece nas notações assintóticas.' },
+  ]);
+});
+</script>
+</body>
+</html>

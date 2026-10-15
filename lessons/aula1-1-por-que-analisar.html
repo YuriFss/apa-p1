@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Aula 1.1 · Por que analisar</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../assets/style.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="../assets/common.js"></script>
+<script defer src="../assets/tree.js"></script>
+<script defer src="../assets/chart.js"></script>
+<script defer src="../assets/quiz.js"></script>
+</head>
+<body>
+<nav class="topbar">
+  <a href="../index.html">← Índice</a>
+  <span>Aula 1 · Análise assintótica (Parte 1)</span>
+  <span class="spacer"></span>
+  <a href="../reference/aula1.html">Folha de referência</a>
+  <button class="theme-btn" type="button">tema</button>
+</nav>
+<main>
+<p class="kicker">Aula 1 · Lição 1 de 3</p>
+<h1>Por que analisar algoritmos?</h1>
+<p class="lead">Antes de contar operações, é preciso entender o que estamos medindo e por quê. Esta lição cobre os slides 1 a 12 da Aula 1 e a introdução do curso, incluindo o exemplo de Fibonacci.</p>
+
+<div class="toc">
+  <b>Nesta lição</b>
+  <ol>
+    <li><a href="#funcionar">Funcionar não basta</a></li>
+    <li><a href="#fib">Exemplo: duas versões de Fibonacci</a></li>
+    <li><a href="#objetivo">Objetivo da análise de complexidade</a></li>
+    <li><a href="#abordagens">Duas abordagens: experimental e teórica</a></li>
+    <li><a href="#tamanho">Tamanho da entrada, $n$</a></li>
+    <li><a href="#quiz">Quiz de recordação</a></li>
+    <li><a href="#exercicio">Exercício</a></li>
+  </ol>
+</div>
+
+<h2 id="funcionar">1. Funcionar não basta</h2>
+<p>Um algoritmo é uma sequência finita de passos bem definidos que resolve um problema. Uma receita, o caminho de casa até a universidade e o jeito de atravessar a rua são algoritmos do dia a dia.</p>
+<p>No início da programação, o critério costuma ser só um: <em>"se resolve o problema, ok"</em>. O professor insiste que isso <b>geralmente não é suficiente</b>. Dois algoritmos corretos para o mesmo problema podem gastar quantidades de recursos muito diferentes:</p>
+<ul>
+  <li><b>tempo de processamento</b>, o foco desta disciplina;</li>
+  <li><b>memória</b>;</li>
+  <li>consumo de dados (internet), energia etc.</li>
+</ul>
+<p>Em APA, queremos responder três perguntas:</p>
+<ol>
+  <li>O algoritmo desenvolvido é eficiente?</li>
+  <li>Existe uma alternativa melhor?</li>
+  <li>O algoritmo usado é o melhor para o meu cenário?</li>
+</ol>
+<p>Para isso, a disciplina analisa a <b>corretude e o desempenho</b> de algoritmos, ensina técnicas de projeto mais sofisticadas (divisão e conquista, por exemplo) e estuda a <b>complexidade de problemas</b>.</p>
+
+<h2 id="fib">2. Exemplo: duas versões de Fibonacci</h2>
+<p>A sequência de Fibonacci é $F_0 = 0$, $F_1 = 1$ e $F_n = F_{n-1} + F_{n-2}$ para $n \ge 2$, ou seja, 0, 1, 1, 2, 3, 5, 8, 13, … O professor mostra duas implementações corretas.</p>
+
+<div class="algo" style="grid-template-columns:1fr 1fr">
+<pre class="panel"><span class="fn">fibonacci1</span>(n)
+1. <span class="kw">if</span> n = 0: return 0
+2. <span class="kw">if</span> n = 1: return 1
+
+3. return <span class="kw">fibonacci1(n−1) + fibonacci1(n−2)</span></pre>
+<pre class="panel"><span class="fn">fibonacci2</span>(n)
+1. <span class="kw">if</span> n = 0: return 0
+2. crie um vetor f[0...n]
+3. f[0] = 0, f[1] = 1
+
+4. <span class="kw">for</span> i = 2...n:
+5.    f[i] = f[i−1] + f[i−2]
+
+6. return f[n]</pre>
+</div>
+
+<h3>O que fibonacci1 faz de fato</h3>
+<p>Cada chamada com $n \ge 2$ faz <b>duas</b> chamadas novas. A árvore abaixo mostra todas as chamadas feitas para calcular <code>fibonacci1(n)</code>. Os nós em laranja calculam um valor que <b>já foi calculado antes</b> em outro ramo. Todo esse trabalho é repetido.</p>
+
+<div class="widget">
+  <div class="wtitle">Árvore de chamadas de fibonacci1(n)</div>
+  <div class="controls" id="fibBtns"></div>
+  <div id="fibTree" style="overflow-x:auto"></div>
+  <p class="caption" id="fibInfo"></p>
+</div>
+
+<p>Contando as chamadas: seja $C(n)$ o número de chamadas feitas por <code>fibonacci1(n)</code>. A própria chamada conta 1, mais as chamadas dos dois filhos:</p>
+$$C(0) = C(1) = 1, \qquad C(n) = C(n-1) + C(n-2) + 1 \quad (n \ge 2).$$
+<p>A conta segue o mesmo padrão do próprio Fibonacci e dá $C(n) = 2F_{n+1} - 1$. Confira na árvore: $C(5) = 2 \cdot F_6 - 1 = 2 \cdot 8 - 1 = 15$. Como $F_n$ cresce aproximadamente como $1{,}618^n$, o número de chamadas cresce <b>exponencialmente</b> em $n$.</p>
+<p>Já <code>fibonacci2</code> preenche o vetor uma posição por vez. O laço da linha 4 roda $n - 1$ vezes, então o trabalho cresce <b>linearmente</b> em $n$.</p>
+
+<div class="widget">
+  <div class="wtitle">Trabalho de cada versão conforme n cresce</div>
+  <div class="controls">
+    <label>n até <b id="xmaxv">20</b> <input type="range" id="xmax" min="6" max="45" value="20"></label>
+    <button class="btn" id="logBtn" type="button">escala log</button>
+  </div>
+  <div id="fibChart"></div>
+  <p class="caption">Laranja: chamadas recursivas de fibonacci1, $2F_{n+1} - 1$. Azul: iterações do laço de fibonacci2, $n - 1$. Com n = 20 a linha azul já parece colada no zero. Ative a escala log para ver as duas formas: reta inclinada (exponencial) contra curva achatada (linear).</p>
+</div>
+
+<div class="box tip">
+  <span class="tag">Para ter noção</span>
+  <p><code>fibonacci1(200)</code> faria $2F_{201} - 1 \approx 9{,}1 \times 10^{41}$ chamadas. A 1 bilhão de chamadas por segundo, isso levaria cerca de $2{,}9 \times 10^{25}$ anos, mais de $10^{15}$ vezes a idade do universo. <code>fibonacci2(200)</code> faz 199 iterações.</p>
+</div>
+
+<p>Os slides fecham com: <em>"Como veremos nas próximas aulas, essa segunda implementação é, no geral, muito mais eficiente. <b>É a melhor?</b>"</em></p>
+<div class="box extra">
+  <span class="tag">Fora dos slides (Dasgupta, cap. 0)</span>
+  <p>Não. <code>fibonacci2</code> guarda o vetor inteiro, mas só precisa dos dois últimos valores. Com duas variáveis, o tempo continua linear e a memória fica constante. Também existe um método por potência de matriz que usa cerca de $\log_2 n$ multiplicações. A pergunta do professor serve para lembrar que, depois de achar uma versão eficiente, ainda vale perguntar se existe uma alternativa melhor.</p>
+</div>
+
+<h2 id="objetivo">3. Objetivo da análise de complexidade</h2>
+<div class="box def">
+  <span class="tag">Definição (slide 5)</span>
+  <p>O <b>objetivo da análise de complexidade</b> é possibilitar medir a eficiência de algoritmos.</p>
+  <p><b>Analisar um algoritmo</b> é prever as exigências de recursos computacionais:</p>
+  <ul>
+    <li>tempo de execução → <b>complexidade temporal</b>;</li>
+    <li>memória → <b>complexidade espacial</b>.</li>
+  </ul>
+</div>
+<p>Nesta disciplina, "complexidade" sem adjetivo quase sempre quer dizer complexidade <b>temporal</b>.</p>
+
+<h2 id="abordagens">4. Duas abordagens: experimental e teórica</h2>
+<p>Há dois jeitos de saber quanto tempo um algoritmo gasta.</p>
+
+<h3>Análise experimental</h3>
+<ol class="steps">
+  <li>Implementar o algoritmo.</li>
+  <li>Executar o programa variando a entrada (tamanhos e conteúdos diferentes).</li>
+  <li>Medir o tempo de execução com algum método (cronômetro do sistema, por exemplo).</li>
+  <li>Imprimir os resultados, geralmente em um gráfico de tempo × tamanho da entrada.</li>
+</ol>
+<p>Os slides apontam três problemas:</p>
+<ul>
+  <li><b>É necessário implementar o algoritmo</b>, o que pode ser difícil e exige esforço.</li>
+  <li><b>Os resultados podem ser tendenciosos</b>: talvez as entradas em que o algoritmo seria menos (ou mais) eficiente não tenham sido testadas.</li>
+  <li><b>A comparação entre dois algoritmos precisa usar o mesmo ambiente</b> (hardware + software). Um tempo medido no seu notebook não vale para o meu.</li>
+</ul>
+
+<h3>Análise teórica</h3>
+<ul>
+  <li><b>Não</b> é necessário implementar: a análise é feita sobre uma descrição de alto nível, como o pseudocódigo.</li>
+  <li>Leva em consideração <b>todas</b> as entradas possíveis, não só as que alguém escolheu testar.</li>
+  <li><b>Não depende</b> do ambiente computacional (hardware ou software).</li>
+  <li>Caracteriza a eficiência como uma função do <b>tamanho da entrada</b>.</li>
+  <li>É uma <b>aproximação</b> da complexidade, não o tempo exato em segundos.</li>
+</ul>
+
+<div class="table-wrap"><table>
+  <tr><th></th><th>Experimental</th><th>Teórica</th></tr>
+  <tr><td>Precisa implementar?</td><td>Sim</td><td>Não, basta o pseudocódigo</td></tr>
+  <tr><td>Entradas consideradas</td><td>Só as testadas (risco de viés)</td><td>Todas as possíveis</td></tr>
+  <tr><td>Depende de hardware/software?</td><td>Sim</td><td>Não</td></tr>
+  <tr><td>Resultado</td><td>Tempos medidos (segundos)</td><td>Função do tamanho da entrada, ex.: $T(n) = 5n + 2$</td></tr>
+</table></div>
+<p>O resto da disciplina usa a <b>abordagem teórica</b>.</p>
+
+<h2 id="tamanho">5. Tamanho da entrada, $n$</h2>
+<p>A análise teórica expressa o custo em função do tamanho da entrada. O que conta como "tamanho" <b>depende do problema</b>:</p>
+<ul>
+  <li><b>Ordenação:</b> o número de elementos do vetor.</li>
+  <li><b>Busca em grafo:</b> o número de vértices e arestas do grafo.</li>
+</ul>
+<p>Para simplificar, usamos a letra $n$. A definição precisa de $n$ é dada em cada problema. Às vezes há dois parâmetros, como na questão 8 da lista, onde o custo é $T(n, m)$ com $n$ = tamanho do texto e $m$ = tamanho do padrão.</p>
+
+<div class="box warn">
+  <span class="tag">Atenção na prova</span>
+  <p>Ao começar uma análise, diga o que é $n$. Na busca sequencial o professor escreve: "vamos definir $n$ como sendo $n = |A|$", ou seja, o número de elementos do vetor $A$.</p>
+</div>
+
+<h2 id="quiz">6. Quiz de recordação</h2>
+<div id="quiz"></div>
+
+<h2 id="exercicio">7. Exercício (estilo da lista)</h2>
+<div class="exercise">
+  <span class="tag">Exercício 1.1</span>
+  <p>Um colega implementou dois algoritmos de ordenação, X e Y. No notebook dele, rodou cada um com 5 vetores <b>já ordenados</b> de 1000 elementos. X foi mais rápido nos 5 testes, e ele concluiu: <em>"X é sempre mais eficiente que Y."</em></p>
+  <p>Aponte <b>pelo menos três</b> problemas nessa conclusão, usando os argumentos da aula sobre análise experimental, e diga como a análise teórica evitaria cada um.</p>
+  <p class="caption">Responda no chat. Eu corrijo e só depois a gente compara com a resposta esperada.</p>
+</div>
+
+<div class="pager">
+  <a href="../index.html"><small>← voltar</small>Índice</a>
+  <a class="next" href="aula1-2-contagem-de-passos.html"><small>próxima →</small>1.2 Contagem de passos</a>
+</div>
+</main>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  // árvore de chamadas de fibonacci1
+  function build(n, seen) {
+    const node = { label: 'f(' + n + ')', children: [] };
+    if (seen.has(n)) node.cls = 'hot'; else seen.add(n);
+    if (n >= 2) node.children = [build(n - 1, seen), build(n - 2, seen)];
+    return node;
+  }
+  function count(t) { return 1 + t.children.reduce((s, c) => s + count(c), 0); }
+  function hot(t) { return (t.cls === 'hot' ? 1 : 0) + t.children.reduce((s, c) => s + hot(c), 0); }
+  const btns = document.getElementById('fibBtns');
+  function showTree(n) {
+    const t = build(n, new Set());
+    document.getElementById('fibTree').replaceChildren(TreeView.render(t, { gap: 44, levelH: 58, r: 18,
+      title: 'Árvore de chamadas de fibonacci1(' + n + ')' }));
+    const c = count(t), h = hot(t);
+    document.getElementById('fibInfo').textContent =
+      `fibonacci1(${n}) faz ${c} chamadas, das quais ${h} (laranja) recalculam um valor que já tinha sido calculado. Só existem ${n + 1} valores distintos, f(0) a f(${n}).`;
+    [...btns.children].forEach((b) => b.classList.toggle('on', b.dataset.n == n));
+  }
+  [3, 4, 5, 6].forEach((n) => btns.append(APA.el('button', { class: 'btn', type: 'button', 'data-n': n,
+    onclick: () => showTree(n) }, 'n = ' + n)));
+  showTree(5);
+
+  // gráfico fib1 × fib2
+  const F = [0, 1]; for (let i = 2; i < 60; i++) F.push(F[i - 1] + F[i - 2]);
+  const chart = LineChart.mount(document.getElementById('fibChart'), {
+    series: [
+      { name: 'fibonacci1: chamadas', f: (n) => 2 * F[n + 1] - 1, color: 'var(--series-2)' },
+      { name: 'fibonacci2: iterações', f: (n) => Math.max(0, n - 1), color: 'var(--series-1)' },
+    ],
+    xMin: 0, xMax: 20, xLabel: 'n', yLabel: 'trabalho', tableXs: [5, 10, 20, 30, 40],
+  });
+  const xmax = document.getElementById('xmax');
+  xmax.oninput = () => { document.getElementById('xmaxv').textContent = xmax.value; chart.update({ xMax: +xmax.value }); };
+  const logBtn = document.getElementById('logBtn');
+  logBtn.onclick = () => { const on = !logBtn.classList.contains('on'); logBtn.classList.toggle('on', on); chart.update({ log: on }); };
+
+  Quiz.mount(document.getElementById('quiz'), [
+    { q: 'Qual é o objetivo da análise de complexidade, segundo a aula?',
+      options: ['Provar que o algoritmo está correto', 'Possibilitar medir a eficiência de algoritmos', 'Encontrar o tempo exato em segundos de um programa', 'Escolher a linguagem de programação mais rápida'],
+      answer: 1, explain: 'Analisar é prever a demanda de recursos (tempo → complexidade temporal; memória → complexidade espacial).' },
+    { q: 'Qual destas é uma desvantagem da análise <b>experimental</b>?',
+      options: ['Não considera o tamanho da entrada', 'Só funciona com pseudocódigo', 'Os resultados podem ser tendenciosos, dependendo das entradas testadas', 'Não consegue medir tempo de execução'],
+      answer: 2, explain: 'Talvez as entradas em que o algoritmo seria menos (ou mais) eficiente não tenham sido incluídas. Além disso, é preciso implementar e comparar no mesmo ambiente.' },
+    { q: 'Por que fibonacci1 é tão lenta?',
+      options: ['Porque soma números grandes', 'Porque recalcula os mesmos subproblemas muitas vezes; o número de chamadas cresce exponencialmente', 'Porque usa um vetor', 'Porque é recursiva, e toda recursão é lenta'],
+      answer: 1, explain: 'Recursão em si não é o problema. O problema é a repetição: $C(n) = 2F_{n+1} - 1$ chamadas, contra $n - 1$ iterações de fibonacci2.' },
+    { q: 'Em um problema de busca em grafo, o tamanho da entrada é normalmente…',
+      options: ['o número de vértices e arestas', 'o valor do maior peso de aresta', 'o número de bits do processador', 'sempre o número de vértices apenas'],
+      answer: 0, explain: 'A definição de "tamanho" depende do problema. Em ordenação é o número de elementos; em grafos, vértices e arestas.' },
+    { q: 'A análise teórica…',
+      options: ['depende do hardware usado', 'exige implementar e executar o algoritmo', 'caracteriza a eficiência em função do tamanho da entrada, considerando todas as entradas possíveis', 'dá o tempo exato em milissegundos'],
+      answer: 2, explain: 'Ela é uma aproximação, feita sobre o pseudocódigo e independente do ambiente.' },
+  ]);
+});
+</script>
+</body>
+</html>

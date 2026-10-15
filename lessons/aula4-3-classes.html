@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Aula 4.3 · Classes de comportamento</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../assets/style.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="../assets/common.js"></script>
+<script defer src="../assets/chart.js"></script>
+<script defer src="../assets/quiz.js"></script>
+</head>
+<body>
+<nav class="topbar">
+  <a href="../index.html">← Índice</a>
+  <span>Aula 4 · Análise assintótica (Parte 4)</span>
+  <span class="spacer"></span>
+  <a href="../reference/aula4.html">Folha de referência</a>
+  <button class="theme-btn" type="button">tema</button>
+</nav>
+<main>
+<p class="kicker">Aula 4 · Lição 3 de 3</p>
+<h1>Principais classes de comportamento</h1>
+<p class="lead">Slides 29 a 37 da Aula 4: as classes de complexidade que aparecem o tempo todo, o que cada uma significa na prática e como elas se ordenam.</p>
+
+<h2>1. As classes, uma a uma</h2>
+<div class="table-wrap"><table>
+  <tr><th>Classe</th><th>Nome</th><th>Características (slides)</th></tr>
+  <tr><td>$O(1)$</td><td>constante</td><td>O uso do algoritmo independe de $n$. As instruções executam um número fixo de vezes.</td></tr>
+  <tr><td>$O(\log n)$</td><td>logarítmica</td><td>Típica em algoritmos que transformam um problema em outros menores, como a busca binária. Para <b>dobrar</b> $\log n$, é preciso elevar $n$ <b>ao quadrado</b>.</td></tr>
+  <tr><td>$O(n)$</td><td>linear</td><td>Um pequeno trabalho sobre cada elemento da entrada. É a melhor situação possível para um algoritmo que precisa processar ou produzir $n$ elementos. Quando $n$ dobra, o tempo dobra.</td></tr>
+  <tr><td>$O(n \log n)$</td><td>"n log n"</td><td>Típica em algoritmos que quebram o problema em outros menores, resolvem cada um independentemente e juntam as soluções depois (divisão e conquista: MergeSort).</td></tr>
+  <tr><td>$O(n^2)$</td><td>quadrática</td><td>Ocorre quando os elementos são processados <b>aos pares</b>, muitas vezes com um laço dentro de outro. Útil para problemas relativamente pequenos.</td></tr>
+  <tr><td>$O(n^3)$</td><td>cúbica</td><td>Útil apenas para problemas pequenos. Com $n = 100$, são da ordem de <b>1 milhão</b> de operações.</td></tr>
+  <tr><td>$O(2^n)$</td><td>exponencial</td><td>Geralmente não é útil na prática. Ocorre quando se usa <b>força bruta</b>. Com $n = 20$, são cerca de <b>1 milhão</b> de operações.</td></tr>
+  <tr><td>$O(n!)$</td><td>exponencial (fatorial)</td><td>Comportamento muito pior que $O(2^n)$. Também aparece com força bruta. Com $n = 20$: $20! = 2\,432\,902\,008\,176\,640\,000$, um número com 19 dígitos.</td></tr>
+</table></div>
+
+<div class="box tip">
+  <span class="tag">"Para dobrar $\log n$, eleve $n$ ao quadrado"</span>
+  <p>$\log_2(n^2) = 2\log_2 n$. Exemplo: $\log_2 1\,000 \approx 10$ e $\log_2 1\,000\,000 \approx 20$. Mil vezes mais dados custam só o dobro de passos. É por isso que a busca binária acha um nome entre 1 bilhão em cerca de 30 comparações.</p>
+</div>
+
+<h2>2. O que acontece quando $n$ dobra</h2>
+<div class="widget">
+  <div class="wtitle">Escolha $n$ e veja quanto cada classe cresce ao passar para $2n$</div>
+  <div class="controls"><label>$n$ = <b id="dnv">10</b> <input type="range" id="dn" min="2" max="60" value="10"></label></div>
+  <div class="table-wrap" id="dtab"></div>
+  <p class="caption">A coluna "fator" é $T(2n)/T(n)$. Nas classes polinomiais o fator é fixo (2, 4, 8). Na exponencial ele cresce com $n$: $2^{2n}/2^n = 2^n$.</p>
+</div>
+
+<h2>3. A ordem das classes</h2>
+$$1 \;\prec\; \log n \;\prec\; n \;\prec\; n\log n \;\prec\; n^2 \;\prec\; n^3 \;\prec\; 2^n \;\prec\; n!$$
+<p>Aqui, $f \prec g$ quer dizer $\lim f/g = 0$: $f = O(g)$, mas $f \ne \Omega(g)$. Duas regras ajudam a encaixar funções que não estão na lista:</p>
+<ul>
+  <li><b>Qualquer potência de $\log$ perde para qualquer potência de $n$:</b> $(\log n)^{10} \prec n^{0{,}1}$.</li>
+  <li><b>Qualquer polinômio perde para qualquer exponencial:</b> $n^{100} \prec 1{,}01^n$.</li>
+</ul>
+<p>Entre potências de $n$, compare os expoentes: $\sqrt{n} = n^{0{,}5} \prec n \prec n^{1{,}5} = n\sqrt n \prec n^2$.</p>
+
+<div class="widget">
+  <div class="wtitle">As classes em escala log</div>
+  <div class="controls"><label>n até <b id="gxv">40</b> <input type="range" id="gx" min="5" max="100" value="40"></label></div>
+  <div id="growth"></div>
+  <p class="caption">Em escala log, as polinomiais viram curvas que se achatam, e as exponenciais viram retas (ou curvas para cima, no caso de $n!$). Clique na legenda para isolar funções.</p>
+</div>
+
+<h2>4. Quiz de recordação</h2>
+<div id="quiz"></div>
+
+<h2>5. Exercício</h2>
+<div class="exercise">
+  <span class="tag">Exercício 4.3</span>
+  <p>Ordene da que cresce mais devagar para a que cresce mais rápido, agrupando as que têm a <b>mesma</b> taxa (são $\Theta$ uma da outra). Justifique pelo menos três comparações com limite.</p>
+  $$100n,\quad n\log n,\quad n^{1{,}5},\quad \log(n^2),\quad 2^n,\quad n^3,\quad n!,\quad \sqrt{n},\quad 3^n,\quad 5n + \log n,\quad \log n$$
+  <p class="caption">Responda no chat. Dica: $\log(n^2) = 2\log n$, e $\lim 2^n/3^n = \lim (2/3)^n$.</p>
+</div>
+
+<div class="pager">
+  <a href="aula4-2-theta.html"><small>← anterior</small>4.2 Notação Θ</a>
+  <a class="next" href="aula5-1-recorrencias.html"><small>próxima →</small>Aula 5 · Recorrências</a>
+</div>
+</main>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const lg = (n) => (n <= 1 ? 0 : Math.log2(n));
+  const fact = (n) => { let r = 1; for (let i = 2; i <= n; i++) r *= i; return r; };
+  const cls = [
+    ['1', () => 1], ['log n', lg], ['n', (n) => n], ['n log n', (n) => n * lg(n)],
+    ['n²', (n) => n * n], ['n³', (n) => n ** 3], ['2ⁿ', (n) => 2 ** n], ['n!', fact],
+  ];
+  const fmt = LineChart.fmt;
+  const dn = document.getElementById('dn');
+  function drawD() {
+    const n = +dn.value; document.getElementById('dnv').textContent = n;
+    const t = APA.el('table');
+    t.append(APA.el('tr', {}, APA.el('th', {}, 'classe'), APA.el('th', { class: 'num' }, `T(${n})`), APA.el('th', { class: 'num' }, `T(${2 * n})`), APA.el('th', { class: 'num' }, 'fator')));
+    for (const [name, f] of cls) {
+      const a = f(n), b = f(2 * n);
+      t.append(APA.el('tr', {}, APA.el('td', {}, name), APA.el('td', { class: 'num' }, fmt(a)), APA.el('td', { class: 'num' }, fmt(b)), APA.el('td', { class: 'num' }, a ? '× ' + fmt(b / a) : '—')));
+    }
+    document.getElementById('dtab').replaceChildren(t);
+  }
+  dn.oninput = drawD; drawD();
+
+  const colors = ['var(--series-6)', 'var(--series-3)', 'var(--series-1)', 'var(--series-4)', 'var(--series-2)', 'var(--series-7)', 'var(--series-5)', 'var(--series-8)'];
+  const g = LineChart.mount(document.getElementById('growth'), {
+    series: cls.map(([name, f], k) => ({ name, f, color: colors[k] })).reverse(),
+    xMin: 1, xMax: 40, xLabel: 'n', yLabel: 'T(n)', log: true, tableXs: [10, 20, 40, 100],
+  });
+  const gx = document.getElementById('gx');
+  gx.oninput = () => { document.getElementById('gxv').textContent = gx.value; g.update({ xMax: +gx.value }); };
+
+  Quiz.mount(document.getElementById('quiz'), [
+    { q: 'Um algoritmo que processa os elementos aos pares, com um laço dentro de outro, tipicamente é…',
+      options: ['$O(n)$', '$O(n^2)$', '$O(\\log n)$', '$O(2^n)$'], answer: 1, explain: 'Slide 33.' },
+    { q: 'Para dobrar o valor de $\\log n$, é preciso…',
+      options: ['dobrar $n$', 'elevar $n$ ao quadrado', 'somar 1 a $n$', 'multiplicar $n$ por 10'], answer: 1, explain: '$\\log(n^2) = 2\\log n$.' },
+    { q: 'Qual a melhor complexidade possível para um algoritmo que precisa ler todos os $n$ elementos da entrada?',
+      options: ['$O(1)$', '$O(\\log n)$', '$O(n)$', '$O(n\\log n)$'], answer: 2, explain: 'Só ler a entrada já custa $n$.' },
+    { q: 'Com $n = 20$, aproximadamente quantas operações faz um algoritmo $2^n$?',
+      options: ['400', '8 000', '1 milhão', '1 bilhão'], answer: 2, explain: '$2^{20} = 1\\,048\\,576$.' },
+    { q: 'Qual cresce mais rápido?',
+      options: ['$n^{100}$', '$1{,}01^n$', 'empatam', 'depende de $n_0$'], answer: 1, explain: 'Toda exponencial com base maior que 1 vence qualquer polinômio, ainda que só para $n$ enorme.' },
+  ]);
+});
+</script>
+</body>
+</html>

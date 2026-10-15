@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Aula 3.2 · Notação O</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../assets/style.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="../assets/common.js"></script>
+<script defer src="../assets/chart.js"></script>
+<script defer src="../assets/quiz.js"></script>
+</head>
+<body>
+<nav class="topbar">
+  <a href="../index.html">← Índice</a>
+  <span>Aula 3 · Análise assintótica (Parte 3)</span>
+  <span class="spacer"></span>
+  <a href="../reference/aula3.html">Folha de referência</a>
+  <button class="theme-btn" type="button">tema</button>
+</nav>
+<main>
+<p class="kicker">Aula 3 · Lição 2 de 2</p>
+<h1>Notação O: limite assintótico superior</h1>
+<p class="lead">Slides 5 a 35 da Aula 3. Primeiro a ideia, construída com os exemplos do professor. Depois a definição formal com $c$ e $n_0$. Por fim, os <b>dois jeitos de provar</b>: pela definição, achando $c$ e $n_0$ explícitos, e pelo limite, que é o que o professor usa no gabarito.</p>
+
+<div class="toc">
+  <b>Nesta lição</b>
+  <ol>
+    <li><a href="#ideia">Limite superior: a ideia</a></li>
+    <li><a href="#n0">O primeiro ajuste: $n_0$</a></li>
+    <li><a href="#c">O segundo ajuste: a constante $c$</a></li>
+    <li><a href="#def">Definição formal</a></li>
+    <li><a href="#widget">Laboratório de $c$ e $n_0$</a></li>
+    <li><a href="#prova-def">Como provar 1: pela definição ($c$ e $n_0$ explícitos)</a></li>
+    <li><a href="#nao-e">Como provar que <b>não</b> é $O$</a></li>
+    <li><a href="#prova-lim">Como provar 2: pelo limite (método do gabarito)</a></li>
+    <li><a href="#apertado">Limite "mais apertado", pior caso e melhor caso</a></li>
+    <li><a href="#quiz">Quiz</a> · <a href="#exercicio">Exercício</a></li>
+  </ol>
+</div>
+
+<h2 id="ideia">1. Limite superior: a ideia</h2>
+<p>Dada uma função $f(n)$ que representa o tempo de execução de um algoritmo, a notação $O$ ajuda a determinar um <b>limite superior</b> para ela, por meio de uma função $g(n)$. O tempo do algoritmo <b>não pode ser superior</b> a $g(n)$ <b>a partir de um determinado valor de entrada</b>.</p>
+
+<h3>Exemplo dos slides: $f(n) = n^2 - 5n + 8$</h3>
+<p><b>Tentativa 1: $g(n) = 10n$.</b> Para $n$ pequeno, $g$ fica acima de $f$ e parece um limite superior. Mas será que é mesmo?</p>
+<p>$f(n) \le 10n \iff n^2 - 15n + 8 \le 0$, que só vale entre as raízes, aproximadamente $0{,}55 \le n \le 14{,}45$. <b>A partir de $n = 15$, $f$ passa $g$ e nunca mais volta.</b> Uma parábola sempre acaba ultrapassando uma reta. Logo, $10n$ <b>não</b> é um limite superior para $f$.</p>
+<p class="caption">No slide, o gráfico mostra o cruzamento perto de $n = 6$, porque a reta desenhada parece ser $n + 9$, e não $10n$. A conclusão é a mesma: depois de certo $n$, a reta deixa de ser limite.</p>
+<p>A pergunta do professor: do ponto de vista de uma análise <b>geral</b>, o que interessa mais, o consumo para $n$ pequeno ou para $n$ grande? <b>Para $n$ grande.</b></p>
+
+<h2 id="n0">2. O primeiro ajuste: $n_0$</h2>
+<p><b>Tentativa 2: $g(n) = n^2$.</b> Agora o problema é outro:</p>
+$$f(n) \le n^2 \iff n^2 - 5n + 8 \le n^2 \iff 8 \le 5n \iff n \ge 1{,}6.$$
+<p>Então $g$ é limite superior <b>somente para $n \ge 2$</b>. Em $n = 0$ ou $n = 1$, $f$ fica acima ($f(1) = 4 > 1$). Mas, como o comportamento para $n$ pequeno não importa:</p>
+<div class="box def">
+  <span class="tag">A constante $n_0$</span>
+  <p>Usamos uma constante $n_0$ para dizer <b>a partir de que ponto o limite é válido</b>. Aqui, $n_0 = 2$.</p>
+  <p>Pode parecer "roubado", mas faz parte das simplificações desse tipo de análise: queremos a visão geral do algoritmo.</p>
+</div>
+
+<h3>Como se lê</h3>
+<p>$f = O(g)$ se lê "a função $f$ <b>está em</b> Ó de $g$", "$f$ <b>está na ordem</b> Ó de $g$" ou "$f$ <b>é</b> Ó de $g$".</p>
+<p>Sejam $f(n)$ e $g(n)$ duas funções <b>assintoticamente não negativas</b>. Dizer que $f = O(g)$ significa que $f$ <b>não cresce mais rapidamente</b> que $g$. Nada impede que as duas cresçam <b>na mesma proporção</b>. Por isso, $f = O(g)$ é uma <b>leve analogia</b> a $f \le g$.</p>
+
+<h2 id="c">3. O segundo ajuste: a constante $c$</h2>
+<p>Outro exemplo: $f(n) = 2n^2 + 1$. Pela definição informal, $g(n) = n^2$ deveria servir, já que as duas são quadráticas e têm a mesma taxa de crescimento. Mas no gráfico, $g$ fica <b>sempre abaixo</b> de $f$: $n^2 &lt; 2n^2 + 1$ para todo $n$, e nenhum $n_0$ resolve.</p>
+<div class="box def">
+  <span class="tag">A constante $c$</span>
+  <p>A definição formal resolve isso com uma <b>segunda constante positiva</b>, $c$: mostramos que $f(n)$ não cresce mais rapidamente que $c \cdot g(n)$.</p>
+</div>
+<p>Com $c = 3$: $2n^2 + 1 \le 3n^2 \iff 1 \le n^2 \iff n \ge 1$. Então $c = 3$ e $n_0 = 1$ funcionam. Não é o único valor possível: $c = 2{,}5$ com $n_0 = 2$ também serve. O $c$ "absorve" o coeficiente, e é por isso que coeficientes não importam.</p>
+
+<h2 id="def">4. Definição formal</h2>
+<div class="box def">
+  <span class="tag">Definição (slide 26)</span>
+  <p>$f(n) = O(g(n))$ <b>se, e somente se</b>:</p>
+  <ul>
+    <li>$f$ e $g$ são funções <b>assintoticamente não negativas</b>; e</li>
+    <li>existem duas <b>constantes positivas</b> $c$ e $n_0$ tais que
+      $$f(n) \le c \cdot g(n) \quad \text{para todo } n \ge n_0.$$</li>
+  </ul>
+</div>
+<svg viewBox="0 0 420 220" style="max-width:420px;display:block;margin:8px auto" role="img" aria-label="Figura: c·g(n) acima de f(n) a partir de n0">
+  <line x1="40" y1="190" x2="400" y2="190" stroke="var(--axis)"/>
+  <line x1="40" y1="190" x2="40" y2="15" stroke="var(--axis)"/>
+  <path d="M40,120 C70,170 90,180 110,90 C130,20 150,150 175,140 C230,110 300,95 390,70" fill="none" stroke="var(--series-2)" stroke-width="2"/>
+  <path d="M40,150 C100,130 140,110 175,100 C250,80 320,60 390,25" fill="none" stroke="var(--series-1)" stroke-width="2"/>
+  <line x1="152" y1="190" x2="152" y2="108" stroke="var(--muted)" stroke-dasharray="4 4"/>
+  <text x="152" y="207" text-anchor="middle" fill="var(--ink-2)" font-size="13">n₀</text>
+  <text x="392" y="22" fill="var(--series-1)" font-size="13" text-anchor="end">c·g(n)</text>
+  <text x="392" y="88" fill="var(--series-2)" font-size="13" text-anchor="end">f(n)</text>
+  <text x="400" y="207" fill="var(--ink-2)" font-size="13" text-anchor="end">n</text>
+</svg>
+<p class="caption" style="text-align:center">Antes de $n_0$, $f$ pode fazer o que quiser. Depois de $n_0$, fica sempre abaixo de $c \cdot g$ (Cormen, figura 3.1b).</p>
+
+<div class="box warn">
+  <span class="tag">Detalhes que caem</span>
+  <ul>
+    <li>É <b>para todo</b> $n \ge n_0$, não "para algum" $n \ge n_0$.</li>
+    <li>$f$ e $g$ não podem ser quaisquer funções: precisam ser <b>assintoticamente não negativas</b>.</li>
+    <li>O limite <b>não precisa</b> valer para todo $n$, só a partir de $n_0$.</li>
+  </ul>
+</div>
+
+<h2 id="widget">5. Laboratório de $c$ e $n_0$</h2>
+<div class="widget">
+  <div class="wtitle">Escolha $f$, $g$ e $c$. A página calcula o menor $n_0$ que funciona.</div>
+  <div class="controls" id="pairBtns"></div>
+  <div class="controls">
+    <label>$c$ = <b id="cv">3</b> <input type="range" id="cr" min="0.5" max="30" step="0.5" value="3"></label>
+    <label>n até <b id="nv">40</b> <input type="range" id="nr" min="5" max="200" value="40"></label>
+  </div>
+  <div id="labChart"></div>
+  <div id="labInfo" class="box tip" style="margin-top:8px"></div>
+</div>
+
+<h2 id="prova-def">6. Como provar 1: pela definição ($c$ e $n_0$ explícitos)</h2>
+<p>Exemplo do slide: o algoritmo $A_1$ tem $f_1(n) = 2n + 20$. Queremos provar que $f_1 = O(n)$. Pela definição, devemos encontrar $c$ e $n_0$ tais que $2n + 20 \le c \cdot n$ para todo $n \ge n_0$.</p>
+
+<h3>Caminho A: escolher $c$ e resolver a desigualdade para achar $n_0$</h3>
+<p>O gráfico do slide sugere $c = 3$:</p>
+$$2n + 20 \le 3n \iff 20 \le n.$$
+<p>Logo, $c = 3$ e $n_0 = 20$.</p>
+
+<h3>Caminho B: escolher $n_0$ e "majorar" termo a termo para achar $c$</h3>
+<p>Para $n \ge 1$, vale $20 \le 20n$, porque multiplicar 20 por um $n \ge 1$ não diminui. Então:</p>
+$$2n + 20 \le 2n + 20n = 22n \quad \text{para todo } n \ge 1.$$
+<p>Logo, $c = 22$ e $n_0 = 1$. As duas respostas estão certas: a definição pede <b>que exista</b> um par, não um par específico.</p>
+
+<div class="box prof">
+  <span class="tag">Modelo de redação para a prova</span>
+  <p><b>Afirmação:</b> $f_1(n) = 2n + 20 = O(n)$.</p>
+  <p><b>Prova:</b> Pela definição, basta mostrar constantes positivas $c$ e $n_0$ tais que $2n + 20 \le c\,n$ para todo $n \ge n_0$. Tome $c = 3$ e $n_0 = 20$. Para todo $n \ge 20$, temos $20 \le n$, logo $2n + 20 \le 2n + n = 3n = c\,n$. Portanto $f_1(n) = O(n)$. ∎</p>
+</div>
+
+<h3>A técnica de majorar, em geral</h3>
+<p>Para provar que um polinômio é $O(n^k)$, onde $k$ é o maior expoente:</p>
+<ol class="steps">
+  <li><b>Jogue fora os termos negativos.</b> Eles só diminuem $f$, e se $f$ sem eles está abaixo, $f$ com eles também está.</li>
+  <li><b>Suba cada termo positivo para $n^k$</b>, usando que, para $n \ge 1$: $1 \le n \le n^2 \le n^3 \le \dots$</li>
+  <li><b>Some os coeficientes</b>: isso dá o $c$. O $n_0$ é 1.</li>
+</ol>
+<p><b>Exemplo:</b> $T_p(n) = 5n^2 + 4n - 7$ (pior caso do InsertionSort). Para $n \ge 1$:</p>
+$$5n^2 + 4n - 7 \;\le\; 5n^2 + 4n \;\le\; 5n^2 + 4n^2 \;=\; 9n^2.$$
+<p>Logo $T_p(n) = O(n^2)$ com $c = 9$ e $n_0 = 1$.</p>
+<p><b>Exemplo:</b> $T(n) = 9n^2 + n + 2$ (soma de matrizes). Para $n \ge 1$: $9n^2 + n + 2 \le 9n^2 + n^2 + 2n^2 = 12n^2$. Então $c = 12$ e $n_0 = 1$.</p>
+
+<h2 id="nao-e">7. Como provar que <b>não</b> é $O$</h2>
+<p>Use contradição: suponha que existem $c$ e $n_0$ e chegue a um absurdo.</p>
+<div class="box prof">
+  <span class="tag">Exemplo: $n^2 \ne O(n)$</span>
+  <p>Suponha, por absurdo, que existem $c &gt; 0$ e $n_0$ com $n^2 \le c\,n$ para todo $n \ge n_0$. Dividindo por $n &gt; 0$: $n \le c$ para todo $n \ge n_0$. Mas isso é falso para $n = \max(n_0, \lceil c \rceil + 1)$, que é $\ge n_0$ e $&gt; c$. Absurdo. Logo $n^2 \ne O(n)$. ∎</p>
+</div>
+<p>A ideia: depois de dividir tudo, sobra "uma coisa que cresce sem limite $\le$ uma constante", e isso nunca vale para todo $n$ grande.</p>
+
+<h2 id="prova-lim">8. Como provar 2: pelo limite (método do gabarito)</h2>
+<p>É o método que o professor mostra nos slides 31 a 33 e usa no gabarito da lista. Calcule</p>
+$$L = \lim_{n \to \infty} \frac{f(n)}{g(n)}$$
+<div class="table-wrap"><table>
+  <tr><th>Resultado</th><th>Significado</th><th>$f = O(g)$?</th></tr>
+  <tr><td>$L = 0$</td><td>$g$ cresce <b>mais rápido</b> que $f$</td><td>Sim</td></tr>
+  <tr><td>$0 &lt; L &lt; \infty$ (uma constante)</td><td>mesma taxa de crescimento</td><td>Sim</td></tr>
+  <tr><td>$L = \infty$</td><td>$f$ cresce <b>mais rápido</b> que $g$</td><td>Não</td></tr>
+</table></div>
+<p><b>Exemplos dos slides:</b></p>
+$$\lim_{n\to\infty} \frac{2n + 20}{n} = \lim_{n\to\infty}\left(2 + \frac{20}{n}\right) = 2 \;\Rightarrow\; \text{mesma taxa}, \; 2n + 20 = O(n).$$
+$$\lim_{n\to\infty} \frac{2n + 20}{n^2} = \lim_{n\to\infty}\left(\frac{2}{n} + \frac{20}{n^2}\right) = 0 \;\Rightarrow\; g \text{ cresce mais rápido}, \; 2n + 20 = O(n^2).$$
+
+<div class="box tip">
+  <span class="tag">Por que o limite funciona (ligação com $c$ e $n_0$)</span>
+  <p>Se $\lim f/g = L &lt; \infty$, então, para $n$ grande o bastante, $f(n)/g(n)$ fica perto de $L$, em particular abaixo de $L + 1$. Isso dá $f(n) \le (L + 1)\,g(n)$ a partir de algum $n_0$, ou seja, $c = L + 1$. O limite é um atalho que garante que $c$ e $n_0$ existem.</p>
+</div>
+
+<h3>Limites com polinômios: divida pela maior potência de $n$</h3>
+$$\lim_{n\to\infty} \frac{5n^2 + 4n - 7}{n^2} = \lim_{n\to\infty}\left(5 + \frac{4}{n} - \frac{7}{n^2}\right) = 5.$$
+
+<h3>Limites com $\log$, $2^n$, $n!$: regra de L'Hôpital</h3>
+<p>Quando dá $\frac{\infty}{\infty}$ e não simplifica, derive em cima e embaixo. Isso é necessário na questão 3 da lista. Exemplo:</p>
+$$\lim_{n\to\infty} \frac{n \log_2 n}{n^2} = \lim_{n\to\infty} \frac{\log_2 n}{n} \overset{\text{L'H}}{=} \lim_{n\to\infty} \frac{\frac{1}{n \ln 2}}{1} = 0.$$
+<p>Logo $n\log n = O(n^2)$. Lembre: $(\log_2 n)' = \frac{1}{n \ln 2}$, $(n^k)' = k\,n^{k-1}$ e $(2^n)' = 2^n \ln 2$.</p>
+
+<h2 id="apertado">9. Limite "mais apertado", pior caso e melhor caso</h2>
+<ul>
+  <li>Ao analisar algoritmos, queremos a taxa de crescimento <b>mais próxima possível</b> do comportamento real, ou seja, um $g(n)$ com a <b>mesma taxa</b> de crescimento. É o limite superior <b>mais apertado</b>, que é como a lista pergunta na questão 2c.</li>
+  <li>Mas, pela definição, <b>não está incorreto</b> afirmar que $f_1(n) = 2n + 20 = O(n^2)$. Só é um limite <b>folgado</b>.</li>
+  <li>A notação $O$ é muito usada para o <b>pior caso</b>: nele queremos exatamente um limite superior para o tempo, e o algoritmo não requer mais tempo que $O(g(n))$.</li>
+  <li>Usar $O$ no <b>melhor caso</b> é correto? <b>Sim.</b> Mas existe uma notação <b>mais apropriada</b> para o melhor caso. É assunto da Aula 4 ($\Omega$ e $\Theta$).</li>
+</ul>
+
+<h2 id="quiz">10. Quiz de recordação</h2>
+<div id="quiz"></div>
+
+<h2 id="exercicio">11. Exercício (estilo da lista)</h2>
+<div class="exercise">
+  <span class="tag">Exercício 3.2</span>
+  <ol type="a">
+    <li>Prove <b>pela definição</b>, com $c$ e $n_0$ explícitos, que o melhor caso do SelectionSort, $T_m(n) = 3n^2 + 3n - 5$, é $O(n^2)$.</li>
+    <li>Prove o mesmo resultado <b>pelo limite</b>.</li>
+    <li>Prove que $3n^2 + 3n - 5 \ne O(n)$.</li>
+    <li>O melhor caso do InsertionSort, $13n - 11$, é $O(n^2)$? É o limite superior mais apertado? Justifique.</li>
+  </ol>
+  <p class="caption">Responda no chat. Use o modelo de redação da seção 6.</p>
+</div>
+
+<div class="pager">
+  <a href="aula3-1-taxa-de-crescimento.html"><small>← anterior</small>3.1 Taxa de crescimento</a>
+  <a class="next" href="aula4-1-omega.html"><small>próxima →</small>4.1 Notação Ω</a>
+</div>
+</main>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const pairs = [
+    { label: '2n + 20 vs n', fn: 'f(n) = 2n + 20', gn: 'n', f: (n) => 2 * n + 20, g: (n) => n, c: 3 },
+    { label: '2n + 20 vs n²', fn: 'f(n) = 2n + 20', gn: 'n²', f: (n) => 2 * n + 20, g: (n) => n * n, c: 1 },
+    { label: '2n² + 1 vs n²', fn: 'f(n) = 2n² + 1', gn: 'n²', f: (n) => 2 * n * n + 1, g: (n) => n * n, c: 3 },
+    { label: 'n² − 5n + 8 vs n²', fn: 'f(n) = n² − 5n + 8', gn: 'n²', f: (n) => n * n - 5 * n + 8, g: (n) => n * n, c: 1 },
+    { label: 'n² − 5n + 8 vs 10n', fn: 'f(n) = n² − 5n + 8', gn: '10n', f: (n) => n * n - 5 * n + 8, g: (n) => 10 * n, c: 1 },
+    { label: '5n² + 4n − 7 vs n²', fn: 'f(n) = 5n² + 4n − 7', gn: 'n²', f: (n) => 5 * n * n + 4 * n - 7, g: (n) => n * n, c: 9 },
+  ];
+  let cur = pairs[0];
+  const cr = document.getElementById('cr'), nr = document.getElementById('nr');
+  const chart = LineChart.mount(document.getElementById('labChart'), { series: [], xMin: 1, xMax: 40, xLabel: 'n', yLabel: 'valor', tableXs: [1, 2, 5, 10, 20, 40] });
+  const fmtc = (c) => String(c).replace('.', ',');
+  function n0For(c) {
+    const LIM = 100000;
+    let last = 0; // último n em que f > c·g
+    for (let n = 1; n <= LIM; n++) if (cur.f(n) > c * cur.g(n)) last = n;
+    if (last >= LIM - 1000) return null;
+    return last + 1;
+  }
+  function draw() {
+    const c = +cr.value, N = +nr.value;
+    document.getElementById('cv').textContent = fmtc(c); document.getElementById('nv').textContent = N;
+    chart.update({ xMax: N, series: [
+      { name: cur.fn, f: cur.f, color: 'var(--series-2)' },
+      { name: `c·g(n) = ${fmtc(c)}·${cur.gn}`, f: (n) => c * cur.g(n), color: 'var(--series-1)' },
+    ] });
+    const n0 = n0For(c), info = document.getElementById('labInfo');
+    info.innerHTML = n0 === null
+      ? `<b>Nenhum $n_0$ funciona com $c = ${fmtc(c)}$</b>: até $n = 100\\,000$, $f$ continua passando $c\\cdot g$ (e só piora). Se nenhum $c$ resolve, então $f \\ne O(g)$: $f$ cresce mais rápido que $g$.`
+      : `Com $c = ${fmtc(c)}$, o menor $n_0$ é <b>${n0}</b>: $f(n) \\le ${fmtc(c)}\\cdot ${cur.gn.replace('²', '^2')}$ para todo $n \\ge ${n0}$ (verificado até $100\\,000$). ` +
+        (n0 > 1 ? `Em $n = ${n0 - 1}$ ainda falha: $f(${n0 - 1}) = ${cur.f(n0 - 1)}$ e $c\\cdot g(${n0 - 1}) = ${(c * cur.g(n0 - 1)).toString().replace('.', ',')}$.` : 'Vale desde $n = 1$.');
+    APA.renderMath(info);
+  }
+  const btns = document.getElementById('pairBtns');
+  pairs.forEach((p, k) => btns.append(APA.el('button', { class: 'btn' + (k ? '' : ' on'), type: 'button', onclick: (e) => {
+    [...btns.children].forEach((b) => b.classList.remove('on')); e.target.classList.add('on');
+    cur = p; cr.value = p.c; draw();
+  } }, p.label)));
+  cr.oninput = draw; nr.oninput = draw; draw();
+
+  Quiz.mount(document.getElementById('quiz'), [
+    { q: 'Na definição de $f = O(g)$, a desigualdade $f(n) \\le c\\,g(n)$ deve valer…',
+      options: ['para algum $n \\ge n_0$', 'para todo $n \\ge n_0$', 'para todo $n \\ge 0$', 'só para $n = n_0$'], answer: 1,
+      explain: 'É "para todo": a desigualdade precisa valer em todos os $n$ a partir de $n_0$.' },
+    { q: 'Para que serve a constante $c$?',
+      options: ['Para ignorar valores pequenos de $n$', 'Para permitir que $f$ e $g$ difiram por um fator constante (absorve coeficientes)', 'Para contar operações', 'Para definir o melhor caso'], answer: 1,
+      explain: 'Sem $c$, $2n^2+1$ não seria $O(n^2)$. Quem ignora $n$ pequeno é o $n_0$.' },
+    { q: '$\\lim_{n\\to\\infty} f(n)/g(n) = 0$ significa que…',
+      options: ['$f = O(g)$ e $g$ cresce mais rápido que $f$', '$f \\ne O(g)$', '$f$ e $g$ têm a mesma taxa', '$f$ cresce mais rápido'], answer: 0,
+      explain: 'Ex.: $(2n+20)/n^2 \\to 0$, logo $2n + 20 = O(n^2)$.' },
+    { q: '$2n + 20 = O(n^2)$ é…',
+      options: ['falso', 'verdadeiro, mas não é o limite mais apertado', 'verdadeiro e é o mais apertado', 'indefinido'], answer: 1,
+      explain: 'Os slides 32 e 33 dizem exatamente isso. O mais apertado é $O(n)$.' },
+    { q: 'Qual par $(c, n_0)$ prova que $2n^2 + 1 = O(n^2)$?',
+      options: ['$c = 1, n_0 = 1$', '$c = 2, n_0 = 1$', '$c = 3, n_0 = 1$', 'nenhum'], answer: 2,
+      explain: '$2n^2 + 1 \\le 3n^2 \\iff n^2 \\ge 1$. Com $c = 2$, falha sempre por causa do $+1$.' },
+  ]);
+});
+</script>
+</body>
+</html>

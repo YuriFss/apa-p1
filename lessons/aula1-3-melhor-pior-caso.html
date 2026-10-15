@@ -1,0 +1,387 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Aula 1.3 · Melhor e pior caso</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../assets/style.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="../assets/common.js"></script>
+<script defer src="../assets/player.js"></script>
+<script defer src="../assets/quiz.js"></script>
+</head>
+<body>
+<nav class="topbar">
+  <a href="../index.html">← Índice</a>
+  <span>Aula 1 · Análise assintótica (Parte 1)</span>
+  <span class="spacer"></span>
+  <a href="../reference/aula1.html">Folha de referência</a>
+  <button class="theme-btn" type="button">tema</button>
+</nav>
+<main>
+<p class="kicker">Aula 1 · Lição 3 de 3</p>
+<h1>Melhor caso, pior caso e caso médio</h1>
+<p class="lead">Quando o número de execuções de uma linha depende dos <em>valores</em> da entrada, e não só do tamanho $n$, não existe um único $T(n)$. Esta lição cobre os slides 18 a 30 da Aula 1 (ArrayMax e busca sequencial) e é a base das questões 2, 7 e 8 da lista.</p>
+
+<div class="toc">
+  <b>Nesta lição</b>
+  <ol>
+    <li><a href="#problema">O problema: linhas que dependem dos dados</a></li>
+    <li><a href="#cenarios">Os três cenários</a></li>
+    <li><a href="#arraymax">ArrayMax: melhor e pior caso, com animação</a></li>
+    <li><a href="#busca">Busca sequencial, com animação</a></li>
+    <li><a href="#while">O cabeçalho de laço que para cedo</a></li>
+    <li><a href="#medio">Caso médio (noção)</a></li>
+    <li><a href="#metodo">Método para "identifique o melhor e o pior caso"</a></li>
+    <li><a href="#quiz">Quiz</a> · <a href="#exercicio">Exercício</a></li>
+  </ol>
+</div>
+
+<h2 id="problema">1. O problema: linhas que dependem dos dados</h2>
+<p>O professor pergunta: <em>"O que fazer em um caso assim?"</em></p>
+<pre class="code"><span class="fn">ArrayMax</span>(A, n)
+1.  currentMax = A[0]
+2.  <span class="kw">for</span> i = 1 <span class="kw">to</span> n − 1:
+3.     <span class="kw">if</span> A[i] > currentMax:
+4.        currentMax = A[i]
+5.
+6.  <span class="kw">return</span> currentMax</pre>
+<p>As linhas 1, 2, 3 e 6 têm # exec fixo: 1, $n-1$, $n-1$ e 1. Mas a linha 4 só roda quando o teste da linha 3 dá verdadeiro, e isso depende dos <b>valores</b> em $A$, não só de $n$:</p>
+<ul>
+  <li>$A = [9, 1, 2, 3]$: o primeiro já é o maior, e a linha 4 roda <b>0</b> vezes.</li>
+  <li>$A = [1, 2, 3, 9]$: cada elemento é um novo máximo, e a linha 4 roda <b>3</b> vezes.</li>
+</ul>
+<div class="box def">
+  <span class="tag">Ideia central (slide 21)</span>
+  <p>O tempo de execução pode ser influenciado pela <b>organização dos dados</b> de entrada, e não apenas pelo tamanho da entrada.</p>
+</div>
+
+<h2 id="cenarios">2. Os três cenários</h2>
+<p>É inviável analisar cada configuração de entrada possível. Por isso, na análise assintótica, consideramos 3 cenários:</p>
+<div class="table-wrap"><table>
+  <tr><th>Cenário</th><th>O que é</th></tr>
+  <tr><td><b>Melhor caso</b></td><td>Caso otimista: a entrada está organizada da melhor forma possível e o algoritmo executa a <b>menor</b> quantidade possível de passos.</td></tr>
+  <tr><td><b>Pior caso</b></td><td>Caso pessimista: a entrada está organizada da pior forma possível <b>para o algoritmo</b> e ele executa a <b>maior</b> quantidade possível de passos.</td></tr>
+  <tr><td><b>Caso médio</b></td><td>Média dos tempos de execução sobre as entradas possíveis. Frequentemente difícil de determinar.</td></tr>
+</table></div>
+
+<div class="box warn">
+  <span class="tag">Erro clássico</span>
+  <p>O melhor caso <b>não é "n pequeno"</b>. O tamanho $n$ é fixo e arbitrário. O melhor caso é a <b>arrumação</b> dos $n$ valores que faz o algoritmo trabalhar menos. Por isso a resposta sempre descreve a entrada ("o primeiro elemento é o maior", "vetor em ordem crescente") e o $T(n)$ continua sendo função de $n$.</p>
+  <p>"Pior forma <b>para o algoritmo</b>" também importa: um vetor ordenado é o melhor caso para um algoritmo e pode ser o pior para outro.</p>
+</div>
+
+<p><b>Usamos o pior caso com mais frequência</b> porque:</p>
+<ul>
+  <li>ele impõe um <b>limite superior</b> para o número de passos sob <b>qualquer</b> entrada. Nenhuma entrada de tamanho $n$ gasta mais que isso;</li>
+  <li>geralmente é mais simples de avaliar que o caso médio.</li>
+</ul>
+
+<h2 id="arraymax">3. ArrayMax</h2>
+<p>Pergunta dos slides: <em>qual o melhor caso? qual o pior caso?</em> O que varia é quantas vezes a linha 4 roda: no mínimo 0, no máximo $n-1$.</p>
+
+<h3>Melhor caso: o primeiro elemento do vetor A é o maior valor</h3>
+<div class="algo">
+<pre class="panel"><span class="fn">ArrayMax</span>(A, n)
+1.  currentMax = A[0]
+2.  <span class="kw">for</span> i = 1 <span class="kw">to</span> n − 1:
+3.     <span class="kw">if</span> A[i] > currentMax:
+4.        currentMax = A[i]
+5.
+6.  <span class="kw">return</span> currentMax</pre>
+<pre class="panel count"><b># op</b>2
+2
+2
+2
+
+1</pre>
+<pre class="panel count"><b># exec</b>1
+n − 1
+n − 1
+<span class="zero">0</span>
+
+1</pre>
+</div>
+<ol class="steps">
+  <li>Linha 1: indexação + atribuição = 2 op, 1 vez → $2$.</li>
+  <li>Linha 2: <code>for i = 1 to n − 1</code> tem $n-1$ iterações → $2(n-1)$.</li>
+  <li>Linha 3: indexação + comparação = 2 op, em toda iteração → $2(n-1)$.</li>
+  <li>Linha 4: <code>A[0]</code> é o maior, então <code>A[i] > currentMax</code> nunca é verdadeiro → $2 \cdot 0 = 0$.</li>
+  <li>Linha 6: $1$.</li>
+</ol>
+$$T(n) = 2 + 2(n-1) + 2(n-1) + 0 + 1 = 2 + 4n - 4 + 1 = 4n - 1.$$
+<p class="result">Melhor caso: $T(n) = 4n - 1$</p>
+
+<h3>Pior caso: o vetor A contém elementos únicos em ordem crescente</h3>
+<div class="algo">
+<pre class="panel"><span class="fn">ArrayMax</span>(A, n)
+1.  currentMax = A[0]
+2.  <span class="kw">for</span> i = 1 <span class="kw">to</span> n − 1:
+3.     <span class="kw">if</span> A[i] > currentMax:
+4.        currentMax = A[i]
+5.
+6.  <span class="kw">return</span> currentMax</pre>
+<pre class="panel count"><b># op</b>2
+2
+2
+2
+
+1</pre>
+<pre class="panel count"><b># exec</b>1
+n − 1
+n − 1
+n − 1
+
+1</pre>
+</div>
+$$T(n) = 2 + 2(n-1) + 2(n-1) + 2(n-1) + 1 = 2 + 6n - 6 + 1 = 6n - 3.$$
+<p class="result">Pior caso: $T(n) = 6n - 3$</p>
+
+<div class="box tip">
+  <span class="tag">Por que "elementos únicos"?</span>
+  <p>O teste é <code>A[i] > currentMax</code>, com $>$ estrito. Em $[1, 3, 3, 5]$, o segundo 3 <b>não</b> é maior que o 3 atual, e a linha 4 roda só 2 vezes. Para a linha 4 rodar em <b>toda</b> iteração, cada elemento precisa ser estritamente maior que todos os anteriores: valores distintos em ordem crescente. Esse tipo de detalhe vale ponto na justificativa.</p>
+</div>
+
+<p>Qualquer outra entrada fica entre os dois: $4n - 1 \le T(n) \le 6n - 3$.</p>
+
+<div class="widget">
+  <div class="wtitle">Animação: ArrayMax</div>
+  <div class="controls" id="amBtns"></div>
+  <div id="amPlayer"></div>
+</div>
+
+<h2 id="busca">4. Busca sequencial</h2>
+<p>Busca de um elemento $x$ em um vetor $A$. Retorna a posição de $x$, ou $-1$ se ele não estiver no vetor.</p>
+<pre class="code"><span class="fn">buscaSequencial</span>(x, A, n)
+1.  i = 0
+2.  <span class="kw">while</span> i &lt; n <span class="kw">and</span> A[i] ≠ x:
+3.     i = i + 1
+4.  <span class="kw">if</span> i >= n:
+5.     <span class="kw">return</span> −1
+6.  <span class="kw">return</span> i</pre>
+<p>Agora o laço é um <code>while</code> que pode <b>parar cedo</b>, assim que encontra $x$. Defina $n = |A|$, o número de elementos do vetor.</p>
+
+<h3># op de cada linha</h3>
+<ul>
+  <li>Linha 1, <code>i = 0</code>: 1 (atribuição).</li>
+  <li>Linha 2, <code>i &lt; n and A[i] ≠ x</code>: 4 (comparação <code>&lt;</code>, indexação <code>A[i]</code>, comparação <code>≠</code>, operador <code>and</code>).</li>
+  <li>Linha 3, <code>i = i + 1</code>: 2 (soma + atribuição).</li>
+  <li>Linhas 4, 5 e 6: 1 cada (comparação, retorno, retorno).</li>
+</ul>
+
+<h3>Melhor caso: $x$ está na primeira posição ($A[0] = x$)</h3>
+<div class="algo">
+<pre class="panel"><span class="fn">buscaSequencial</span>(x, A, n)
+1.  i = 0
+2.  <span class="kw">while</span> i &lt; n <span class="kw">and</span> A[i] ≠ x:
+3.     i = i + 1
+4.  <span class="kw">if</span> i >= n:
+5.     <span class="kw">return</span> −1
+6.  <span class="kw">return</span> i</pre>
+<pre class="panel count"><b># op</b>1
+4
+2
+1
+1
+1</pre>
+<pre class="panel count"><b># exec</b>1
+1
+0
+1
+0
+1</pre>
+</div>
+<p>O teste do <code>while</code> roda uma vez e já falha, porque $A[0] = x$. O corpo não roda. O <code>if</code> dá falso, então a linha 5 não roda e a linha 6 sim.</p>
+$$T(n) = 1 + 4 + 0 + 1 + 0 + 1 = 7.$$
+<p class="result">Melhor caso: $T(n) = 7$ (constante: não depende de $n$)</p>
+
+<h3>Pior caso: $x$ não está no vetor</h3>
+<div class="algo">
+<pre class="panel"><span class="fn">buscaSequencial</span>(x, A, n)
+1.  i = 0
+2.  <span class="kw">while</span> i &lt; n <span class="kw">and</span> A[i] ≠ x:
+3.     i = i + 1
+4.  <span class="kw">if</span> i >= n:
+5.     <span class="kw">return</span> −1
+6.  <span class="kw">return</span> i</pre>
+<pre class="panel count"><b># op</b>1
+4
+2
+1
+1
+1</pre>
+<pre class="panel count"><b># exec</b>1
+n
+n
+1
+1
+0</pre>
+</div>
+$$T(n) = 1 + 4n + 2n + 1 + 1 + 0 = 6n + 3.$$
+<p class="result">Pior caso: $T(n) = 6n + 3$</p>
+
+<div class="box tip">
+  <span class="tag">E se x estiver na última posição?</span>
+  <p>Parece o pior caso, mas não é. Com $x = A[n-1]$, o corpo roda $n - 1$ vezes e a função retorna pela linha 6. Pela mesma convenção, $T(n) = 1 + 4(n-1) + 2(n-1) + 1 + 1 = 6n - 3$, menor que $6n + 3$. Quando $x$ não existe, o algoritmo percorre o vetor inteiro <b>e ainda</b> faz um último teste que falha por $i = n$. Esse é o máximo de passos. Confira na animação.</p>
+</div>
+
+<div class="widget">
+  <div class="wtitle">Animação: buscaSequencial em A = [4, 8, 15, 16, 23, 42]</div>
+  <div class="controls" id="bsBtns"></div>
+  <div id="bsPlayer"></div>
+</div>
+
+<h2 id="while">5. O cabeçalho de laço que para cedo</h2>
+<p>Reunindo as tabelas do professor, a regra que reproduz todas elas é:</p>
+<div class="box prof">
+  <span class="tag">Convenção do professor: # exec do cabeçalho</span>
+  <p><b># exec do cabeçalho = número de vezes que o corpo executa.</b> O teste final, que falha e encerra o laço, não é contado…</p>
+  <p>…<b>exceto</b> quando o corpo executa 0 vezes. Aí o único teste realizado conta 1. É o melhor caso da busca sequencial, com linha 2 = 1.</p>
+</div>
+<p>Na contagem rigorosa (Cormen), o teste de um laço roda sempre <b>uma vez a mais</b> que o corpo. No pior caso da busca, isso daria $4(n+1)$ na linha 2 e $T(n) = 6n + 7$. A diferença é só a constante, e o formato "$6n$ + constante" não muda. Na prova, siga o professor. Se quiser se proteger, escreva uma linha como "não conto o teste final do laço".</p>
+<div class="box extra">
+  <span class="tag">Detalhe: curto-circuito</span>
+  <p>Quando $i = n$, uma linguagem real nem avalia <code>A[i] ≠ x</code>, porque o <code>and</code> para no primeiro falso, e <code>A[n]</code> estaria fora do vetor. A tabela do professor conta as 4 op mesmo assim. Não perca tempo com isso na prova.</p>
+</div>
+
+<h2 id="medio">6. Caso médio (noção)</h2>
+<p>O slide define o caso médio como a média dos tempos de execução. Mais precisamente (Cormen, seção 2.2), é a média sobre todas as entradas de tamanho $n$, ponderada pela probabilidade de cada uma. Ele é <b>frequentemente difícil de determinar</b>, porque exige supor uma distribuição das entradas.</p>
+<div class="box extra">
+  <span class="tag">Exemplo (fora dos slides)</span>
+  <p>Na busca sequencial, se $x$ está no vetor e é igualmente provável em cada uma das $n$ posições, o corpo do laço roda em média $\frac{0 + 1 + \dots + (n-1)}{n} = \frac{n-1}{2}$ vezes. O custo médio fica em torno de $3n$: cerca da metade do pior caso, mas ainda proporcional a $n$.</p>
+</div>
+<p>O caso médio <b>não</b> é a média aritmética entre melhor e pior caso. Se as entradas de melhor caso forem raríssimas, a média fica muito perto do pior caso.</p>
+
+<h2 id="metodo">7. Método para "identifique o melhor e o pior caso"</h2>
+<ol class="steps">
+  <li><b>Ache as linhas variáveis:</b> as que estão dentro de um <code>if</code>, os laços com condição sobre os dados (<code>while … A[i] ≠ x</code>), os <code>return</code>/<code>quebra</code> dentro de laços e os laços controlados por flag (<code>repita … até !houveTroca</code>).</li>
+  <li><b>Para cada uma, pergunte:</b> qual o mínimo e o máximo de vezes que ela pode rodar?</li>
+  <li><b>Descreva a entrada</b> que produz o mínimo (melhor caso) e a que produz o máximo (pior caso). Não diga "n pequeno". Diga como os valores estão arrumados.</li>
+  <li><b>Monte uma tabela # op / # exec para cada caso</b> e calcule $T(n)$. O professor faz duas tabelas separadas.</li>
+  <li><b>Confira:</b> $T_{\text{melhor}}(n) \le T_{\text{pior}}(n)$ para todo $n$.</li>
+</ol>
+
+<h2 id="quiz">8. Quiz de recordação</h2>
+<div id="quiz"></div>
+
+<h2 id="exercicio">9. Exercício (slide 30 da Aula 1)</h2>
+<div class="exercise">
+  <span class="tag">Exercício 1.3, do próprio professor</span>
+<pre class="code"><span class="fn">contaOcorrencias</span>(x, A, n)
+1.  cont = 0
+2.  <span class="kw">for</span> i = 0 <span class="kw">to</span> n−1:
+3.     <span class="kw">if</span> A[i] == x:
+4.        cont++
+5.  <span class="kw">return</span> cont</pre>
+  <p>1) Identifique o melhor e o pior caso.<br>
+     2) Faça a contagem de passos para o pior caso (e, de bônus, para o melhor).</p>
+  <p class="caption">Responda no chat. Depois desta lição, refazemos as 3 questões do diagnóstico.</p>
+</div>
+
+<div class="pager">
+  <a href="aula1-2-contagem-de-passos.html"><small>← anterior</small>1.2 Contagem de passos</a>
+  <a class="next" href="../reference/aula1.html"><small>resumo →</small>Folha de referência da Aula 1</a>
+</div>
+</main>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  // ---------- ArrayMax ----------
+  function traceMax(A) {
+    const n = A.length, S = [];
+    let cm, best = 0;
+    const snap = (line, note, o = {}) => S.push({
+      line, note, skip: o.skip,
+      vars: { n, i: o.i ?? '—', currentMax: cm ?? '—' },
+      arrays: [{ name: 'A', values: A, marks: { [best]: 'ok', ...(o.marks || {}) }, ptrs: o.ptrs || {} }],
+    });
+    cm = A[0];
+    snap(1, `Linha 1: currentMax = A[0] = ${cm}. Indexação + atribuição → 2 op.`);
+    for (let i = 1; i < n; i++) {
+      snap(2, `Linha 2: iteração i = ${i}.`, { i, ptrs: { [i]: 'i' } });
+      const gt = A[i] > cm;
+      snap(3, `Linha 3: A[${i}] = ${A[i]} > ${cm}? <b>${gt ? 'Sim' : 'Não'}</b>. 2 op.`, { i, ptrs: { [i]: 'i' }, marks: { [i]: 'cmp' } });
+      if (gt) { cm = A[i]; best = i; snap(4, `Linha 4: novo máximo, currentMax = ${cm}. 2 op. <b>Esta é a linha que varia entre melhor e pior caso.</b>`, { i, ptrs: { [i]: 'i' } }); }
+    }
+    snap(2, `Teste final do for (i = ${n}): não conta.`, { i: n, skip: true });
+    const total = S.reduce((s, st) => s + (st.skip ? 0 : { 1: 2, 2: 2, 3: 2, 4: 2, 6: 1 }[st.line]), 0) + 1;
+    snap(6, `Linha 6: return ${cm}. Total = <b>${total}</b>. Compare: melhor caso $4n-1 = ${4 * n - 1}$, pior caso $6n-3 = ${6 * n - 3}$.`, { i: n });
+    return S;
+  }
+  const amInputs = { 'melhor caso: [9, 4, 7, 2, 5]': [9, 4, 7, 2, 5], 'pior caso: [1, 3, 5, 7, 9]': [1, 3, 5, 7, 9], 'misto: [3, 1, 7, 2, 9]': [3, 1, 7, 2, 9], 'com repetido: [1, 3, 3, 5, 5]': [1, 3, 3, 5, 5] };
+  const am = StepPlayer.mount(document.getElementById('amPlayer'), {
+    code: ['ArrayMax(A, n)', 'currentMax = A[0]', 'for i = 1 to n − 1:', '   if A[i] > currentMax:', '      currentMax = A[i]', '', 'return currentMax'],
+    ops: { 1: 2, 2: 2, 3: 2, 4: 2, 6: 1 },
+    steps: traceMax(amInputs['melhor caso: [9, 4, 7, 2, 5]']),
+  });
+  const amBtns = document.getElementById('amBtns');
+  Object.entries(amInputs).forEach(([label, A], k) => amBtns.append(APA.el('button', { class: 'btn' + (k ? '' : ' on'), type: 'button',
+    onclick: (e) => { [...amBtns.children].forEach((b) => b.classList.remove('on')); e.target.classList.add('on'); am.load(traceMax(A)); } }, label)));
+
+  // ---------- busca sequencial ----------
+  const OPS = { 1: 1, 2: 4, 3: 2, 4: 1, 5: 1, 6: 1 };
+  function traceBusca(A, x) {
+    const n = A.length, S = [];
+    let i;
+    const snap = (line, note, o = {}) => S.push({
+      line, note, skip: o.skip,
+      vars: { n, x, i: i ?? '—' },
+      arrays: [{ name: 'A', values: A, marks: o.marks || {}, ptrs: i != null && i < n ? { [i]: 'i' } : {} }],
+    });
+    i = 0;
+    snap(1, 'Linha 1: i = 0. 1 op.');
+    let body = 0;
+    while (true) {
+      const ok = i < n && A[i] !== x;
+      if (!ok) {
+        const why = i >= n ? `i = ${n} não é &lt; n` : `A[${i}] = ${A[i]} é igual a x`;
+        snap(2, `Linha 2: teste falha (${why}). ` + (body > 0
+          ? 'Teste final que encerra o laço: o professor não conta.'
+          : 'O corpo não rodou nenhuma vez, então este único teste <b>conta</b> (4 op).'),
+          { skip: body > 0, marks: i < n ? { [i]: 'ok' } : {} });
+        break;
+      }
+      snap(2, `Linha 2: ${i} &lt; ${n} e A[${i}] = ${A[i]} ≠ ${x} → continua. 4 op.`, { marks: { [i]: 'cmp' } });
+      i++; body++;
+      snap(3, `Linha 3: i = ${i}. 2 op.`);
+    }
+    snap(4, `Linha 4: ${i} >= ${n}? ${i >= n ? 'Sim' : 'Não'}. 1 op.`);
+    const total = () => S.reduce((s, st) => s + (st.skip ? 0 : OPS[st.line]), 0) + 1;
+    if (i >= n) snap(5, `Linha 5: return −1. Total = <b>${total()}</b> = $6n + 3$ com n = ${n} ✓ (pior caso).`);
+    else snap(6, `Linha 6: return ${i}. Total = <b>${total()}</b>.` + (i === 0 ? ' = 7 ✓ (melhor caso).' : ` Pela fórmula $6k + 3$ com k = ${i} iterações do corpo: ${6 * i + 3}.`));
+    return S;
+  }
+  const A = [4, 8, 15, 16, 23, 42];
+  const bsInputs = { 'x = 4 (1ª posição)': 4, 'x = 16 (meio)': 16, 'x = 42 (última)': 42, 'x = 10 (ausente)': 10 };
+  const bs = StepPlayer.mount(document.getElementById('bsPlayer'), {
+    code: ['buscaSequencial(x, A, n)', 'i = 0', 'while i < n and A[i] ≠ x:', '   i = i + 1', 'if i >= n:', '   return −1', 'return i'],
+    ops: OPS,
+    steps: traceBusca(A, 4),
+  });
+  const bsBtns = document.getElementById('bsBtns');
+  Object.entries(bsInputs).forEach(([label, x], k) => bsBtns.append(APA.el('button', { class: 'btn' + (k ? '' : ' on'), type: 'button',
+    onclick: (e) => { [...bsBtns.children].forEach((b) => b.classList.remove('on')); e.target.classList.add('on'); bs.load(traceBusca(A, x)); } }, label)));
+
+  Quiz.mount(document.getElementById('quiz'), [
+    { q: 'Qual a melhor descrição do <b>melhor caso</b> do ArrayMax?',
+      options: ['Quando $n = 1$', 'Quando o primeiro elemento é o maior valor do vetor', 'Quando o vetor está em ordem crescente', 'Quando todos os elementos são negativos'],
+      answer: 1, explain: 'O melhor caso é uma <b>arrumação</b> dos dados para um $n$ qualquer. Com $A[0]$ máximo, a linha 4 nunca roda: $T(n) = 4n - 1$.' },
+    { q: 'Por que o pior caso do ArrayMax exige elementos <b>únicos</b> em ordem crescente?',
+      options: ['Porque vetores com repetidos não podem ser ordenados', 'Porque o teste é $>$ estrito: um valor igual ao máximo atual não dispara a linha 4', 'Porque o professor quis simplificar', 'Não exige; qualquer ordem crescente serve'],
+      answer: 1, explain: 'Com repetidos, alguma iteração tem <code>A[i] = currentMax</code> e a linha 4 não roda, então são menos que $n-1$ atualizações.' },
+    { q: 'Na busca sequencial, qual entrada dá o <b>pior caso</b>?',
+      options: ['$x$ na última posição', '$x$ na posição do meio', '$x$ não está no vetor', '$x$ na primeira posição'],
+      answer: 2, explain: 'Percorre tudo e ainda executa <code>return −1</code>: $6n+3$. Com $x$ na última posição dá $6n-3$.' },
+    { q: 'Por que se usa mais o pior caso?',
+      options: ['Porque é o que acontece com mais frequência', 'Porque dá um limite superior válido para qualquer entrada e costuma ser mais simples de calcular', 'Porque o melhor caso é sempre constante', 'Porque o caso médio não existe'],
+      answer: 1, explain: 'Nenhuma entrada de tamanho $n$ custa mais que o pior caso. O caso médio exige supor uma distribuição de entradas.' },
+    { q: 'Na convenção do professor, qual o # exec da linha do <code>while</code> no melhor caso da busca sequencial?',
+      options: ['0', '1', '$n$', '$n+1$'], answer: 1,
+      explain: 'O corpo roda 0 vezes, mas o teste foi feito uma vez. Quando o laço não executa, o único teste conta.' },
+  ]);
+});
+</script>
+</body>
+</html>

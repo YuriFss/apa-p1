@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Aula 5.2 · Torre de Hanói</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../assets/style.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="../assets/common.js"></script>
+<script defer src="../assets/player.js"></script>
+<script defer src="../assets/tree.js"></script>
+<script defer src="../assets/quiz.js"></script>
+<style>
+  .pegs { width: 100%; max-width: 420px; display: block; }
+  .pegs .base { fill: var(--axis); }
+  .pegs .pole { fill: var(--muted); }
+  .pegs .disc { fill: var(--accent); }
+  .pegs .disc.moved { fill: var(--orange); }
+  .pegs text { fill: var(--ink-2); font: 600 13px var(--sans); text-anchor: middle; }
+</style>
+</head>
+<body>
+<nav class="topbar">
+  <a href="../index.html">← Índice</a>
+  <span>Aula 5 · Recorrências</span>
+  <span class="spacer"></span>
+  <a href="../reference/aula5.html">Folha de referência</a>
+  <button class="theme-btn" type="button">tema</button>
+</nav>
+<main>
+<p class="kicker">Aula 5 · Lição 2 de 2</p>
+<h1>Torre de Hanói: uma recorrência exponencial</h1>
+<p class="lead">Slides 15 a 24 da Aula 5. É o exemplo clássico para pensar recursivamente, e a recorrência dele resolve por PG: $T(n) = 2^n - 1$.</p>
+
+<div class="toc">
+  <b>Nesta lição</b>
+  <ol>
+    <li><a href="#problema">O problema</a></li>
+    <li><a href="#estrategia">A estratégia recursiva</a></li>
+    <li><a href="#anim">Animação</a></li>
+    <li><a href="#recorrencia">A recorrência</a></li>
+    <li><a href="#arvore">Árvore de recursão</a></li>
+    <li><a href="#iterativo">Resolvendo pelo método iterativo</a></li>
+    <li><a href="#brahma">A lenda dos 64 discos</a></li>
+    <li><a href="#quiz">Quiz</a> · <a href="#exercicio">Exercício</a></li>
+  </ol>
+</div>
+
+<h2 id="problema">1. O problema</h2>
+<p>São três postes (A, B e C) e $n$ discos de tamanhos diferentes, que deslizam pelos postes. No início, todos os discos estão no poste A, do maior (embaixo) para o menor (em cima). O objetivo é levar todos para o poste C, seguindo as regras:</p>
+<ol type="a">
+  <li>mover <b>um disco de cada vez</b>;</li>
+  <li>um disco <b>maior não pode ficar sobre um menor</b>.</li>
+</ol>
+
+<h2 id="estrategia">2. A estratégia recursiva</h2>
+<p>Resolver esse problema é um bom exercício de como pensar recursivamente: é preciso entender o <b>caso base</b> e como <b>reduzir o problema a uma instância menor</b>. A estratégia básica:</p>
+<ol class="steps">
+  <li>Mover $n - 1$ discos do poste <b>origem</b> para o <b>intermediário</b>. É o mesmo problema, com um disco a menos.</li>
+  <li>Mover 1 disco, o disco base (o maior), da origem para o <b>destino</b>. Ele está livre, porque os outros saíram de cima.</li>
+  <li>Mover $n - 1$ discos do <b>intermediário</b> para o <b>destino</b>, em cima do maior.</li>
+</ol>
+<p>O "truque": você não precisa saber como mover $n-1$ discos. Basta confiar que a mesma função faz isso. Caso base: com 1 disco, é só movê-lo.</p>
+<pre class="code"><span class="fn">hanoi</span>(n, A, C, B)
+1.  <span class="kw">if</span> n = 1 <span class="kw">then</span>
+2.      <span class="fn">movaDisco</span>(A, C)          // move de A para C
+3.  <span class="kw">else</span>
+4.      <span class="fn">hanoi</span>(n−1, A, B, C)      // move n−1 discos de A para B
+5.      <span class="fn">movaDisco</span>(A, C)          // move a base para C
+6.      <span class="fn">hanoi</span>(n−1, B, C, A)      // move n−1 discos de B para C</pre>
+<p class="caption">Ordem dos parâmetros: <code>hanoi(quantos, origem, destino, auxiliar)</code>. Na linha 4, o destino vira B e o auxiliar vira C.</p>
+
+<h2 id="anim">3. Animação</h2>
+<div class="widget">
+  <div class="wtitle">hanoi(n, A, C, B) passo a passo</div>
+  <div class="controls" id="hnBtns"></div>
+  <div id="hnPlayer"></div>
+  <p class="caption">Laranja: o disco que acabou de mover. A variável "pilha" mostra a cadeia de chamadas ativas. Com $n = 3$ são $7$ movimentos, como no slide 18.</p>
+</div>
+
+<h2 id="recorrencia">4. A recorrência</h2>
+<p>Seja $T(n)$ o número de movimentos para $n$ discos. Lendo o pseudocódigo:</p>
+<ul>
+  <li><b>Caso base</b> (linhas 1–2): com 1 disco, 1 movimento. $T(1) = 1$.</li>
+  <li><b>Linha 4:</b> $T(n-1)$ movimentos.</li>
+  <li><b>Linha 5:</b> 1 movimento.</li>
+  <li><b>Linha 6:</b> mais $T(n-1)$ movimentos.</li>
+</ul>
+$$\begin{cases} T(1) = 1 \\ T(n) = 1 + 2\,T(n-1) & \text{para } n \ge 2 \end{cases}$$
+<p>A diferença para o fatorial é o <b>2</b>: cada chamada faz <b>duas</b> chamadas menores. Isso transforma uma corrente numa árvore, e a soma linear vira uma PG.</p>
+
+<h2 id="arvore">5. Árvore de recursão</h2>
+<div class="widget">
+  <div class="wtitle">Chamadas de hanoi(n): cada nó faz 1 movimento</div>
+  <div class="controls" id="trBtns"></div>
+  <div id="hnTree" style="overflow-x:auto"></div>
+  <p class="caption" id="trInfo"></p>
+</div>
+<p>No nível $d$ (raiz = nível 0) há $2^d$ chamadas, cada uma fazendo 1 movimento próprio (linha 2 ou linha 5). Os níveis vão de $0$ a $n - 1$:</p>
+$$T(n) = \underbrace{1}_{\text{nível }0} + \underbrace{2}_{\text{nível }1} + \underbrace{4}_{\text{nível }2} + \dots + \underbrace{2^{n-1}}_{\text{nível }n-1} = \sum_{i=0}^{n-1} 2^i = 2^n - 1.$$
+
+<h2 id="iterativo">6. Resolvendo pelo método iterativo</h2>
+<p><b>Observando:</b> $T(n-1) = 2T(n-2) + 1$, $T(n-2) = 2T(n-3) + 1$, …</p>
+$$\begin{aligned}
+T(n) &= 2\,T(n-1) + 1 && \text{passo 1}\\
+&= 2\big(\textcolor{#2a78d6}{2\,T(n-2) + 1}\big) + 1\\
+&= 2^2\,T(n-2) + 2 + 1 && \text{passo 2}\\
+&= 2^2\big(\textcolor{#2a78d6}{2\,T(n-3) + 1}\big) + 2 + 1\\
+&= 2^3\,T(n-3) + 4 + 2 + 1 && \text{passo 3}\\
+&\;\;\vdots\\
+&= 2^k\,T(n-k) + 2^{k-1} + \dots + 2^2 + 2 + 1 && \text{passo } k
+\end{aligned}$$
+<p>Repare que distribuir o 2 multiplica <b>tudo</b> que está dentro do parêntese: $2 \cdot (2T + 1) = 2^2 T + 2$. É aí que os termos $1, 2, 4, \dots$ aparecem.</p>
+<p><b>Caso base:</b> $n - k = 1$, ou seja, $k = n - 1$ (passos para atingir a base):</p>
+$$T(n) = 2^{n-1}\cdot T(1) + 2^{n-2} + \dots + 2^2 + 2 + 1 = 2^{n-1} + 2^{n-2} + \dots + 2 + 1 = \sum_{i=0}^{n-1} 2^i.$$
+<p>Pela PG de razão 2: $\displaystyle\sum_{i=0}^{n-1} 2^i = \frac{2^n - 1}{2 - 1} = 2^n - 1$.</p>
+<p class="result">$T(n) = 2^n - 1 = \Theta(2^n)$</p>
+<p><b>Confira:</b> $T(1) = 1$, $T(2) = 2\cdot 1 + 1 = 3$, $T(3) = 2\cdot 3 + 1 = 7$, $T(4) = 15$. A fórmula $2^n - 1$ dá 1, 3, 7, 15 ✓.</p>
+
+<h2 id="brahma">7. A lenda dos 64 discos</h2>
+<p>A Torre de Hanói tem pouco a ver com a cidade de Hanói. O registro mais antigo é de Édouard Lucas, em 1893. Ele relata que no templo de Kashi Vishwanath, em Varanasi, na Índia, há 64 discos de ouro em 3 agulhas de diamante, a "Torre de Brahma", que monges tentam resolver desde o início dos tempos. O universo acabaria quando eles terminassem.</p>
+<ul>
+  <li>$2^{64} - 1 \approx 1{,}84 \times 10^{19}$ movimentos.</li>
+  <li>A 1 movimento por segundo: $\frac{1{,}84\times10^{19}}{3{,}15\times 10^{7}\ \text{s/ano}} \approx 5{,}8 \times 10^{11}$ anos, cerca de <b>42 vezes</b> a idade do universo ($1{,}38 \times 10^{10}$ anos).</li>
+</ul>
+<p class="caption">O slide escreve "$1{,}38\times10^{10}$ anos" ao lado do resultado, mas esse número é a idade do universo. O tempo total é cerca de $5{,}8 \times 10^{11}$ anos, o que bate com as "42 vezes".</p>
+
+<h2 id="quiz">8. Quiz de recordação</h2>
+<div id="quiz"></div>
+
+<h2 id="exercicio">9. Exercício</h2>
+<div class="exercise">
+  <span class="tag">Exercício 5.2</span>
+  <ol type="a">
+    <li>Quantos movimentos são necessários para 10 discos? Confira calculando $T(10)$ pela recorrência a partir de $T(1)$ e pela fórmula fechada.</li>
+    <li>Resolva pelo método iterativo, mostrando os passos e o caso base: $T(0) = 1$, $T(n) = 2\,T(n-1)$ para $n \ge 1$. Qual a complexidade?</li>
+    <li>Um computador faz $10^9$ movimentos por segundo. Quanto tempo leva para resolver os 64 discos? Dê a resposta em anos.</li>
+    <li>Por que a recorrência $T(n) = 2T(n-1) + 1$ é exponencial, mas $T(n) = T(n-1) + 1$ é linear? Explique pelo formato da árvore de recursão.</li>
+  </ol>
+  <p class="caption">Responda no chat.</p>
+</div>
+
+<div class="pager">
+  <a href="aula5-1-recorrencias.html"><small>← anterior</small>5.1 Recorrências</a>
+  <a class="next" href="aula6-1-divisao-e-conquista.html"><small>próxima →</small>Aula 6 · Divisão e conquista</a>
+</div>
+</main>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const NS = 'http://www.w3.org/2000/svg';
+  const mk = (t, a, txt) => { const e = document.createElementNS(NS, t); for (const [k, v] of Object.entries(a)) e.setAttribute(k, v); if (txt != null) e.textContent = txt; return e; };
+  function drawPegs(st, box) {
+    const n = st.n, W = 420, H = 40 + n * 18 + 30;
+    const svg = mk('svg', { class: 'pegs', viewBox: `0 0 ${W} ${H}`, role: 'img', 'aria-label': 'Postes A, B e C com os discos' });
+    ['A', 'B', 'C'].forEach((p, k) => {
+      const cx = 70 + k * 140;
+      svg.append(mk('rect', { class: 'pole', x: cx - 3, y: 20, width: 6, height: H - 50, rx: 3 }));
+      svg.append(mk('rect', { class: 'base', x: cx - 62, y: H - 32, width: 124, height: 6, rx: 3 }));
+      svg.append(mk('text', { x: cx, y: H - 8 }, p));
+      st.pegs[p].forEach((d, i) => {
+        const w = 24 + (d / n) * 90;
+        svg.append(mk('rect', { class: 'disc' + (st.moved === d && st.movedTo === p && i === st.pegs[p].length - 1 ? ' moved' : ''),
+          x: cx - w / 2, y: H - 32 - (i + 1) * 18, width: w, height: 15, rx: 5 }));
+      });
+    });
+    box.append(svg);
+  }
+  function trace(n) {
+    const pegs = { A: [], B: [], C: [] }; for (let d = n; d >= 1; d--) pegs.A.push(d);
+    const S = []; let moves = 0; const stack = []; let moved = null, movedTo = null;
+    const snap = (line, note) => S.push({ line, note, n, moved, movedTo, pegs: { A: [...pegs.A], B: [...pegs.B], C: [...pegs.C] },
+      vars: { movimentos: moves, pilha: stack.join(' → ') || '—' } });
+    const move = (f, t) => { const d = pegs[f].pop(); pegs[t].push(d); moves++; moved = d; movedTo = t; return d; };
+    function rec(k, A, C, B) {
+      stack.push(`h(${k},${A},${C},${B})`);
+      snap(1, `Chamada hanoi(${k}, ${A}, ${C}, ${B}): mover ${k} disco(s) de ${A} para ${C}, usando ${B} como auxiliar. n = 1? <b>${k === 1 ? 'Sim' : 'Não'}</b>.`);
+      if (k === 1) { const d = move(A, C); snap(2, `Linha 2: caso base, move o disco ${d} de ${A} para ${C}. Movimento nº ${moves}.`); stack.pop(); return; }
+      snap(4, `Linha 4: primeiro tira os ${k - 1} disco(s) de cima, de ${A} para ${B} (auxiliar). Chama hanoi(${k - 1}, ${A}, ${B}, ${C}).`);
+      rec(k - 1, A, B, C);
+      const d = move(A, C);
+      snap(5, `Linha 5 (de volta em hanoi(${k}, ${A}, ${C}, ${B})): move a base, disco ${d}, de ${A} para ${C}. Movimento nº ${moves}.`);
+      snap(6, `Linha 6: agora leva os ${k - 1} disco(s) de ${B} para ${C}, em cima da base. Chama hanoi(${k - 1}, ${B}, ${C}, ${A}).`);
+      rec(k - 1, B, C, A);
+      stack.pop();
+    }
+    snap(0, `Início: ${n} discos em A. Meta: todos em C. Total esperado: $2^{${n}} - 1 = ${2 ** n - 1}$ movimentos.`);
+    rec(n, 'A', 'C', 'B');
+    moved = null; snap(0, `Fim: ${moves} movimentos = $2^{${n}} - 1$ ✓`);
+    return S;
+  }
+  const P = StepPlayer.mount(document.getElementById('hnPlayer'), {
+    code: ['hanoi(n, A, C, B)', 'if n = 1 then', '   movaDisco(A, C)', 'else', '   hanoi(n−1, A, B, C)', '   movaDisco(A, C)', '   hanoi(n−1, B, C, A)'],
+    steps: trace(3), extra: (st, box) => drawPegs(st, box), speed: 800,
+  });
+  const hb = document.getElementById('hnBtns');
+  [1, 2, 3, 4].forEach((n) => hb.append(APA.el('button', { class: 'btn' + (n === 3 ? ' on' : ''), type: 'button',
+    onclick: (e) => { [...hb.children].forEach((b) => b.classList.remove('on')); e.target.classList.add('on'); P.load(trace(n)); } }, n + ' disco' + (n > 1 ? 's' : ''))));
+
+  // árvore de recursão
+  const tb = document.getElementById('trBtns');
+  function showTree(n) {
+    const build = (k) => ({ label: 'h' + k, cls: k === 1 ? 'ok' : '', children: k > 1 ? [build(k - 1), build(k - 1)] : [] });
+    document.getElementById('hnTree').replaceChildren(TreeView.render(build(n), {
+      gap: n >= 5 ? 30 : 42, levelH: 54, r: n >= 5 ? 13 : 17, title: 'Árvore de recursão de hanoi(' + n + ')',
+      levelLabel: (d) => `nível ${d}: ${2 ** d} chamada${d ? 's' : ''} → ${2 ** d} mov.`,
+    }));
+    document.getElementById('trInfo').textContent = `Total: ${Array.from({ length: n }, (_, d) => 2 ** d).join(' + ')} = ${2 ** n - 1} movimentos. Verde = caso base (n = 1).`;
+    [...tb.children].forEach((b) => b.classList.toggle('on', +b.dataset.n === n));
+  }
+  [2, 3, 4, 5].forEach((n) => tb.append(APA.el('button', { class: 'btn', type: 'button', 'data-n': n, onclick: () => showTree(n) }, 'n = ' + n)));
+  showTree(3);
+
+  Quiz.mount(document.getElementById('quiz'), [
+    { q: 'Qual a recorrência da Torre de Hanói?',
+      options: ['$T(n) = T(n-1) + 1$', '$T(n) = 2T(n-1) + 1$, $T(1) = 1$', '$T(n) = 2T(n/2) + 1$', '$T(n) = T(n-1) + n$'], answer: 1, explain: 'Duas chamadas com $n-1$ (linhas 4 e 6) + 1 movimento (linha 5).' },
+    { q: 'Quantos movimentos para 5 discos?',
+      options: ['25', '31', '32', '10'], answer: 1, explain: '$2^5 - 1 = 31$.' },
+    { q: 'No passo $k$ da expansão, $T(n) = $ …',
+      options: ['$2k\\,T(n-k) + k$', '$2^k\\,T(n-k) + 2^{k-1} + \\dots + 2 + 1$', '$T(n-k) + 2^k$', '$k\\,T(n-1)$'], answer: 1, explain: 'Cada substituição dobra o coeficiente de $T$ e acrescenta uma potência de 2 na soma.' },
+    { q: 'No nível $d$ da árvore de recursão de hanoi($n$), quantas chamadas existem?',
+      options: ['$d$', '$2^d$', '$n - d$', '$2d$'], answer: 1, explain: 'Cada chamada gera duas no nível seguinte.' },
+    { q: 'A complexidade da Torre de Hanói é…',
+      options: ['$\\Theta(n)$', '$\\Theta(n^2)$', '$\\Theta(2^n)$', '$\\Theta(n!)$'], answer: 2, explain: '$2^n - 1 = \\Theta(2^n)$: exponencial.' },
+  ]);
+});
+</script>
+</body>
+</html>

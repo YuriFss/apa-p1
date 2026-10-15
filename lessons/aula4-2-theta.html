@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Aula 4.2 · Notação Θ</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../assets/style.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="../assets/common.js"></script>
+<script defer src="../assets/chart.js"></script>
+<script defer src="../assets/quiz.js"></script>
+</head>
+<body>
+<nav class="topbar">
+  <a href="../index.html">← Índice</a>
+  <span>Aula 4 · Análise assintótica (Parte 4)</span>
+  <span class="spacer"></span>
+  <a href="../reference/aula4.html">Folha de referência</a>
+  <button class="theme-btn" type="button">tema</button>
+</nav>
+<main>
+<p class="kicker">Aula 4 · Lição 2 de 3</p>
+<h1>Notação Θ: o "sanduíche" e as propriedades</h1>
+<p class="lead">Slides 19 a 28 da Aula 4. $\Theta$ junta $O$ e $\Omega$ e dá o limite <b>assintoticamente restrito</b>, o termo que a lista usa ("determine um limite assintoticamente restrito…"). Também vemos o que dá para afirmar "sob qualquer entrada".</p>
+
+<div class="toc">
+  <b>Nesta lição</b>
+  <ol>
+    <li><a href="#def">Definição: o sanduíche</a></li>
+    <li><a href="#exemplo">Exemplo do slide: $n^2 - 3n + 3 = \Theta(n^2)$</a></li>
+    <li><a href="#widget">Laboratório do sanduíche</a></li>
+    <li><a href="#teorema">Teorema: $\Theta \iff O$ e $\Omega$</a></li>
+    <li><a href="#limite">Tabela-resumo pelo limite</a></li>
+    <li><a href="#casos">Melhor caso, pior caso e "qualquer entrada"</a></li>
+    <li><a href="#quiz">Quiz</a> · <a href="#exercicio">Exercício do slide 37</a></li>
+  </ol>
+</div>
+
+<h2 id="def">1. Definição: o sanduíche</h2>
+<p>A notação $\Theta$ define <b>tanto um limite inferior quanto um superior</b>. Ele se chama limite <b>assintoticamente restrito</b>. O professor chama de "sanduíche de uma função": $f(n)$ é o recheio, e as fatias de pão são duas cópias de $g(n)$, uma multiplicada por $c_1$ e outra por $c_2$.</p>
+<div class="box def">
+  <span class="tag">Definição (slide 22)</span>
+  <p>$f(n) = \Theta(g(n))$ <b>se, e somente se</b>, existem constantes positivas $c_1$, $c_2$ e $n_0$ tais que</p>
+  $$c_1\,g(n) \;\le\; f(n) \;\le\; c_2\,g(n) \quad \text{para todo } n \ge n_0.$$
+</div>
+<svg viewBox="0 0 420 220" style="max-width:420px;display:block;margin:8px auto" role="img" aria-label="Figura: f entre c1·g e c2·g a partir de n0">
+  <line x1="40" y1="190" x2="400" y2="190" stroke="var(--axis)"/>
+  <line x1="40" y1="190" x2="40" y2="15" stroke="var(--axis)"/>
+  <path d="M40,190 C80,120 110,110 150,105 C220,90 280,50 390,25" fill="none" stroke="var(--series-1)" stroke-width="2"/>
+  <path d="M40,140 C80,150 110,130 150,125 C220,110 300,90 390,65" fill="none" stroke="var(--series-2)" stroke-width="2"/>
+  <path d="M40,150 C80,135 110,140 150,140 C230,130 300,120 390,105" fill="none" stroke="var(--series-3)" stroke-width="2"/>
+  <line x1="140" y1="190" x2="140" y2="108" stroke="var(--muted)" stroke-dasharray="4 4"/>
+  <text x="140" y="207" text-anchor="middle" fill="var(--ink-2)" font-size="13">n₀</text>
+  <text x="392" y="20" fill="var(--series-1)" font-size="13" text-anchor="end">c₂·g(n)</text>
+  <text x="392" y="60" fill="var(--series-2)" font-size="13" text-anchor="end">f(n)</text>
+  <text x="392" y="100" fill="var(--series-3)" font-size="13" text-anchor="end">c₁·g(n)</text>
+</svg>
+<p>Analogia: $f = \Theta(g)$ é como "$f = g$" em taxa de crescimento: crescem na <b>mesma proporção</b>.</p>
+
+<h2 id="exemplo">2. Exemplo do slide: $n^2 - 3n + 3 = \Theta(n^2)$</h2>
+<p>Devemos provar que existem $c_1$, $c_2$ e $n_0$ tais que $c_1 n^2 \le n^2 - 3n + 3 \le c_2 n^2$ para todo $n \ge n_0$. O slide escolhe <b>$n_0 = 1$, $c_1 = 0{,}2$ e $c_2 = 1$</b>. Vamos provar as duas metades separadamente.</p>
+
+<h3>Lado de cima: $n^2 - 3n + 3 \le 1 \cdot n^2$</h3>
+$$n^2 - 3n + 3 \le n^2 \iff -3n + 3 \le 0 \iff n \ge 1. \;\checkmark$$
+
+<h3>Lado de baixo: $0{,}2\,n^2 \le n^2 - 3n + 3$</h3>
+$$0{,}2\,n^2 \le n^2 - 3n + 3 \iff 0 \le 0{,}8\,n^2 - 3n + 3.$$
+<p>O discriminante de $0{,}8\,n^2 - 3n + 3$ é $\Delta = 9 - 4 \cdot 0{,}8 \cdot 3 = 9 - 9{,}6 = -0{,}6 &lt; 0$. Uma parábola com coeficiente líder positivo e sem raízes reais é <b>sempre positiva</b>. Logo vale para todo $n$. ✓</p>
+<p>As duas metades valem para $n \ge 1$, então $n^2 - 3n + 3 = \Theta(n^2)$ com $c_1 = 0{,}2$, $c_2 = 1$ e $n_0 = 1$. ∎</p>
+
+<div class="box tip">
+  <span class="tag">De onde veio o 0,2? (como achar $c_1$ sozinho)</span>
+  <p>Olhe para a razão $\dfrac{f(n)}{g(n)} = \dfrac{n^2 - 3n + 3}{n^2} = 1 - \dfrac{3}{n} + \dfrac{3}{n^2}$:</p>
+  <div class="table-wrap"><table>
+    <tr><th>$n$</th><td class="num">1</td><td class="num">2</td><td class="num">3</td><td class="num">4</td><td class="num">10</td><td class="num">100</td></tr>
+    <tr><th>$f(n)/n^2$</th><td class="num">1</td><td class="num">0,25</td><td class="num">0,33</td><td class="num">0,44</td><td class="num">0,73</td><td class="num">0,97</td></tr>
+  </table></div>
+  <p>A razão nunca passa de 1, então $c_2 = 1$ serve. O menor valor é $0{,}25$, em $n = 2$, então qualquer $c_1 \le 0{,}25$ serve a partir de $n_0 = 1$. O professor escolheu $0{,}2$. Para $n$ grande a razão tende a 1, que é o limite $\lim f/g = 1$.</p>
+</div>
+
+<h2 id="widget">3. Laboratório do sanduíche</h2>
+<div class="widget">
+  <div class="wtitle">Ajuste $c_1$ e $c_2$. A página acha o menor $n_0$ em que $f$ fica entre as duas fatias.</div>
+  <div class="controls" id="pairBtns"></div>
+  <div class="controls">
+    <label>$c_1$ = <b id="c1v">0,2</b> <input type="range" id="c1" min="0.05" max="10" step="0.05" value="0.2"></label>
+    <label>$c_2$ = <b id="c2v">1</b> <input type="range" id="c2" min="0.05" max="15" step="0.05" value="1"></label>
+    <label>n até <b id="nv">30</b> <input type="range" id="nr" min="5" max="200" value="30"></label>
+  </div>
+  <div id="labChart"></div>
+  <div id="labInfo" class="box tip" style="margin-top:8px"></div>
+</div>
+
+<h2 id="teorema">4. Teorema: $\Theta \iff O$ e $\Omega$</h2>
+<div class="box def">
+  <span class="tag">Teorema (slide 25)</span>
+  <p>Para quaisquer funções $f(n)$ e $g(n)$:</p>
+  $$f(n) = \Theta(g(n)) \iff f(n) = \Omega(g(n)) \;\text{ e }\; f(n) = O(g(n)).$$
+</div>
+<p>Podemos usar esse teorema para provar um limite assintótico restrito por meio de limites superiores e inferiores: prove $O(g)$, prove $\Omega(g)$ e conclua $\Theta(g)$. Esse é um formato comum de resposta na lista.</p>
+<p><b>Na prática:</b> a parte $O$ dá o $c_2$ e a parte $\Omega$ dá o $c_1$. O $n_0$ do $\Theta$ é o <b>maior</b> dos dois $n_0$, para que as duas desigualdades valham ao mesmo tempo.</p>
+<p><b>Exemplo:</b> $5n^2 + 4n - 7$ (pior caso do InsertionSort). Na lição 3.2: $\le 9n^2$ para $n \ge 1$. Na lição 4.1: $\ge 4n^2$ para $n \ge 3$. Logo, $5n^2 + 4n - 7 = \Theta(n^2)$ com $c_1 = 4$, $c_2 = 9$ e $n_0 = \max(1, 3) = 3$.</p>
+
+<h2 id="limite">5. Tabela-resumo pelo limite</h2>
+<p>Com $L = \lim_{n\to\infty} \frac{f(n)}{g(n)}$:</p>
+<div class="table-wrap"><table>
+  <tr><th>$L$</th><th>Interpretação</th><th>$O(g)$</th><th>$\Omega(g)$</th><th>$\Theta(g)$</th></tr>
+  <tr><td>$0$</td><td>$g$ cresce mais rápido</td><td>✔</td><td>✘</td><td>✘</td></tr>
+  <tr><td>$0 &lt; L &lt; \infty$</td><td>mesma taxa</td><td>✔</td><td>✔</td><td>✔</td></tr>
+  <tr><td>$\infty$</td><td>$f$ cresce mais rápido</td><td>✘</td><td>✔</td><td>✘</td></tr>
+</table></div>
+<p>O professor também costuma calcular o limite inverso, $\lim g/f$: se os dois são finitos, nenhuma das funções cresce mais rápido que a outra, e as duas têm a mesma taxa.</p>
+
+<h2 id="casos">6. Melhor caso, pior caso e "qualquer entrada"</h2>
+<div class="box prof">
+  <span class="tag">Propriedades (slide 26)</span>
+  <ul>
+    <li><b>Melhor caso analisado com $\Omega$:</b> dá um limite <b>inferior</b> para o tempo do algoritmo <b>sob qualquer entrada</b>. Nenhuma entrada custa menos que o melhor caso.</li>
+    <li><b>Pior caso analisado com $O$:</b> dá um limite <b>superior</b> para o tempo <b>sob qualquer entrada</b>. Nenhuma entrada custa mais que o pior caso.</li>
+  </ul>
+</div>
+<p><b>Pergunta do slide 28:</b> o pior caso do InsertionSort tem taxa $O(n^2)$. Podemos afirmar que $\Theta(n^2)$ é um limite válido para o InsertionSort <b>sob qualquer entrada</b>?</p>
+<p><b>Não!</b> O melhor caso é $\Theta(n)$. Com o vetor ordenado, o algoritmo gasta $13n - 11$, que <b>não</b> é $\Omega(n^2)$. Uma afirmação "sob qualquer entrada" precisa valer também para o melhor caso.</p>
+
+<div class="table-wrap"><table>
+  <tr><th>Afirmação sobre o InsertionSort</th><th>Válida?</th></tr>
+  <tr><td>Pior caso é $\Theta(n^2)$</td><td>✔ ($5n^2 + 4n - 7$)</td></tr>
+  <tr><td>Melhor caso é $\Theta(n)$</td><td>✔ ($13n - 11$)</td></tr>
+  <tr><td>$O(n^2)$ sob qualquer entrada</td><td>✔ (o pior caso limita tudo por cima)</td></tr>
+  <tr><td>$\Omega(n)$ sob qualquer entrada</td><td>✔ (o melhor caso limita tudo por baixo)</td></tr>
+  <tr><td>$\Theta(n^2)$ sob qualquer entrada</td><td>✘ (o melhor caso não é $\Omega(n^2)$)</td></tr>
+  <tr><td>$\Theta(n)$ sob qualquer entrada</td><td>✘ (o pior caso não é $O(n)$)</td></tr>
+</table></div>
+<p><b>Regra geral:</b> existe um $\Theta(g)$ válido sob qualquer entrada se, e somente se, o melhor caso e o pior caso são <b>ambos</b> $\Theta(g)$. Exemplo: o SelectionSort tem melhor caso $3n^2 + 3n - 5$, e o pior caso também é quadrático, então ele é $\Theta(n^2)$ para qualquer entrada.</p>
+
+<h2 id="quiz">7. Quiz de recordação</h2>
+<div id="quiz"></div>
+
+<h2 id="exercicio">8. Exercício (slide 37)</h2>
+<div class="exercise">
+  <span class="tag">Exercício 4.2, do próprio professor</span>
+  <p>Sejam $f(n) = n^3 + 10n - 2$ e $g(n) = n^3$. Mostre que $f = \Theta(g)$ é um limite válido:</p>
+  <ol type="a">
+    <li>pela definição, exibindo $c_1$, $c_2$ e $n_0$ (prove cada metade);</li>
+    <li>pelo limite.</li>
+  </ol>
+  <p class="caption">Responda no chat. Confira seus $c_1$, $c_2$ e $n_0$ no laboratório (botão "n³ + 10n − 2 vs n³").</p>
+</div>
+
+<div class="pager">
+  <a href="aula4-1-omega.html"><small>← anterior</small>4.1 Notação Ω</a>
+  <a class="next" href="aula4-3-classes.html"><small>próxima →</small>4.3 Classes de comportamento</a>
+</div>
+</main>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const pairs = [
+    { label: 'n² − 3n + 3 vs n²', fn: 'f(n) = n² − 3n + 3', gn: 'n²', f: (n) => n * n - 3 * n + 3, g: (n) => n * n, c1: 0.2, c2: 1 },
+    { label: '5n² + 4n − 7 vs n²', fn: 'f(n) = 5n² + 4n − 7', gn: 'n²', f: (n) => 5 * n * n + 4 * n - 7, g: (n) => n * n, c1: 4, c2: 9 },
+    { label: '13n − 11 vs n', fn: 'f(n) = 13n − 11', gn: 'n', f: (n) => 13 * n - 11, g: (n) => n, c1: 2, c2: 13 },
+    { label: 'n³ + 10n − 2 vs n³', fn: 'f(n) = n³ + 10n − 2', gn: 'n³', f: (n) => n ** 3 + 10 * n - 2, g: (n) => n ** 3, c1: 0.5, c2: 2 },
+    { label: '13n − 11 vs n² (não é Θ)', fn: 'f(n) = 13n − 11', gn: 'n²', f: (n) => 13 * n - 11, g: (n) => n * n, c1: 0.1, c2: 13 },
+  ];
+  let cur = pairs[0];
+  const c1 = document.getElementById('c1'), c2 = document.getElementById('c2'), nr = document.getElementById('nr');
+  const chart = LineChart.mount(document.getElementById('labChart'), { series: [], xMin: 1, xMax: 30, xLabel: 'n', yLabel: 'valor', tableXs: [1, 2, 5, 10, 20, 30] });
+  const fc = (c) => String(+(+c).toFixed(2)).replace('.', ',');
+  const lastFail = (ok) => { const LIM = 100000; let last = 0; for (let n = 1; n <= LIM; n++) if (!ok(n)) last = n; return last >= LIM - 1000 ? null : last + 1; };
+  function draw() {
+    const a = +c1.value, b = +c2.value, N = +nr.value;
+    document.getElementById('c1v').textContent = fc(a); document.getElementById('c2v').textContent = fc(b); document.getElementById('nv').textContent = N;
+    chart.update({ xMax: N, series: [
+      { name: `c₂·g = ${fc(b)}·${cur.gn}`, f: (n) => b * cur.g(n), color: 'var(--series-1)' },
+      { name: cur.fn, f: cur.f, color: 'var(--series-2)' },
+      { name: `c₁·g = ${fc(a)}·${cur.gn}`, f: (n) => a * cur.g(n), color: 'var(--series-3)' },
+    ] });
+    const up = lastFail((n) => cur.f(n) <= b * cur.g(n)), lo = lastFail((n) => cur.f(n) >= a * cur.g(n));
+    const info = document.getElementById('labInfo');
+    const part = (x, s) => x === null ? `<b>${s}: falha</b> para $n$ grande (nenhum $n_0$)` : `${s}: vale a partir de $n = ${x}$`;
+    info.innerHTML = `${part(up, 'Lado de cima ($f \\le c_2 g$)')}.<br>${part(lo, 'Lado de baixo ($c_1 g \\le f$)')}.<br>` +
+      (up !== null && lo !== null ? `<b>Sanduíche válido com $n_0 = \\max(${up}, ${lo}) = ${Math.max(up, lo)}$.</b>` : 'Ajuste as constantes. Se um dos lados falha para todo valor, então $f \\ne \\Theta(g)$.');
+    APA.renderMath(info);
+  }
+  const btns = document.getElementById('pairBtns');
+  pairs.forEach((p, k) => btns.append(APA.el('button', { class: 'btn' + (k ? '' : ' on'), type: 'button', onclick: (e) => {
+    [...btns.children].forEach((x) => x.classList.remove('on')); e.target.classList.add('on'); cur = p; c1.value = p.c1; c2.value = p.c2; draw();
+  } }, p.label)));
+  c1.oninput = draw; c2.oninput = draw; nr.oninput = draw; draw();
+
+  Quiz.mount(document.getElementById('quiz'), [
+    { q: '$f = \\Theta(g)$ exige…',
+      options: ['só $f \\le c\\,g$', 'só $f \\ge c\\,g$', '$c_1 g \\le f \\le c_2 g$ para todo $n \\ge n_0$', '$f = g$ para todo $n$'], answer: 2,
+      explain: 'Limite inferior e superior ao mesmo tempo: o sanduíche.' },
+    { q: 'Pelo teorema, para provar $f = \\Theta(g)$ basta…',
+      options: ['provar só $O$', 'provar $O$ e $\\Omega$', 'provar só $\\Omega$', 'mostrar um gráfico'], answer: 1,
+      explain: 'Slide 25: $\\Theta \\iff O$ e $\\Omega$.' },
+    { q: 'Se $\\lim f/g = 7$, então…',
+      options: ['$f = O(g)$ apenas', '$f = \\Omega(g)$ apenas', '$f = \\Theta(g)$ (logo também $O$ e $\\Omega$)', 'nada se conclui'], answer: 2,
+      explain: 'Constante finita e positiva = mesma taxa de crescimento.' },
+    { q: 'O InsertionSort é $\\Theta(n^2)$ sob qualquer entrada?',
+      options: ['Sim, porque o pior caso é $\\Theta(n^2)$', 'Não, porque o melhor caso é $\\Theta(n)$', 'Sim, porque é $O(n^2)$', 'Não, porque o pior caso é $O(n^3)$'], answer: 1,
+      explain: 'Slide 28. Válido sob qualquer entrada: $O(n^2)$ e $\\Omega(n)$.' },
+    { q: 'Para $n^2 - 3n + 3 = \\Theta(n^2)$ com $n_0 = 1$, qual o maior $c_1$ possível?',
+      options: ['$0{,}2$', '$0{,}25$', '$1$', '$0{,}5$'], answer: 1,
+      explain: 'O mínimo de $f(n)/n^2$ para $n \\ge 1$ ocorre em $n = 2$: $1/4$. O slide usou $0{,}2$, que também serve.' },
+  ]);
+});
+</script>
+</body>
+</html>
