@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Aula 7.2 · QuickSort</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../assets/style.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="../assets/common.js"></script>
+<script defer src="../assets/player.js"></script>
+<script defer src="../assets/tree.js"></script>
+<script defer src="../assets/quiz.js"></script>
+</head>
+<body>
+<nav class="topbar">
+  <a href="../index.html">← Índice</a>
+  <span>Aula 7 · Divisão e conquista (Parte II)</span>
+  <span class="spacer"></span>
+  <a href="../reference/aula7.html">Folha de referência</a>
+  <button class="theme-btn" type="button">tema</button>
+</nav>
+<main>
+<p class="kicker">Aula 7 · Lição 2 de 2</p>
+<h1>QuickSort</h1>
+<p class="lead">Slides 12 a 20 da Aula 7. Outra ordenação por divisão e conquista, mas com o trabalho no lado oposto: o MergeSort divide "de graça" e trabalha na combinação; o QuickSort trabalha na <b>divisão</b> (partition) e não precisa combinar nada. O custo depende de quão equilibradas ficam as partições.</p>
+
+<div class="toc">
+  <b>Nesta lição</b>
+  <ol>
+    <li><a href="#ideia">Ideia</a></li>
+    <li><a href="#partition">partition (Hoare), com o exemplo do slide</a></li>
+    <li><a href="#quick">quickSort e animação completa</a></li>
+    <li><a href="#casos">Melhor e pior caso: a árvore de recursão</a></li>
+    <li><a href="#merge-vs-quick">MergeSort × QuickSort</a></li>
+    <li><a href="#quiz">Quiz</a> · <a href="#exercicio">Exercício</a></li>
+  </ol>
+</div>
+
+<h2 id="ideia">1. Ideia</h2>
+<p><b>Problema:</b> ordenar um vetor. <b>Ideia básica:</b> usar divisão e conquista. Selecionar um <b>pivô</b> e dividir o vetor em 2 partições:</p>
+<ul>
+  <li>uma com os elementos de valor <b>menor</b> que o pivô;</li>
+  <li>outra com os elementos de valor <b>maior ou igual</b> ao pivô.</li>
+</ul>
+<p>Depois, ordena cada partição recursivamente. Como tudo da esquerda é $\le$ tudo da direita, não há nada a combinar. A implementação usa 2 funções: <code>quickSort</code> e <code>partition</code>.</p>
+
+<h2 id="partition">2. partition (Hoare), com o exemplo do slide</h2>
+<pre class="code"><span class="fn">partition</span>(A, inicio, fim)
+1.  pivo ← A[inicio]
+2.  i ← inicio − 1
+3.  j ← fim + 1
+4.  <span class="kw">while</span> true:
+5.     <span class="kw">do</span>: i ← i + 1
+6.     <span class="kw">while</span> A[i] &lt; pivo
+7.     <span class="kw">do</span>: j ← j − 1
+8.     <span class="kw">while</span> A[j] &gt; pivo
+9.     <span class="kw">if</span> i &gt;= j: <span class="kw">return</span> j
+10.    swap(A[i], A[j])</pre>
+<p class="caption">É o pseudocódigo do slide 16, com as linhas renumeradas: no slide, o número 3 aparece duas vezes e há linhas vazias.</p>
+<ul>
+  <li><b>$i$ anda para a direita</b> e para no primeiro elemento $\ge$ pivô, que está "no lado errado" se ficar à esquerda.</li>
+  <li><b>$j$ anda para a esquerda</b> e para no primeiro elemento $\le$ pivô.</li>
+  <li>Se ainda não se cruzaram ($i &lt; j$), <b>troca</b> os dois e continua.</li>
+  <li>Quando os índices se cruzam ($i \ge j$), tudo à direita de $j$ é $\ge$ pivô e tudo até $j$ é $\le$ pivô. O vetor é dividido na posição $j$.</li>
+</ul>
+<div class="widget">
+  <div class="wtitle">Uma chamada de partition em [4, 8, 7, 1, 3, 5, 6], pivô 4 (slide 15)</div>
+  <div id="ptPlayer"></div>
+</div>
+<p>Resultado do slide: depois das trocas, o vetor fica $[3, 1, 7, 8, 4, 5, 6]$ e os índices se cruzam com $j = 1$. As partições são $[3, 1]$ (todos $\le 4$) e $[7, 8, 4, 5, 6]$ (todos $\ge 4$).</p>
+
+<h2 id="quick">3. quickSort e animação completa</h2>
+<pre class="code"><span class="fn">quickSort</span>(A, l, r)
+1. <span class="kw">if</span> l &lt; r:
+2.    q ← partition(A, l, r)
+3.    quickSort(A, l, q)
+4.    quickSort(A, q+1, r)</pre>
+<p class="caption">Com a partição de Hoare, a chamada da esquerda vai até $q$, inclusive, porque o pivô não fica necessariamente na posição final.</p>
+<div class="widget">
+  <div class="wtitle">quickSort + partition, passo a passo</div>
+  <div class="controls" id="qsBtns"></div>
+  <div id="qsPlayer"></div>
+  <p class="caption">Cinza: fora do trecho $[l..r]$ da chamada atual. Laranja: elementos sob $i$ e $j$. A variável "pivô" mostra o pivô da partição corrente.</p>
+</div>
+
+<h2 id="casos">4. Melhor e pior caso: a árvore de recursão</h2>
+<p>O melhor e o pior caso dependem da <b>escolha do pivô</b>: primeiro elemento, último elemento ou aleatório. Mas, de modo geral, dá para especificar o melhor e o pior caso <b>pelo formato da árvore de recursão</b>.</p>
+<div class="widget">
+  <div class="wtitle">Árvore de partições real (pivô = primeiro elemento)</div>
+  <div class="controls" id="trBtns"></div>
+  <div id="qsTree" style="overflow-x:auto"></div>
+  <p class="caption" id="qsTreeCap"></p>
+</div>
+
+<h3>Melhor caso: o pivô divide ao meio</h3>
+<p>Se cada partição sai com metade dos elementos, a árvore fica <b>equilibrada</b>, como a do MergeSort:</p>
+<ul>
+  <li>nível 0: $cn$;</li>
+  <li>nível 1: $2 \cdot c\frac{n}{2} = cn$;</li>
+  <li>nível 2: $4 \cdot c\frac{n}{4} = cn$;</li>
+  <li>…, nível $\log_2 n$: $n \cdot c\frac{n}{n} = cn$.</li>
+</ul>
+$$T(n) = T\!\left(\left\lceil \tfrac{n}{2}\right\rceil\right) + T\!\left(\left\lfloor \tfrac{n}{2}\right\rfloor\right) + cn \;\Rightarrow\; \Theta(n\log n),$$
+<p>pela mesma conta do MergeSort (lição 7.1): $cn$ por nível, $\log_2 n + 1$ níveis.</p>
+
+<h3>Pior caso: o pivô é sempre o menor (ou o maior)</h3>
+<p>Com o pivô no primeiro elemento e o vetor <b>já ordenado</b>, cada partição separa só 1 elemento: os subproblemas têm tamanho $1$ e $n - 1$. A árvore vira uma <b>corrente</b>:</p>
+$$\begin{cases} T(1) = 1 \\ T(n) = T(n-1) + cn \end{cases}$$
+<p>Somando os custos por nível da figura do slide 20: $cn + c(n-1) + c(n-2) + \dots + c$. É uma PA, e a soma é quadrática: <b>$\Theta(n^2)$</b>.</p>
+<div class="box prof">
+  <span class="tag">Resolva você</span>
+  <p>Deduza essa recorrência pelo método iterativo (Aula 5): expanda, ache o padrão após $k$ passos, use o caso base e resolva a PA. É o mesmo tipo de conta que a questão 5 da lista pede.</p>
+</div>
+<div class="box tip">
+  <span class="tag">Na prática</span>
+  <p>O pior caso aparece justamente em entradas "fáceis", como um vetor já ordenado com pivô no primeiro elemento. Por isso implementações reais escolhem o pivô <b>aleatoriamente</b> ou pela mediana de três: fica muito improvável cair sempre no pior caso, e o tempo esperado é $\Theta(n\log n)$.</p>
+</div>
+
+<h2 id="merge-vs-quick">5. MergeSort × QuickSort</h2>
+<div class="table-wrap"><table>
+  <tr><th></th><th>MergeSort</th><th>QuickSort</th></tr>
+  <tr><td>Onde está o trabalho</td><td>na <b>combinação</b> (merge)</td><td>na <b>divisão</b> (partition)</td></tr>
+  <tr><td>Divisão</td><td>sempre ao meio, sem olhar os valores</td><td>depende do pivô</td></tr>
+  <tr><td>Melhor caso</td><td rowspan="2">$\Theta(n\log n)$ sempre (não há melhor nem pior)</td><td>$\Theta(n\log n)$ (partições equilibradas)</td></tr>
+  <tr><td>Pior caso</td><td>$\Theta(n^2)$ (partições $1$ e $n-1$)</td></tr>
+  <tr><td>Memória extra</td><td>vetores $L$ e $R$: $\Theta(n)$</td><td>ordena no próprio vetor</td></tr>
+</table></div>
+
+<h2 id="quiz">6. Quiz de recordação</h2>
+<div id="quiz"></div>
+
+<h2 id="exercicio">7. Exercício</h2>
+<div class="exercise">
+  <span class="tag">Exercício 7.2</span>
+  <ol type="a">
+    <li>Execute <code>partition</code> de Hoare em $[5, 3, 8, 1, 9, 2]$, pivô $= 5$. Mostre cada parada de $i$ e $j$, cada troca e o valor retornado. Quais são as duas partições? Confira na animação, com o botão "[5, 3, 8, 1, 9, 2]".</li>
+    <li>Com pivô = primeiro elemento, dê uma entrada de tamanho 6 que produz o pior caso e explique por que a árvore vira uma corrente.</li>
+    <li>Por que o MergeSort não tem melhor nem pior caso, mas o QuickSort tem?</li>
+  </ol>
+  <p class="caption">Responda no chat.</p>
+</div>
+
+<div class="pager">
+  <a href="aula7-1-merge-sort.html"><small>← anterior</small>7.1 MergeSort</a>
+  <a class="next" href="aula8-1-counting-sort.html"><small>próxima →</small>Aula 8 · Ordenação em tempo linear</a>
+</div>
+</main>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const code = [{ h: 'quickSort(A, l, r)' }, ['1.', 'if l < r:'], ['2.', '   q ← partition(A, l, r)'], ['3.', '   quickSort(A, l, q)'], ['4.', '   quickSort(A, q+1, r)'],
+    { h: 'partition(A, inicio, fim)' }, ['1.', 'pivo ← A[inicio]'], ['2.', 'i ← inicio − 1'], ['3.', 'j ← fim + 1'], ['4.', 'while true:'],
+    ['5.', '   do: i ← i + 1'], ['6.', '   while A[i] < pivo'], ['7.', '   do: j ← j − 1'], ['8.', '   while A[j] > pivo'], ['9.', '   if i >= j: return j'], ['10.', '   swap(A[i], A[j])']];
+
+  function trace(input, onlyPartition) {
+    const A = input.slice(), n = A.length, S = [];
+    let lo = 0, hi = n - 1, i = null, j = null, piv = '—', depth = 0;
+    const snap = (line, note, extra = {}) => {
+      const marks = {};
+      A.forEach((_, x) => { if (x < lo || x > hi) marks[x] = 'dim'; });
+      if (i != null && i >= lo && i <= hi) marks[i] = 'cmp';
+      if (j != null && j >= lo && j <= hi) marks[j] = 'cmp';
+      Object.assign(marks, extra.marks || {});
+      const ptrs = {};
+      const add = (k, s) => { if (k != null && k >= 0 && k < n) ptrs[k] = ptrs[k] ? ptrs[k] + ',' + s : s; };
+      add(i, 'i'); add(j, 'j');
+      S.push({ line, note, arrays: [{ name: 'A', values: A.slice(), marks, ptrs }], vars: { l: lo, r: hi, 'pivô': piv, i: i ?? '—', j: j ?? '—' } });
+    };
+    function partition(l, r) {
+      lo = l; hi = r;
+      piv = A[l]; snap(6, `partition(A, ${l}, ${r}): pivô ← A[${l}] = ${piv}.`);
+      i = l - 1; snap(7, `i ← ${i} (uma posição antes do início).`);
+      j = r + 1; snap(8, `j ← ${j} (uma posição depois do fim).`);
+      while (true) {
+        snap(9, 'while true: nova rodada.');
+        do { i++; snap(10, `i ← ${i}.`); snap(11, `A[${i}] = ${A[i]} &lt; ${piv}? <b>${A[i] < piv ? 'Sim, continua' : 'Não, i para aqui'}</b>.`); } while (A[i] < piv);
+        do { j--; snap(12, `j ← ${j}.`); snap(13, `A[${j}] = ${A[j]} &gt; ${piv}? <b>${A[j] > piv ? 'Sim, continua' : 'Não, j para aqui'}</b>.`); } while (A[j] > piv);
+        if (i >= j) {
+          const mk = {}; for (let x = l; x <= j; x++) mk[x] = 'ok'; for (let x = j + 1; x <= r; x++) mk[x] = 'cur';
+          snap(14, `i = ${i} ≥ j = ${j}: os índices se cruzaram. return ${j}. Partições: A[${l}..${j}] (verde, ≤ ${piv}) e A[${j + 1}..${r}] (azul, ≥ ${piv}).`, { marks: mk });
+          return j;
+        }
+        snap(14, `i = ${i} &lt; j = ${j}: ainda não se cruzaram.`);
+        [A[i], A[j]] = [A[j], A[i]];
+        snap(15, `swap: A[${i}] = ${A[i]}, A[${j}] = ${A[j]}.`);
+      }
+    }
+    function qs(l, r) {
+      depth++; lo = l; hi = r; i = j = null; piv = '—';
+      snap(1, `quickSort(A, ${l}, ${r}): l &lt; r? <b>${l < r ? 'Sim' : 'Não (0 ou 1 elemento)'}</b>.`);
+      if (l < r) {
+        snap(2, 'Chama partition.');
+        const q = partition(l, r);
+        lo = l; hi = r; i = j = null;
+        snap(3, `q = ${q}. Ordena A[${l}..${q}].`); qs(l, q);
+        lo = l; hi = r; i = j = null;
+        snap(4, `Ordena A[${q + 1}..${r}].`); qs(q + 1, r);
+      }
+      depth--;
+    }
+    if (onlyPartition) partition(0, n - 1);
+    else { qs(0, n - 1); lo = 0; hi = n - 1; i = j = null; piv = '—'; snap(0, `Ordenado: [${A.join(', ')}].`, { marks: Object.fromEntries(A.map((_, x) => [x, 'ok'])) }); }
+    return S;
+  }
+  StepPlayer.mount(document.getElementById('ptPlayer'), { code, steps: trace([4, 8, 7, 1, 3, 5, 6], true), speed: 800 });
+  const P = StepPlayer.mount(document.getElementById('qsPlayer'), { code, steps: trace([4, 8, 7, 1, 3, 5, 6]), speed: 450 });
+  const qb = document.getElementById('qsBtns');
+  [['slide: [4, 8, 7, 1, 3, 5, 6]', [4, 8, 7, 1, 3, 5, 6]], ['[5, 3, 8, 1, 9, 2]', [5, 3, 8, 1, 9, 2]], ['ordenado: [1, 2, 3, 4, 5]', [1, 2, 3, 4, 5]]].forEach(([lab, arr], x) =>
+    qb.append(APA.el('button', { class: 'btn' + (x ? '' : ' on'), type: 'button', onclick: (e) => {
+      [...qb.children].forEach((b) => b.classList.remove('on')); e.target.classList.add('on'); P.load(trace(arr)); } }, lab)));
+
+  // árvore de partições real
+  function tree(input) {
+    const A = input.slice(); let cmps = 0;
+    function part(l, r) {
+      const p = A[l]; let i = l - 1, j = r + 1;
+      while (true) { do { i++; cmps++; } while (A[i] < p); do { j--; cmps++; } while (A[j] > p); if (i >= j) return j; [A[i], A[j]] = [A[j], A[i]]; }
+    }
+    function rec(l, r) {
+      const node = { arr: A.slice(l, r + 1), marks: { 0: 'hot' }, children: [] };
+      if (l >= r) { node.marks = { 0: 'ok' }; return node; }
+      const q = part(l, r);
+      node.children = [rec(l, q), rec(q + 1, r)];
+      return node;
+    }
+    const root = rec(0, A.length - 1);
+    return { root, cmps };
+  }
+  const tb = document.getElementById('trBtns');
+  const ins = { 'aleatório: [5, 2, 7, 4, 8, 1, 6, 3]': [5, 2, 7, 4, 8, 1, 6, 3], 'pior caso: [1, 2, 3, 4, 5, 6, 7, 8]': [1, 2, 3, 4, 5, 6, 7, 8], 'slide: [4, 8, 7, 1, 3, 5, 6]': [4, 8, 7, 1, 3, 5, 6] };
+  function showT(lab) {
+    const { root, cmps } = tree(ins[lab]);
+    let depth = 0; (function d(n, k) { depth = Math.max(depth, k); n.children.forEach((c) => d(c, k + 1)); })(root, 0);
+    document.getElementById('qsTree').replaceChildren(TreeView.arrays(root, { cell: 26, gapX: 10, levelH: 52, title: 'Árvore de partições do QuickSort' }));
+    document.getElementById('qsTreeCap').textContent = `Laranja: o pivô de cada chamada (primeiro elemento). Altura da árvore: ${depth} níveis. Comparações com o pivô: ${cmps}.` +
+      (lab.startsWith('pior') ? ' O vetor ordenado gera uma corrente: cada partição tira só 1 elemento.' : '');
+    [...tb.children].forEach((b) => b.classList.toggle('on', b.textContent === lab));
+  }
+  Object.keys(ins).forEach((lab) => tb.append(APA.el('button', { class: 'btn', type: 'button', onclick: () => showT(lab) }, lab)));
+  showT(Object.keys(ins)[0]);
+
+  Quiz.mount(document.getElementById('quiz'), [
+    { q: 'No partition de Hoare, quando o laço termina?',
+      options: ['Quando i chega ao fim', 'Quando os índices se cruzam ($i \\ge j$); retorna $j$', 'Após uma troca', 'Quando o pivô vai para o meio'], answer: 1, explain: 'Linha 9.' },
+    { q: 'Onde o QuickSort faz o trabalho pesado?',
+      options: ['Na combinação', 'Na divisão (partition)', 'No caso base', 'Em lugar nenhum'], answer: 1, explain: 'Depois do partition não há nada a combinar.' },
+    { q: 'Pior caso do QuickSort com pivô = primeiro elemento:',
+      options: ['vetor aleatório', 'vetor já ordenado: partições de tamanho 1 e $n-1$', 'vetor com tamanho par', 'não existe pior caso'], answer: 1, explain: '$T(n) = T(n-1) + cn$, uma corrente.' },
+    { q: 'Complexidade do QuickSort no melhor caso:',
+      options: ['$\\Theta(n)$', '$\\Theta(n\\log n)$', '$\\Theta(n^2)$', '$\\Theta(\\log n)$'], answer: 1, explain: 'Árvore equilibrada: $cn$ por nível, $\\log n$ níveis.' },
+    { q: 'Do que depende o melhor/pior caso do QuickSort?',
+      options: ['Do tamanho do vetor', 'Da escolha do pivô e da organização dos dados', 'Do merge', 'Da linguagem'], answer: 1, explain: 'Slide 18.' },
+  ]);
+});
+</script>
+</body>
+</html>

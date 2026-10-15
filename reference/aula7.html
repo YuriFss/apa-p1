@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Referência · Aula 7</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../assets/style.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="../assets/common.js"></script>
+</head>
+<body>
+<nav class="topbar">
+  <a href="../index.html">← Índice</a>
+  <span>Folha de referência · Aula 7</span>
+  <span class="spacer"></span>
+  <button class="theme-btn" type="button">tema</button>
+</nav>
+<main>
+<h1>Aula 7: Divisão e conquista (Parte II)</h1>
+
+<h2>MergeSort</h2>
+<div class="algo" style="grid-template-columns:1fr 1fr">
+<pre class="panel"><span class="fn">mergeSort</span>(A, p, r)
+1. <span class="kw">if</span> p &lt; r:
+2.    q = floor((p+r)/2)
+3.    mergeSort(A, p, q)
+4.    mergeSort(A, q+1, r)
+5.    merge(A, p, q, r)</pre>
+<pre class="panel"><span class="fn">merge</span>(A, p, q, r)
+1-2. L ← A[p..q]; R ← A[q+1..r]
+3-4. L e R recebem INF no fim
+5.   i ← j ← 1
+6.   <span class="kw">for</span> k ← p <span class="kw">to</span> r:
+7.     <span class="kw">if</span> L[i] &lt;= R[j]: A[k] ← L[i]; i++
+10.    <span class="kw">else</span>: A[k] ← R[j]; j++</pre>
+</div>
+<ul>
+  <li>merge custa $\Theta(n)$; a sentinela INF dispensa testar se um lado acabou.</li>
+  <li><b>Não há melhor nem pior caso:</b> divide sempre igual, independentemente dos dados.</li>
+  <li>$T(1) = 1$, $T(n) = T(\lceil n/2\rceil) + T(\lfloor n/2\rfloor) + cn$. Com $n = 2^k$: $T(n) = 2T(n/2) + n$ ($a = 2, b = 2, f(n) = n$).</li>
+  <li>Árvore: $n$ por nível, $\log_2 n + 1$ níveis. Iterativo: $2^kT(n/2^k) + kn$, $k = \log_2 n$, logo $T(n) = n\log_2 n + n = \Theta(n\log n)$.</li>
+  <li>Memória extra $\Theta(n)$. Com <code>&lt;=</code> é estável.</li>
+</ul>
+
+<h2>QuickSort</h2>
+<div class="algo" style="grid-template-columns:1fr 1fr">
+<pre class="panel"><span class="fn">quickSort</span>(A, l, r)
+1. <span class="kw">if</span> l &lt; r:
+2.    q ← partition(A, l, r)
+3.    quickSort(A, l, q)
+4.    quickSort(A, q+1, r)</pre>
+<pre class="panel"><span class="fn">partition</span>(A, inicio, fim)  // Hoare
+pivo ← A[inicio]
+i ← inicio − 1;  j ← fim + 1
+<span class="kw">while</span> true:
+  <span class="kw">do</span> i++ <span class="kw">while</span> A[i] &lt; pivo
+  <span class="kw">do</span> j−− <span class="kw">while</span> A[j] &gt; pivo
+  <span class="kw">if</span> i &gt;= j: <span class="kw">return</span> j
+  swap(A[i], A[j])</pre>
+</div>
+<ul>
+  <li>Exemplo do slide: $[4, 8, 7, 1, 3, 5, 6]$ com pivô 4 vira $[3, 1, 7, 8, 4, 5, 6]$ e retorna $j = 1$.</li>
+  <li>O trabalho está na divisão (partition, $\Theta(n)$); não há combinação.</li>
+  <li>O caso depende da escolha do pivô (primeiro, último, aleatório) e se lê pelo formato da árvore.</li>
+  <li><b>Melhor caso</b> (partições equilibradas): $T(n) = T(\lceil n/2\rceil) + T(\lfloor n/2\rfloor) + cn = \Theta(n\log n)$.</li>
+  <li><b>Pior caso</b> (partições $1$ e $n-1$, ex.: vetor ordenado com pivô no primeiro): $T(n) = T(n-1) + cn$; níveis $cn + c(n-1) + \dots + c$, uma PA, logo $\Theta(n^2)$.</li>
+</ul>
+
+<h2>Comparação rápida</h2>
+<div class="table-wrap"><table>
+  <tr><th>Algoritmo</th><th>Melhor</th><th>Pior</th><th>Memória extra</th></tr>
+  <tr><td>InsertionSort</td><td>$\Theta(n)$</td><td>$\Theta(n^2)$</td><td>$O(1)$</td></tr>
+  <tr><td>SelectionSort</td><td>$\Theta(n^2)$</td><td>$\Theta(n^2)$</td><td>$O(1)$</td></tr>
+  <tr><td>MergeSort</td><td>$\Theta(n\log n)$</td><td>$\Theta(n\log n)$</td><td>$\Theta(n)$</td></tr>
+  <tr><td>QuickSort</td><td>$\Theta(n\log n)$</td><td>$\Theta(n^2)$</td><td>no próprio vetor</td></tr>
+</table></div>
+</main>
+</body>
+</html>
